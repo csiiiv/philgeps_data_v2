@@ -24,7 +24,7 @@ from typing import Any
 from .catalog import Catalog
 from .config import Settings
 from .database import DuckDBPool, execute_bounded, sql_literal_path
-from .derivation import outcome_metadata
+from .derivation import outcome_metadata, relationship_metadata, relationship_status
 from .outcomes import OUTCOME_LABELS, OutcomesService
 from .query import QueryError
 
@@ -970,6 +970,15 @@ class ProcessService:
                 "joint_venture": entry.get("source_joint_venture"),
                 "award_link_status": entry.get("award_link_status"),
                 "party_link_status": entry.get("party_link_status"),
+                "link": {
+                    "award": relationship_status(entry.get("award_link_status")),
+                    "party": relationship_status(entry.get("party_link_status")),
+                    "metadata": relationship_metadata(
+                        source_table="award_suppliers",
+                        status_column="award_link_status",
+                        raw_status=entry.get("award_link_status"),
+                    ),
+                },
                 "quality_flags": list(entry.get("supplier_quality_flags") or []),
             })
         for award_id, assertions in raw_by_award.items():
@@ -1228,6 +1237,19 @@ class ProcessService:
                     "name": label,
                     "party_id": entry.get("party_id"),
                     "joint_venture": entry.get("source_joint_venture"),
+                    # §16: normalized to the shared link vocabulary
+                    # (linked/missing/ambiguous/conflicting) so every
+                    # navigation path renders link confidence the same way.
+                    "link": {
+                        "award": relationship_status(entry.get("award_link_status")),
+                        "party": relationship_status(entry.get("party_link_status")),
+                        "metadata": relationship_metadata(
+                            source_table="award_suppliers",
+                            status_column="award_link_status",
+                            raw_status=entry.get("award_link_status"),
+                        ),
+                    },
+                    # Kept for backward compatibility with existing consumers.
                     "award_link_status": entry.get("award_link_status"),
                     "party_link_status": entry.get("party_link_status"),
                     "quality_flags": list(entry.get("supplier_quality_flags") or []),
@@ -1364,6 +1386,7 @@ class ProcessService:
                     "joint_venture": item.get("joint_venture"),
                     "award_link_status": item.get("award_link_status"),
                     "party_link_status": item.get("party_link_status"),
+                    "link": item.get("link"),
                     "quality_flags": list(item.get("quality_flags") or []),
                     "observation_count": 0,
                     "duplicate_status": None,

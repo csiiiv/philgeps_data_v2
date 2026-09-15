@@ -126,9 +126,12 @@ export default function AboutPage() {
           </li>
           <li>
             <strong>Relationships can be unresolved</strong> — supplier and
-            contract links carry a status (<code>matched</code> /{' '}
-            <code>missing</code> / <code>ambiguous</code>). The viewer shows
-            these statuses instead of pretending links exist.
+            contract links carry a confidence state (<code>linked</code> /{' '}
+            <code>missing</code> / <code>ambiguous</code> /{' '}
+            <code>conflicting</code>), normalized to one shared vocabulary
+            regardless of which table the evidence came from. The viewer shows
+            these states instead of pretending links exist: unresolved links
+            stay inspectable but are never silently navigable.
           </li>
           <li>
             <strong>Supplier identity is explicit</strong> — searches declare a

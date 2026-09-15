@@ -364,11 +364,33 @@ export interface MoneyValue {
   currency: string | null;
 }
 
+/** Shared relationship-confidence vocabulary (docs/11 §16, rule v1). */
+export type LinkState = 'linked' | 'missing' | 'ambiguous' | 'conflicting';
+
+export interface DerivationMetadata {
+  origin: string;
+  rule: string;
+  rule_version: string;
+  source_fields: string[];
+  basis: string;
+  confidence: string;
+  source_count: number;
+}
+
+export interface LinkInfo {
+  award: LinkState;
+  party: LinkState;
+  metadata: DerivationMetadata;
+}
+
 export interface AwardSupplierAssertion {
   name: string;
   joint_venture: string | null;
+  /** Raw ETL statuses, kept for backward compatibility. */
   award_link_status: string | null;
   party_link_status: string | null;
+  /** Normalized §16 link states — render these, not the raw statuses. */
+  link?: LinkInfo;
   quality_flags: string[];
   /** How many identical source assertions were collapsed into this row. */
   observation_count?: number;
@@ -582,16 +604,6 @@ export interface SearchFacetsResponse {
 export interface OutcomeFacetEntry {
   outcome: string;
   count: number;
-}
-
-export interface DerivationMetadata {
-  origin: string;
-  rule: string;
-  rule_version: string;
-  source_fields: string[];
-  basis: string;
-  confidence: string;
-  source_count: number;
 }
 
 export interface OutcomeInfo {

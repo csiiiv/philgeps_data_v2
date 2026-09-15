@@ -44,6 +44,7 @@ except ImportError:  # pragma: no cover
 from .catalog import Catalog
 from .config import Settings
 from .database import DuckDBPool, execute_bounded, sql_literal_path
+from .derivation import OUTCOME_RULE, OUTCOME_RULE_VERSION
 from .query import QueryError
 
 logger = logging.getLogger("philgeps.viewer.search")
@@ -184,6 +185,37 @@ class SearchIndex:
                 "mtime_ns": stat.st_mtime_ns,
             }
         return entries
+
+    def build_manifest(self, paths: dict[str, Path]) -> dict[str, Any] | None:
+        """The versioned build manifest stored in the index, if readable.
+
+        Returns None when the index does not exist or predates manifests.
+        Never triggers a build — diagnostics only.
+        """
+        if not self.database_path.exists():
+            return None
+        try:
+            connection = duckdb.connect(str(self.database_path), read_only=True)
+        except duckdb.Error:
+            return None
+        try:
+            row = connection.execute(
+                "SELECT value FROM meta WHERE key = 'build_manifest'"
+            ).fetchone()
+        except duckdb.Error:
+            return None
+        finally:
+            connection.close()
+        if row is None:
+            return None
+        try:
+            manifest = json.loads(row[0])
+        except json.JSONDecodeError:
+            return None
+        # Annotate freshness: does the on-disk index match current sources?
+        manifest["stale"] = self._current_fingerprint(paths) != self._stored_fingerprint()
+        manifest["index_state"] = self.state(paths)
+        return manifest
 
     def _stored_fingerprint(self) -> dict[str, Any] | None:
         if not self.database_path.exists():
@@ -452,6 +484,42 @@ class SearchIndex:
             connection.execute(
                 "INSERT INTO meta VALUES ('built_at', ?)",
                 [started.isoformat()],
+            )
+            # Versioned build manifest (docs/11 Phase 1 step 5): one JSON
+            # blob describing exactly what produced this projection — the
+            # rule versions, source fingerprints, and row counts. Consumed
+            # by GET /api/index/manifest; never a source of truth itself.
+            manifest = {
+                "manifest_version": 1,
+                "projection": "search_index",
+                "schema_version": INDEX_SCHEMA_VERSION,
+                "rules": {
+                    "outcome": {
+                        "rule": OUTCOME_RULE,
+                        "rule_version": OUTCOME_RULE_VERSION,
+                    },
+                    "relationship": {
+                        "rule": "relationship-status-v1",
+                        "rule_version": "1",
+                    },
+                },
+                "built_at": started.isoformat(),
+                "built_at_epoch_s": round(started.timestamp()),
+                "sources": {
+                    name: info
+                    for name, info in fingerprint.items()
+                    if name != "schema_version"
+                },
+                "row_counts": {
+                    table: connection.execute(
+                        f"SELECT count(*) FROM {table}"
+                    ).fetchone()[0]
+                    for table in ("procurements", "outcomes", "filter_stats")
+                },
+            }
+            connection.execute(
+                "INSERT INTO meta VALUES ('build_manifest', ?)",
+                [json.dumps(manifest, sort_keys=True)],
             )
             connection.close()
             with self._reader_lock:

@@ -3,6 +3,7 @@ import {
   ApiError,
   type AwardEntry,
   type AwardStructure,
+  type LinkInfo,
   type ProcessSummary,
   type ProcessTimeline,
   type ReleaseSourcesResponse,
@@ -248,15 +249,30 @@ function AwardStructureRows({
                     JV
                   </span>
                 )}
-                {(supplier.award_link_status && supplier.award_link_status !== 'matched') ||
-                (supplier.party_link_status && supplier.party_link_status !== 'matched') ? (
-                  <span
-                    className="badge warning-badge"
-                    title={`award link: ${supplier.award_link_status ?? '—'}, party link: ${supplier.party_link_status ?? '—'}`}
-                  >
-                    link issue
-                  </span>
-                ) : null}
+                {(() => {
+                  // §16: render the normalized link state; fall back to the
+                  // raw statuses for payloads served before this change.
+                  const link = supplier.link ?? {
+                    award: supplier.award_link_status === 'matched' ? 'linked' : 'missing',
+                    party: supplier.party_link_status === 'matched' ? 'linked' : 'missing',
+                  } as LinkInfo;
+                  if (link.award === 'linked' && link.party === 'linked') return null;
+                  const stateLabel =
+                    link.award === 'ambiguous' || link.party === 'ambiguous'
+                      ? 'ambiguous link'
+                      : 'unverified link';
+                  const reason = link.metadata
+                    ? ` (from ${link.metadata.source_fields.join(', ')}; basis ${link.metadata.basis})`
+                    : ` (award link: ${supplier.award_link_status ?? '—'}, party link: ${supplier.party_link_status ?? '—'})`;
+                  return (
+                    <span
+                      className={`badge ${link.award === 'ambiguous' || link.party === 'ambiguous' ? 'warning-badge' : 'badge'}`}
+                      title={`Relationship confidence: award ${link.award}, party ${link.party}${reason}. The name is shown as recorded, but this link is not confirmed evidence.`}
+                    >
+                      {stateLabel}
+                    </span>
+                  );
+                })()}
                 {isDeduped && (
                   <span
                     className="badge"

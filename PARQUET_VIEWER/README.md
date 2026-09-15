@@ -50,6 +50,9 @@ The active implementation checklist is maintained in [TODO.md](TODO.md).
 9. [Cross-year supplier contract queries](docs/09_supplier_contract_queries.md)
 10. [Data model ERD (Mermaid)](docs/10_data_erd.md)
 11. [Product improvement opportunities](docs/11_product_improvement_opportunities.md)
+12. [Benchmark baseline](docs/12_benchmark_baseline.md)
+13. [Process outcomes spec](docs/13_process_outcomes_spec.md)
+14. [Relationship status spec](docs/14_relationship_status_spec.md)
 
 ## Data sources
 

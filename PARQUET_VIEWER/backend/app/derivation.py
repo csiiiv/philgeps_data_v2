@@ -29,6 +29,54 @@ CONFIDENCE = ("observed", "derived", "provisional")
 OUTCOME_RULE = "process-outcomes-v1"
 OUTCOME_RULE_VERSION = "1"
 
+# --------------------------------------------------------------- §16 links
+#
+# One closed vocabulary for relationship confidence (docs/11 §16). The ETL
+# emits raw statuses per table; this maps each to exactly one shared state
+# so the API and the frontend render links the same way everywhere.
+#
+#   linked      evidence asserts the relationship (ETL "matched")
+#   missing     expected counterparty/record not found (ETL "missing"/null)
+#   ambiguous   multiple conflicting candidates (ETL "ambiguous")
+#   conflicting evidence points both ways (viewer-side detection only)
+#
+# Anything unrecognised maps to `missing` rather than inventing a sixth
+# state — a visible gap, never a fake link.
+LINK_STATES = ("linked", "missing", "ambiguous", "conflicting")
+
+# ETL status -> shared state (contracts.award_link_status,
+# award_suppliers.award_link_status / party_link_status).
+_LINK_STATUS_MAP = {
+    "matched": "linked",
+    "missing": "missing",
+    "ambiguous": "ambiguous",
+}
+
+
+def relationship_status(raw_status: str | None) -> str:
+    """Normalize one ETL link status to the shared vocabulary."""
+    if raw_status is None:
+        return "missing"
+    return _LINK_STATUS_MAP.get(str(raw_status).strip().lower(), "missing")
+
+
+def relationship_metadata(
+    *,
+    source_table: str,
+    status_column: str,
+    raw_status: str | None,
+) -> dict[str, Any]:
+    """Derivation metadata for a normalized relationship state (§16)."""
+    return describe(
+        origin="normalized",
+        rule="relationship-status-v1",
+        rule_version="1",
+        source_fields=[f"{source_table}.{status_column}"],
+        basis=f"{source_table}:{status_column}={raw_status!r}",
+        confidence="observed" if raw_status else "provisional",
+        source_count=1,
+    )
+
 
 def describe(
     *,

@@ -199,6 +199,33 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         """Coverage funnel: process counts per canonical outcome."""
         return outcomes.funnel(year_from, year_to)
 
+    @app.get("/api/index/manifest")
+    def index_manifest():
+        """Versioned build manifest for the disposable search projection.
+
+        Diagnostics only: describes what produced the index (rule versions,
+        source fingerprints, row counts, build time) and whether it is stale.
+        Returns 409 while a build is in flight, 404 when no index exists.
+        """
+        snapshot = catalog.snapshot()
+        paths = {
+            item["name"]: Path(item["path"])
+            for item in snapshot["datasets"]
+            if item["status"] == "healthy"
+        }
+        manifest = search.index.build_manifest(paths)
+        if manifest is None:
+            state = search.index.state(paths)
+            detail = (
+                {"code": "index_building", "state": state}
+                if state == "building"
+                else {"code": "index_absent"}
+            )
+            raise HTTPException(
+                status_code=409 if state == "building" else 404, detail=detail
+            )
+        return manifest
+
     @app.get("/api/outcomes/facets")
     def outcome_facets():
         return outcomes.outcome_facets()

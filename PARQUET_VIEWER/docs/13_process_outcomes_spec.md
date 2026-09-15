@@ -91,3 +91,24 @@ Each fixture asserts both `outcome` and `outcome_basis`:
 6. award + `Failed` status → `conflicting_evidence`
 7. closed tender, no award/fail/cancel → `closed_unknown`
 8. `Active` tender → `active`
+
+## Build manifest
+
+The search index that carries the `outcomes` table also stores a versioned
+build manifest in its `meta` table (key `build_manifest`), exposed at
+`GET /api/index/manifest`:
+
+- `manifest_version` — shape of the manifest itself (currently 1);
+- `projection` — which disposable projection produced it (`search_index`);
+- `schema_version` — the index schema version the build ran with;
+- `rules` — rule name + version for every derived artifact inside
+  (`process-outcomes-v1`, `relationship-status-v1`);
+- `sources` — per-input path/size/mtime fingerprints used for the build;
+- `row_counts` — `procurements`, `outcomes`, `filter_stats`;
+- `built_at` / `built_at_epoch_s`;
+- `stale` / `index_state` — added by the endpoint (not stored): whether the
+  on-disk index still matches current sources, and hit/building/miss state.
+
+The manifest is diagnostics only. It never decides freshness — the stored
+fingerprint comparison does that — so a missing or malformed manifest
+degrades to a 404/`index_absent` response without affecting queries.

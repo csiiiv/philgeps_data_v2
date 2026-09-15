@@ -395,9 +395,32 @@ Status markers:
   process summary. UI: Coverage tab (funnel bars drill through to outcome-
   filtered search), outcome filter chips with counts, colored outcome badge
   on the process page. Fixture matrix covers every outcome class; 126/126
-  backend tests green.)
-- [ ] Preserve missing and ambiguous relationships as visible incomplete data,
+  backend tests green. Year-range filter added to the Coverage tab
+  (2026-09-16): from/to inputs drive the same `year_from`/`year_to` params
+  the API echoes back, heading + filter echo update live, undated-process
+  note hides while filtering; verified in-browser 2023–2024 → 2,084,442.)
+- [x] Preserve missing and ambiguous relationships as visible incomplete data,
   not broken or falsely resolved links.
+  (2026-09-16: docs/11 §16 rule `relationship-status-v1` (docs/14) — ETL
+  statuses (`matched`/`missing`/`ambiguous`, null) normalize to the shared
+  four-state vocabulary `linked`/`missing`/`ambiguous`/`conflicting` in
+  `backend/app/derivation.py`; unknown statuses map to `missing`, never a
+  new state. Award-supplier entries on the process page now carry a `link`
+  block (`award`, `party`, derivation metadata) alongside the raw statuses;
+  the UI badge distinguishes *ambiguous link* from *unverified link* and
+  shows the evidence basis in its tooltip, so unresolved links stay
+  inspectable and non-clickable instead of silently resolving. Fixture +
+  integration tests in `backend/tests/test_relationships.py`.)
+- [x] Generate a versioned build manifest for the disposable projections
+  (docs/11 Phase 1 step 5).
+  (2026-09-16: `search_index.duckdb` stores a `build_manifest` JSON blob in
+  its `meta` table at build time — manifest/schema version, outcome and
+  relationship rule versions, per-source fingerprints, row counts, build
+  time — exposed at `GET /api/index/manifest` with `stale` and
+  `index_state` annotations. 404 `index_absent` before the first build,
+  409 while building; diagnostics only, never decides freshness. Tests in
+  `backend/tests/test_build_manifest.py`; verified live after deleting and
+  rebuilding the 3.6GB index.)
 
 ## Search and performance
 

@@ -804,7 +804,11 @@ everything else.
 1. Launch the procurement coverage and conversion funnel (hard-depends on
    Phase 1 outcomes).
 2. Expand search facets and add outcome filters.
-3. Add partial-award and unawarded-item views.
+3. Add partial-award and unawarded-item views. *(Done 2026-09-16: the
+   process Items tab labels every line item awarded vs not awarded from
+   award_items evidence — with a filter to isolate the unawarded scope —
+   and only when linkage evidence exists for the release; the timeline
+   closing stop already sampled unawarded items.)*
 4. Add source-period coverage and data-quality summaries (severity grouping
    is blocked on the ETL severity ticket; see Known review finding 1).
 

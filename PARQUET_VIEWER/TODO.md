@@ -140,6 +140,17 @@ Status markers:
 
 ## Domain views
 
+- [x] Partial-award / unawarded-item view (docs/11 Phase 2 step 3).
+  (2026-09-16: the process Items tab labels every line item `awarded` vs
+  `not awarded` from award_items evidence (§16 rule), with All/Awarded/
+  Not-awarded filter chips and a rollup (`linked_count` / `unlinked_count`
+  / `linkage_evidence`). Labels render only when the release carries
+  award-item evidence — zero linkage rows never read as "unawarded"
+  (docs/13). The timeline closing stop already sampled unawarded items;
+  the Awards tab lists suppliers listed-but-never-awarded. Verified
+  in-browser on a partially-awarded process: 12 items → 4 awarded, 8 not
+  awarded; filter isolates exactly those 8. Tests in
+  `backend/tests/test_item_linkage.py`.)
 - [x] Search-first landing for non-technical researchers.
   (`GET /api/search?q=…&page=…` returns plain-language story cards: procurement
   titles (one per process via preferred release) and party names (with

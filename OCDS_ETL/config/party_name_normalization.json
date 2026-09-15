@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "rule_version": "party-name-v1",
+  "status": "candidate-key-approved",
+  "purpose": "Generate reproducible candidate match keys without asserting legal-entity identity.",
+  "source_field": "parties.name",
+  "preserve_source_name": true,
+  "steps": [
+    {"operation": "lowercase", "scope": "entire_name"},
+    {
+      "operation": "replace_non_ascii_alphanumeric_with_space",
+      "scope": "entire_name",
+      "warning": "This is a retrieval key only; it is not a display-name transformation."
+    },
+    {"operation": "collapse_and_trim_spaces", "scope": "entire_name"},
+    {
+      "operation": "canonicalize_terminal_legal_suffix",
+      "scope": "final_token_only",
+      "equivalences": {
+        "incorporated": "inc",
+        "corporation": "corp",
+        "company": "co",
+        "limited": "ltd"
+      }
+    }
+  ],
+  "outputs": {
+    "punctuation_name_key": "Key after lowercase, punctuation folding, and whitespace normalization.",
+    "legal_suffix_name_key": "Punctuation key after terminal legal-suffix canonicalization."
+  },
+  "entity_resolution_policy": {
+    "auto_merge_on_key_alone": false,
+    "key_is_identity": false,
+    "required_additional_evidence": [
+      "official organization identifier",
+      "compatible normalized address",
+      "compatible organization role and process context"
+    ],
+    "negative_evidence": [
+      "conflicting official identifiers",
+      "incompatible local-government location or organizational unit",
+      "materially conflicting addresses"
+    ]
+  },
+  "excluded_transformations": [
+    "source-name overwrite",
+    "automatic encoding repair",
+    "abbreviation expansion outside the terminal legal suffix",
+    "fuzzy edit-distance merge",
+    "joint-venture member parsing"
+  ]
+}

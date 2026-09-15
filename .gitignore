@@ -1,0 +1,33 @@
+# ===== Data (immutable pipeline outputs — never version these) =====
+*.parquet
+*.csv
+*.duckdb
+*.duckdb.wal
+RAW_DATA_DOWNLOADER/
+OCDS_ETL/outputs/
+DATA_NORMALIZATION/output/
+.tmp/
+
+# ===== Runtime caches (disposable, rebuilt automatically — ADR-014) =====
+PARQUET_VIEWER/.cache/
+
+# ===== Node / frontend build =====
+node_modules/
+PARQUET_VIEWER/frontend/dist/
+
+# ===== Python =====
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# ===== Logs & local state =====
+*.log
+*.pid
+
+# ===== OS / editor =====
+Thumbs.db
+.DS_Store
+.vscode/*
+!.vscode/settings.json

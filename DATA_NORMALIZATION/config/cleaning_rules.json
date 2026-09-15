@@ -1,0 +1,49 @@
+{
+  "null_literals": ["NULL", "N/A", "NA", "NONE"],
+  "timestamp_columns": [
+    "bid_published_date",
+    "prebid_date",
+    "closing_date",
+    "award_published_date",
+    "award_date",
+    "notice_to_proceed_date",
+    "contract_effectivity_date",
+    "contract_end_date"
+  ],
+  "decimal_columns": {
+    "approved_budget": "DECIMAL(38,4)",
+    "item_budget": "DECIMAL(38,4)",
+    "contract_amount": "DECIMAL(38,4)",
+    "quantity": "DECIMAL(38,6)"
+  },
+  "numeric_null_sentinels": {
+    "item_budget": ["-1"]
+  },
+  "integer_columns": ["line_item_no", "contract_duration"],
+  "organization_name_columns": [
+    "procuring_entity_name",
+    "client_agency",
+    "awardee_organization_name"
+  ],
+  "categorical_columns": [
+    "classification",
+    "notice_type",
+    "procurement_mode",
+    "business_category",
+    "funding_source",
+    "funding_instrument",
+    "trade_agreement",
+    "calendar_type",
+    "bid_notice_status",
+    "award_type",
+    "award_notice_status",
+    "procuring_entity_organization_type",
+    "procuring_entity_organization_type_grouped",
+    "awardee_size"
+  ],
+  "categorical_value_map": {
+    "bid_notice_status": {
+      "DisApproved": "Disapproved"
+    }
+  }
+}

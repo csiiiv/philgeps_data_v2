@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "errors": [],
+  "warnings": [],
+  "counts": {
+    "manifest_documents": 71,
+    "manifest_source_files": 70,
+    "catalog_sheets": 70,
+    "schemas": {
+      "legacy_40_unit_of_measurement": 1,
+      "legacy_40_uom": 11,
+      "location_46": 18,
+      "modern_43": 40
+    },
+    "header_positions": {
+      "legacy_40_unit_of_measurement@row_4": 1,
+      "legacy_40_uom@row_4": 11,
+      "location_46@row_1": 14,
+      "modern_43@row_1": 40
+    },
+    "headerless_files": [
+      "files/2021_Oct-Dec.csv",
+      "files/2022 _Jul-Sep.csv",
+      "files/2022 _Oct-Dec.csv",
+      "files/2022_Apr-Jun.csv"
+    ]
+  }
+}

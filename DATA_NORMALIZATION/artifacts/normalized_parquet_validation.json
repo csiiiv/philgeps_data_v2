@@ -1,0 +1,32 @@
+{
+  "status": "pass",
+  "output_file": "output/philgeps_normalized.parquet",
+  "output_size_bytes": 1241630997,
+  "input_size_bytes": 7722513760,
+  "compression_ratio_vs_source": 0.1608,
+  "row_count": 17528727,
+  "column_count": 60,
+  "row_group_count": 736,
+  "manifest_source_file_count": 67,
+  "parquet_source_file_count": 67,
+  "missing_manifest_source_file_count": 0,
+  "unexpected_source_file_count": 0,
+  "schema_count": 4,
+  "schema_rows": {
+    "legacy_40_unit_of_measurement": 324509,
+    "legacy_40_uom": 1595484,
+    "location_46": 7149712,
+    "modern_43": 8459022
+  },
+  "duplicate_provenance_group_count": 0,
+  "null_source_file_id_row_count": 0,
+  "null_source_row_number_row_count": 0,
+  "null_source_schema_id_row_count": 0,
+  "unexpected_trailing_value_row_count": 0,
+  "per_source_row_count_mismatch_count": 0,
+  "blank_rows_skipped": 663074,
+  "nonblank_malformed_width_row_count": 0,
+  "formula_cell_count": 2312,
+  "replacement_character_cell_count": 10,
+  "value_policy": "source values preserved as nullable strings"
+}

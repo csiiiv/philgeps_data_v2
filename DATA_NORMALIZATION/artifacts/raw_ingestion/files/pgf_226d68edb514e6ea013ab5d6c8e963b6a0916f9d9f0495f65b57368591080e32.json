@@ -1,0 +1,513 @@
+{
+  "status": "complete",
+  "source_file_id": "pgf_226d68edb514e6ea013ab5d6c8e963b6a0916f9d9f0495f65b57368591080e32",
+  "local_file": "files/January-March 2012.xlsx",
+  "normalized_file_name": "2012-01--2012-03.xlsx",
+  "schema_id": "modern_43",
+  "format": "xlsx",
+  "input_size_bytes": 26667074,
+  "output_file": "philgeps_normalized.parquet",
+  "expected_column_count": 43,
+  "physical_data_rows_seen": 112779,
+  "rows_written": 112779,
+  "blank_rows_skipped": 0,
+  "width_counts": {
+    "43": 112779
+  },
+  "malformed_width_row_count": 0,
+  "malformed_width_examples": [],
+  "formula_cell_count": 37,
+  "replacement_character_cell_count": 0,
+  "null_profile": {
+    "procuring_entity_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "client_agency": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 105962,
+      "nonempty": 6817
+    },
+    "bid_reference_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "solicitation_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 135,
+      "nonempty": 112644
+    },
+    "notice_title": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "notice_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "classification": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "procurement_mode": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "business_category": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "funding_source": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "funding_instrument": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "trade_agreement": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "approved_budget": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "bid_published_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "closing_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "prebid_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 80533,
+      "nonempty": 32246
+    },
+    "area_of_delivery": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 9673,
+      "nonempty": 103106
+    },
+    "contract_duration": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "calendar_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "line_item_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 67567,
+      "nonempty": 45212
+    },
+    "item_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 67626,
+      "nonempty": 45153
+    },
+    "item_description": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 67725,
+      "nonempty": 45054
+    },
+    "quantity": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 67567,
+      "nonempty": 45212
+    },
+    "unit_of_measurement": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 67567,
+      "nonempty": 45212
+    },
+    "item_budget": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 67567,
+      "nonempty": 45212
+    },
+    "bid_notice_status": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "created_by": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 112779
+    },
+    "award_reference_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 81046,
+      "nonempty": 31733
+    },
+    "award_title": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 81046,
+      "nonempty": 31733
+    },
+    "award_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 81046,
+      "nonempty": 31733
+    },
+    "unspsc_code": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 111817,
+      "nonempty": 962
+    },
+    "unspsc_description": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 111817,
+      "nonempty": 962
+    },
+    "award_published_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 81046,
+      "nonempty": 31733
+    },
+    "award_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 81046,
+      "nonempty": 31733
+    },
+    "notice_to_proceed_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 97333,
+      "nonempty": 15446
+    },
+    "contract_no": {
+      "missing_cell": 131,
+      "blank_string": 0,
+      "null_literal": 97360,
+      "nonempty": 15288
+    },
+    "contract_amount": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 81046,
+      "nonempty": 31733
+    },
+    "contract_effectivity_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 97333,
+      "nonempty": 15446
+    },
+    "contract_end_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 97333,
+      "nonempty": 15446
+    },
+    "award_notice_status": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 81046,
+      "nonempty": 31733
+    },
+    "reason_for_award": {
+      "missing_cell": 0,
+      "blank_string": 3,
+      "null_literal": 81046,
+      "nonempty": 31730
+    },
+    "awardee_organization_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 81046,
+      "nonempty": 31733
+    },
+    "awardee_contact_person": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 81047,
+      "nonempty": 31732
+    }
+  },
+  "date_months": {
+    "prebid_date": {
+      "2011-08": 2,
+      "2012-01": 6596,
+      "2012-02": 11411,
+      "2012-03": 11421,
+      "2012-04": 2813,
+      "2012-05": 3
+    },
+    "bid_published_date": {
+      "2012-01": 28196,
+      "2012-02": 40031,
+      "2012-03": 44552
+    },
+    "contract_effectivity_date": {
+      "2011-02": 1,
+      "2011-09": 2,
+      "2011-10": 4,
+      "2011-11": 17,
+      "2011-12": 32,
+      "2012-01": 325,
+      "2012-02": 2011,
+      "2012-03": 4688,
+      "2012-04": 4053,
+      "2012-05": 1968,
+      "2012-06": 1093,
+      "2012-07": 365,
+      "2012-08": 221,
+      "2012-09": 479,
+      "2012-10": 45,
+      "2012-11": 30,
+      "2012-12": 25,
+      "2013-01": 12,
+      "2013-02": 13,
+      "2013-03": 15,
+      "2013-04": 6,
+      "2013-05": 15,
+      "2013-07": 4,
+      "2013-08": 1,
+      "2013-09": 1,
+      "2013-10": 1,
+      "2014-03": 16,
+      "2014-06": 2,
+      "2015-04": 1
+    },
+    "award_published_date": {
+      "2012-01": 569,
+      "2012-02": 2329,
+      "2012-03": 5457,
+      "2012-04": 4594,
+      "2012-05": 4688,
+      "2012-06": 3862,
+      "2012-07": 1850,
+      "2012-08": 997,
+      "2012-09": 1057,
+      "2012-10": 769,
+      "2012-11": 1449,
+      "2012-12": 764,
+      "2013-01": 622,
+      "2013-02": 237,
+      "2013-03": 206,
+      "2013-04": 169,
+      "2013-05": 534,
+      "2013-06": 539,
+      "2013-07": 380,
+      "2013-08": 66,
+      "2013-09": 147,
+      "2013-10": 33,
+      "2013-11": 41,
+      "2013-12": 44,
+      "2014-01": 22,
+      "2014-02": 100,
+      "2014-03": 109,
+      "2014-04": 22,
+      "2014-05": 10,
+      "2014-06": 8,
+      "2014-07": 6,
+      "2014-08": 2,
+      "2014-10": 9,
+      "2014-12": 4,
+      "2015-01": 27,
+      "2015-03": 1,
+      "2015-06": 1,
+      "2015-07": 1,
+      "2015-08": 1,
+      "2015-09": 3,
+      "2015-10": 4
+    },
+    "notice_to_proceed_date": {
+      "2011-02": 1,
+      "2011-09": 2,
+      "2011-10": 4,
+      "2011-11": 18,
+      "2011-12": 29,
+      "2012-01": 321,
+      "2012-02": 2225,
+      "2012-03": 4925,
+      "2012-04": 3970,
+      "2012-05": 1949,
+      "2012-06": 837,
+      "2012-07": 307,
+      "2012-08": 187,
+      "2012-09": 476,
+      "2012-10": 41,
+      "2012-11": 36,
+      "2012-12": 23,
+      "2013-01": 9,
+      "2013-02": 13,
+      "2013-03": 19,
+      "2013-04": 12,
+      "2013-05": 13,
+      "2013-06": 2,
+      "2013-07": 5,
+      "2013-08": 1,
+      "2013-09": 1,
+      "2013-10": 1,
+      "2014-03": 16,
+      "2014-06": 2,
+      "2015-04": 1
+    },
+    "contract_end_date": {
+      "2011-05": 1,
+      "2011-11": 3,
+      "2011-12": 22,
+      "2012-01": 177,
+      "2012-02": 1052,
+      "2012-03": 1866,
+      "2012-04": 2858,
+      "2012-05": 2880,
+      "2012-06": 1583,
+      "2012-07": 1171,
+      "2012-08": 512,
+      "2012-09": 1538,
+      "2012-10": 278,
+      "2012-11": 281,
+      "2012-12": 576,
+      "2013-01": 80,
+      "2013-02": 82,
+      "2013-03": 118,
+      "2013-04": 74,
+      "2013-05": 61,
+      "2013-06": 53,
+      "2013-07": 29,
+      "2013-08": 19,
+      "2013-09": 13,
+      "2013-10": 3,
+      "2013-11": 3,
+      "2013-12": 4,
+      "2014-01": 4,
+      "2014-02": 6,
+      "2014-03": 25,
+      "2014-04": 8,
+      "2014-05": 14,
+      "2014-06": 5,
+      "2014-07": 4,
+      "2014-08": 3,
+      "2014-09": 2,
+      "2014-11": 2,
+      "2014-12": 7,
+      "2015-02": 2,
+      "2015-03": 2,
+      "2015-04": 4,
+      "2015-05": 7,
+      "2015-06": 3,
+      "2015-07": 3,
+      "2015-10": 3,
+      "2015-11": 1,
+      "2015-12": 1,
+      "2017-02": 1,
+      "2017-03": 1,
+      "2018-12": 1
+    },
+    "award_date": {
+      "2011-02": 3,
+      "2011-03": 1,
+      "2011-04": 1,
+      "2011-08": 3,
+      "2011-09": 3,
+      "2011-10": 8,
+      "2011-11": 25,
+      "2011-12": 51,
+      "2012-01": 1815,
+      "2012-02": 6168,
+      "2012-03": 11302,
+      "2012-04": 7006,
+      "2012-05": 2958,
+      "2012-06": 1081,
+      "2012-07": 418,
+      "2012-08": 190,
+      "2012-09": 445,
+      "2012-10": 65,
+      "2012-11": 43,
+      "2012-12": 16,
+      "2013-01": 14,
+      "2013-02": 16,
+      "2013-03": 32,
+      "2013-04": 16,
+      "2013-05": 8,
+      "2013-06": 7,
+      "2013-07": 1,
+      "2013-08": 1,
+      "2013-09": 2,
+      "2013-10": 10,
+      "2013-11": 2,
+      "2014-02": 1,
+      "2014-03": 15,
+      "2014-05": 2,
+      "2014-06": 1,
+      "2015-03": 1,
+      "2015-10": 1,
+      "2016-04": 1
+    },
+    "closing_date": {
+      "2012-01": 18328,
+      "2012-02": 36792,
+      "2012-03": 43427,
+      "2012-04": 13596,
+      "2012-05": 464,
+      "2012-06": 80,
+      "2012-07": 9,
+      "2012-08": 26,
+      "2012-09": 5,
+      "2012-10": 10,
+      "2012-11": 2,
+      "2012-12": 22,
+      "2013-01": 4,
+      "2013-02": 9,
+      "2013-03": 4,
+      "2013-06": 1
+    }
+  },
+  "elapsed_seconds": 44.945
+}

@@ -1,0 +1,359 @@
+{
+  "profile_version": 1,
+  "overview": {
+    "observation_rows": 17528727,
+    "source_files": 67,
+    "source_schemas": 4,
+    "rows_with_cleaning_issues": 762381
+  },
+  "source_schema_rows": [
+    {
+      "schema_id": "legacy_40_unit_of_measurement",
+      "rows": 324509,
+      "source_files": 1
+    },
+    {
+      "schema_id": "legacy_40_uom",
+      "rows": 1595484,
+      "source_files": 11
+    },
+    {
+      "schema_id": "location_46",
+      "rows": 7149712,
+      "source_files": 16
+    },
+    {
+      "schema_id": "modern_43",
+      "rows": 8459022,
+      "source_files": 39
+    }
+  ],
+  "identifier_completeness": {
+    "bid_reference_no": {
+      "present_rows": 17528726,
+      "missing_rows": 1
+    },
+    "solicitation_no": {
+      "present_rows": 10365885,
+      "missing_rows": 7162842
+    },
+    "line_item_no": {
+      "present_rows": 11118722,
+      "missing_rows": 6410005
+    },
+    "award_reference_no": {
+      "present_rows": 6499122,
+      "missing_rows": 11029605
+    },
+    "contract_no": {
+      "present_rows": 2055804,
+      "missing_rows": 15472923
+    },
+    "procuring_entity_name": {
+      "present_rows": 17528726,
+      "missing_rows": 1
+    },
+    "client_agency": {
+      "present_rows": 278785,
+      "missing_rows": 17249942
+    },
+    "awardee_organization_name": {
+      "present_rows": 6448977,
+      "missing_rows": 11079750
+    }
+  },
+  "process_candidates": {
+    "distinct_bid_references": 10293935,
+    "rows_with_bid_reference": 17528726,
+    "obvious_placeholder_reference_values": 1,
+    "rows_with_obvious_placeholder_reference": 405345,
+    "references_with_multiple_entities": 3,
+    "rows_in_multiple_entity_references": 405349,
+    "max_entities_per_reference": 8701,
+    "nonplaceholder_references_with_multiple_entities": 2,
+    "rows_in_nonplaceholder_multiple_entity_references": 4,
+    "references_with_multiple_solicitations": 5,
+    "rows_in_multiple_solicitation_references": 405353,
+    "max_solicitations_per_reference": 170889,
+    "references_with_multiple_titles": 12,
+    "references_seen_in_multiple_files": 171966,
+    "references_seen_in_multiple_schemas": 81,
+    "missing_bid_reference_rows": 1,
+    "rows_requiring_process_key_fallback": 405346
+  },
+  "top_process_candidate_collisions": [
+    {
+      "bid_reference_no": "0",
+      "rows": 405345,
+      "is_placeholder": true,
+      "entities": 8701,
+      "solicitations": 170889,
+      "titles": 263696,
+      "source_files": 55
+    },
+    {
+      "bid_reference_no": "3933064",
+      "rows": 2,
+      "is_placeholder": false,
+      "entities": 2,
+      "solicitations": 1,
+      "titles": 1,
+      "source_files": 1
+    },
+    {
+      "bid_reference_no": "6634367",
+      "rows": 2,
+      "is_placeholder": false,
+      "entities": 2,
+      "solicitations": 1,
+      "titles": 1,
+      "source_files": 1
+    },
+    {
+      "bid_reference_no": "3400013",
+      "rows": 2,
+      "is_placeholder": false,
+      "entities": 1,
+      "solicitations": 2,
+      "titles": 1,
+      "source_files": 2
+    },
+    {
+      "bid_reference_no": "3522896",
+      "rows": 2,
+      "is_placeholder": false,
+      "entities": 1,
+      "solicitations": 2,
+      "titles": 1,
+      "source_files": 2
+    },
+    {
+      "bid_reference_no": "3610656",
+      "rows": 2,
+      "is_placeholder": false,
+      "entities": 1,
+      "solicitations": 2,
+      "titles": 1,
+      "source_files": 2
+    },
+    {
+      "bid_reference_no": "4670274",
+      "rows": 2,
+      "is_placeholder": false,
+      "entities": 1,
+      "solicitations": 2,
+      "titles": 1,
+      "source_files": 2
+    }
+  ],
+  "fallback_process_candidates": {
+    "candidate_rows": 405346,
+    "rows_with_solicitation_number": 227552,
+    "rows_with_entity": 405346,
+    "rows_with_title": 404066,
+    "rows_with_publication_date": 253151,
+    "rows_using_content_composite": 252692,
+    "rows_using_source_row_fallback": 152654,
+    "distinct_content_composite_candidates": 206640,
+    "repeated_composite_groups": 11481,
+    "rows_grouped_beyond_first": 46052,
+    "composite_groups_seen_in_multiple_files": 5983,
+    "max_rows_per_composite": 329,
+    "max_line_numbers_per_composite": 137,
+    "max_awards_per_composite": 96
+  },
+  "solicitation_candidates": {
+    "distinct_solicitation_numbers": 4931821,
+    "solicitations_with_multiple_bid_references": 587859,
+    "rows_in_reused_solicitations": 4053105,
+    "max_bid_references_per_solicitation": 18192,
+    "solicitations_with_multiple_entities": 280588
+  },
+  "item_grain": {
+    "evidence_rows": 11119241,
+    "evidence_rows_missing_line_number": 519,
+    "evidence_rows_missing_process_reference": 0,
+    "process_line_groups": 8877073,
+    "repeated_process_line_groups": 537533,
+    "repeated_rows_beyond_first": 2241649,
+    "process_line_groups_with_conflicting_content": 3514,
+    "rows_in_conflicting_process_line_groups": 10625,
+    "max_signatures_per_process_line": 25
+  },
+  "award_grain": {
+    "evidence_rows": 6499122,
+    "evidence_rows_missing_award_reference": 0,
+    "evidence_rows_missing_process_reference": 0,
+    "process_award_groups": 4600588,
+    "repeated_process_award_groups": 406463,
+    "process_award_groups_with_conflicting_content": 0,
+    "rows_in_conflicting_process_award_groups": 0,
+    "process_awards_with_multiple_suppliers": 0,
+    "award_references_reused_across_processes": 5927,
+    "rows_in_cross_process_award_references": 29632,
+    "max_processes_per_award_reference": 5
+  },
+  "contract_grain_and_links": {
+    "evidence_rows": 4788907,
+    "evidence_rows_missing_contract_number": 2733103,
+    "evidence_rows_missing_award_reference": 0,
+    "evidence_rows_missing_process_reference": 0,
+    "process_contract_groups": 1560531,
+    "repeated_process_contract_groups": 84945,
+    "process_contract_groups_with_conflicting_content": 72780,
+    "process_contracts_missing_award_link": 0,
+    "process_contracts_with_ambiguous_award_link": 74870,
+    "contract_numbers_reused_across_processes": 100738,
+    "rows_in_cross_process_contract_numbers": 589248,
+    "max_processes_per_contract_number": 5210
+  },
+  "supplier_grain_and_links": {
+    "evidence_rows": 6448977,
+    "evidence_rows_missing_supplier_name": 0,
+    "evidence_rows_missing_award_reference": 0,
+    "evidence_rows_missing_process_reference": 0,
+    "distinct_supplier_name_keys": 125086,
+    "process_awards_with_multiple_supplier_names": 0,
+    "max_supplier_names_per_process_award": 1,
+    "normalized_name_keys_with_multiple_spellings": 0,
+    "rows_with_joint_venture_value": 65326
+  },
+  "repeated_observations": {
+    "distinct_business_observations": 15326658,
+    "repeated_observation_groups": 522475,
+    "repeated_rows_beyond_first": 2202069,
+    "cross_file_repeat_groups": 305779,
+    "rows_in_cross_file_repeat_groups": 1862855,
+    "max_repetitions": 755
+  },
+  "top_joint_venture_values": [
+    {
+      "value": "BAN BEE COMMERCIAL CO., INC.",
+      "rows": 1371
+    },
+    {
+      "value": "LUXENBERG MARKETING, INC.",
+      "rows": 871
+    },
+    {
+      "value": "3-TECH INNOVATION MASTER CORP.",
+      "rows": 770
+    },
+    {
+      "value": "MOBLER CONTRACT GROUP,INC.",
+      "rows": 728
+    },
+    {
+      "value": "ROQ UNIVERSITY BUSINESS CENTER",
+      "rows": 726
+    },
+    {
+      "value": "NEED INK SALES & SERVICES",
+      "rows": 570
+    },
+    {
+      "value": "GPL TRADING OPC",
+      "rows": 493
+    },
+    {
+      "value": "INTEGRATED COMPUTER SYSTEMS, INC.",
+      "rows": 486
+    },
+    {
+      "value": "PANDAYAN SUPERSTORES, INC.",
+      "rows": 465
+    },
+    {
+      "value": "STERITEX MEDICAL SYSTEM",
+      "rows": 452
+    },
+    {
+      "value": "KC'S OFFICE AND SCHOOL SUPPLIES",
+      "rows": 436
+    },
+    {
+      "value": "CEBU BSR ETHANIM CHEMICALS INC.",
+      "rows": 426
+    },
+    {
+      "value": "METOS OFFSHORE, INC.",
+      "rows": 397
+    },
+    {
+      "value": "GROUP 5 COMPUTER PRODUCTS & SUPPLIES, INC.",
+      "rows": 370
+    },
+    {
+      "value": "MAE MARIE MARKETING",
+      "rows": 367
+    },
+    {
+      "value": "FGS BACOLOD OPC",
+      "rows": 349
+    },
+    {
+      "value": "PLUS 9 GENERAL MERCHANDISE",
+      "rows": 344
+    },
+    {
+      "value": "BEST CHOICE ENTERPRISES",
+      "rows": 331
+    },
+    {
+      "value": "GAKKEN PHILIPPINES INC.",
+      "rows": 331
+    },
+    {
+      "value": "POINTER ENTERPRISES INC.",
+      "rows": 330
+    }
+  ],
+  "methodology": {
+    "business_observation_signature": "DuckDB 64-bit hash over all 55 cleaned business fields; used for profiling only, never as a published or persistent ID",
+    "relationship_statuses": [
+      "matched",
+      "missing",
+      "ambiguous"
+    ],
+    "null_policy": "Null values are not counted as distinct links.",
+    "obvious_identifier_placeholders": [
+      "0",
+      "00",
+      "000",
+      "-",
+      "N/A",
+      "NA",
+      "NONE",
+      "NULL"
+    ]
+  },
+  "query_seconds": {
+    "overview": 1.474,
+    "schema_rows": 1.772,
+    "identifier_completeness": 2.459,
+    "process_candidates": 42.876,
+    "top_process_collisions": 40.987,
+    "fallback_process_candidates": 2.238,
+    "solicitation_candidates": 12.751,
+    "item_grain": 16.565,
+    "award_grain": 25.816,
+    "contract_grain_and_links": 11.766,
+    "supplier_grain_and_links": 16.165,
+    "repeated_observations": 34.06,
+    "joint_venture_values": 0.232
+  },
+  "input": {
+    "path": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\DATA_NORMALIZATION\\output\\philgeps_cleaned.parquet",
+    "truncated_for_test": false,
+    "max_rows": null
+  },
+  "elapsed_seconds": 209.406,
+  "recommendations": [
+    "Use valid-looking `bid_reference_no` as the process-key candidate. Manual review found that the small set of cross-entity cases are agency-label variants with matching solicitation numbers and titles; retain one process and flag the conflicting labels. For missing or placeholder values, use the profiled content composite when possible and a provenance fallback otherwise.",
+    "Treat `solicitation_no` as a tender attribute, not an unconditional component of process identity, because it varies within some bid references.",
+    "Version item states: `line_item_no` locates an item within a process but does not identify immutable content.",
+    "Scope award identifiers to the process; award references are reused across processes.",
+    "Scope contract identifiers to the related award; contract numbers are reused across processes and sometimes across awards in one process.",
+    "Retain missing and ambiguous relationships in analytical tables with link statuses and publication-blocking quality issues."
+  ]
+}

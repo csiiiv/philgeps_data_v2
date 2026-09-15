@@ -1,0 +1,262 @@
+{
+  "identity_rules_version": 1,
+  "overview": {
+    "observation_rows": 100000,
+    "source_files": 1,
+    "distinct_source_observation_keys": 100000,
+    "duplicate_source_observation_keys": 0
+  },
+  "processes": {
+    "observation_rows": 100000,
+    "distinct_ids": 98383,
+    "hash_collision_ids": 0,
+    "rows_in_hash_collisions": 0,
+    "identity_bases": [
+      {
+        "basis": "bid_reference",
+        "observation_rows": 87589,
+        "distinct_ids": 86474
+      },
+      {
+        "basis": "inferred_content_composite",
+        "observation_rows": 6485,
+        "distinct_ids": 5983
+      },
+      {
+        "basis": "source_row",
+        "observation_rows": 5926,
+        "distinct_ids": 5926
+      }
+    ],
+    "ids_with_multiple_entity_names": 0,
+    "ids_with_multiple_solicitations": 0,
+    "ids_with_multiple_titles": 0,
+    "max_entity_names_per_id": 1,
+    "max_solicitations_per_id": 0,
+    "max_titles_per_id": 1
+  },
+  "items": {
+    "observation_rows": 14039,
+    "distinct_ids": 13419,
+    "hash_collision_ids": 0,
+    "rows_in_hash_collisions": 0,
+    "ids_with_multiple_content_versions": 168,
+    "max_content_versions_per_id": 13,
+    "identity_bases": [
+      {
+        "basis": "line_item_no",
+        "observation_rows": 14039,
+        "distinct_ids": 13419
+      }
+    ]
+  },
+  "awards": {
+    "observation_rows": 13340,
+    "distinct_ids": 12925,
+    "hash_collision_ids": 0,
+    "rows_in_hash_collisions": 0,
+    "ids_with_multiple_content_versions": 0,
+    "max_content_versions_per_id": 1,
+    "identity_bases": [
+      {
+        "basis": "award_reference_no",
+        "observation_rows": 13340,
+        "distinct_ids": 12925
+      }
+    ]
+  },
+  "contracts": {
+    "observation_rows": 8933,
+    "distinct_ids": 8652,
+    "hash_collision_ids": 0,
+    "rows_in_hash_collisions": 0,
+    "ids_with_multiple_content_versions": 0,
+    "max_content_versions_per_id": 1,
+    "identity_bases": [
+      {
+        "basis": "award_scoped_content_composite",
+        "observation_rows": 8933,
+        "distinct_ids": 8652
+      }
+    ],
+    "award_links": [
+      {
+        "status": "matched",
+        "observation_rows": 8933,
+        "distinct_contract_ids": 8652
+      }
+    ],
+    "contract_ids_crossing_awards": 0,
+    "max_awards_per_contract_id": 1
+  },
+  "parties": {
+    "observation_rows": 113340,
+    "distinct_ids": 111082,
+    "hash_collision_ids": 0,
+    "rows_in_hash_collisions": 0,
+    "identity_bases": [
+      {
+        "basis": "procuringEntity",
+        "observation_rows": 100000,
+        "distinct_ids": 98383
+      },
+      {
+        "basis": "supplier",
+        "observation_rows": 13340,
+        "distinct_ids": 12750
+      }
+    ],
+    "role_mentions": [
+      {
+        "role": "procuringEntity",
+        "observation_rows": 100000,
+        "distinct_party_ids": 98383
+      },
+      {
+        "role": "supplier",
+        "observation_rows": 13340,
+        "distinct_party_ids": 12750
+      }
+    ],
+    "party_ids_with_multiple_source_spellings": 0,
+    "max_source_spellings_per_party_id": 1
+  },
+  "examples": {
+    "process": [
+      {
+        "basis": "bid_reference",
+        "id": "pgcp_1cc3e53e6105fe9c73378be46a930041944ab4ba4ba5a9e412be9307a4ae8a73",
+        "payload_fingerprint": 18236767057921691376,
+        "source_breadcrumb": "pgf_d0193c5ae5d8ad56542b931a3d2331d8eb3faa1d9f3926cf77b77d120d05563d:100000"
+      },
+      {
+        "basis": "inferred_content_composite",
+        "id": "pgcp_f73b30f2a517ecc255fd9468e3c71facb3336f89bcac25871b44a8647f533e7d",
+        "payload_fingerprint": 12233273720708691062,
+        "source_breadcrumb": "pgf_d0193c5ae5d8ad56542b931a3d2331d8eb3faa1d9f3926cf77b77d120d05563d:10"
+      },
+      {
+        "basis": "source_row",
+        "id": "pgcp_1464b6cf86e3cbdb13c3a8165d8e99b3ccf3ce00af5383995726cb9eeb1242af",
+        "payload_fingerprint": 11050867060594682140,
+        "source_breadcrumb": "pgf_d0193c5ae5d8ad56542b931a3d2331d8eb3faa1d9f3926cf77b77d120d05563d:100"
+      }
+    ],
+    "item": [
+      {
+        "basis": "line_item_no",
+        "id": "pgti_c2e2789aa7dc8762618bedbed533b101888f461c53c2fb2e111bdb66eca4b067",
+        "payload_fingerprint": 12581171752597686411,
+        "source_breadcrumb": "pgf_d0193c5ae5d8ad56542b931a3d2331d8eb3faa1d9f3926cf77b77d120d05563d:10"
+      }
+    ],
+    "award": [
+      {
+        "basis": "award_reference_no",
+        "id": "pgaw_e658731daf9d0c2799ce7fee8e7a5e986ce61228157bcdf9a8d1a2decfeed0a1",
+        "payload_fingerprint": 7779601629525981529,
+        "source_breadcrumb": "pgf_d0193c5ae5d8ad56542b931a3d2331d8eb3faa1d9f3926cf77b77d120d05563d:10"
+      }
+    ],
+    "contract": [
+      {
+        "basis": "award_scoped_content_composite",
+        "id": "pgct_830fd08d79a44f8a0ec08e15d39a00a7511d7edddbffcabaa1eac7d077f364cf",
+        "payload_fingerprint": 12887794618370173241,
+        "source_breadcrumb": "pgf_d0193c5ae5d8ad56542b931a3d2331d8eb3faa1d9f3926cf77b77d120d05563d:10"
+      }
+    ],
+    "party": [
+      {
+        "basis": "procuringEntity",
+        "id": "pgpa_c318792bbee1fc54e59d79d081a2d1249f9d1293b502999d4718aa96e016c669",
+        "payload_fingerprint": 10709190994583192425,
+        "source_breadcrumb": "pgf_d0193c5ae5d8ad56542b931a3d2331d8eb3faa1d9f3926cf77b77d120d05563d:10"
+      },
+      {
+        "basis": "supplier",
+        "id": "pgpa_08ba9d64403fc68e4e7153b0ab3e647bc6c43a7bcfcf4d9b818d9a0d7286fc19",
+        "payload_fingerprint": 8488799764978719537,
+        "source_breadcrumb": "pgf_d0193c5ae5d8ad56542b931a3d2331d8eb3faa1d9f3926cf77b77d120d05563d:10"
+      }
+    ]
+  },
+  "query_seconds": {
+    "overview": 0.048,
+    "process_summary": 0.101,
+    "process_bases": 0.04,
+    "process_conflicts": 0.205,
+    "item_summary": 0.022,
+    "item_bases": 0.008,
+    "award_summary": 0.018,
+    "award_bases": 0.009,
+    "contract_summary": 0.014,
+    "contract_bases": 0.006,
+    "contract_links": 0.006,
+    "contract_award_scope": 0.008,
+    "party_summary": 0.119,
+    "party_bases": 0.047,
+    "party_roles": 0.041,
+    "party_name_variants": 0.065,
+    "process_examples": 0.014,
+    "item_examples": 0.004,
+    "award_examples": 0.003,
+    "contract_examples": 0.003,
+    "party_examples": 0.015
+  },
+  "validation": {
+    "status": "pass",
+    "failures": [],
+    "hash_collision_counts": {
+      "processes": 0,
+      "items": 0,
+      "awards": 0,
+      "contracts": 0,
+      "parties": 0
+    },
+    "coverage_checks": {
+      "processes": {
+        "expected_observation_rows": 100000,
+        "identity_basis_rows": 100000,
+        "matches": true
+      },
+      "items": {
+        "expected_observation_rows": 14039,
+        "identity_basis_rows": 14039,
+        "matches": true
+      },
+      "awards": {
+        "expected_observation_rows": 13340,
+        "identity_basis_rows": 13340,
+        "matches": true
+      },
+      "contracts": {
+        "expected_observation_rows": 8933,
+        "identity_basis_rows": 8933,
+        "matches": true
+      },
+      "parties": {
+        "expected_observation_rows": 113340,
+        "identity_basis_rows": 113340,
+        "matches": true
+      },
+      "contract_award_links": {
+        "expected_observation_rows": 8933,
+        "link_status_rows": 8933,
+        "matches": true
+      }
+    },
+    "interpretation": "Multiple content versions under one stable ID are expected observed states, not cryptographic collisions."
+  },
+  "input": {
+    "path": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\DATA_NORMALIZATION\\output\\philgeps_cleaned.parquet",
+    "size_bytes": 1195893966,
+    "truncated_for_test": true,
+    "max_rows": 100000
+  },
+  "identity_config": {
+    "path": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\OCDS_ETL\\config\\identity_rules.json",
+    "sha256": "998dd4035249e7f0f93cbdea05054ba809d74f42b4d66ed769fd8f1d966713ed"
+  },
+  "elapsed_seconds": 2.614
+}

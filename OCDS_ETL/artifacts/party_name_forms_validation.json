@@ -1,0 +1,7 @@
+{
+  "status": "pass",
+  "output": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\OCDS_ETL\\outputs\\parquet\\party_name_forms.parquet",
+  "rows": 180147,
+  "distinct_name_form_ids": 180147,
+  "rule_version": "party-name-v1"
+}

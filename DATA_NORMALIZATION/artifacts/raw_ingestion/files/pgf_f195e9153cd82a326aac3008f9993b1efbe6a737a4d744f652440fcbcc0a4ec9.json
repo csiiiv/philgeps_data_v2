@@ -1,0 +1,473 @@
+{
+  "status": "complete",
+  "source_file_id": "pgf_f195e9153cd82a326aac3008f9993b1efbe6a737a4d744f652440fcbcc0a4ec9",
+  "local_file": "files/2025_(JUL-SEPT).csv",
+  "normalized_file_name": "2025-07--2025-09.csv",
+  "schema_id": "location_46",
+  "format": "csv",
+  "input_size_bytes": 240116147,
+  "output_file": "philgeps_normalized.parquet",
+  "expected_column_count": 46,
+  "physical_data_rows_seen": 361502,
+  "rows_written": 361502,
+  "blank_rows_skipped": 0,
+  "width_counts": {
+    "46": 361502
+  },
+  "malformed_width_row_count": 0,
+  "malformed_width_examples": [],
+  "formula_cell_count": 0,
+  "replacement_character_cell_count": 0,
+  "null_profile": {
+    "procuring_entity_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "procuring_entity_region": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "procuring_entity_province": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "procuring_entity_city_municipality": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "government_branch": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "procuring_entity_organization_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "procuring_entity_organization_type_grouped": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "bid_reference_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "notice_title": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "classification": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "procurement_mode": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "business_category": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "funding_source": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "funding_instrument": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "trade_agreement": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "approved_budget": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "bid_published_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 5403,
+      "nonempty": 356099
+    },
+    "closing_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 9961,
+      "nonempty": 351541
+    },
+    "area_of_delivery": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 29919,
+      "nonempty": 331583
+    },
+    "contract_duration": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 1978,
+      "nonempty": 359524
+    },
+    "calendar_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 9961,
+      "nonempty": 351541
+    },
+    "line_item_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 156215,
+      "nonempty": 205287
+    },
+    "item_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 156262,
+      "nonempty": 205240
+    },
+    "item_description": {
+      "missing_cell": 0,
+      "blank_string": 16,
+      "null_literal": 156351,
+      "nonempty": 205135
+    },
+    "quantity": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 156215,
+      "nonempty": 205287
+    },
+    "unit_of_measurement": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 156215,
+      "nonempty": 205287
+    },
+    "item_budget": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 156215,
+      "nonempty": 205287
+    },
+    "bid_notice_status": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 361502
+    },
+    "award_reference_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281144,
+      "nonempty": 80358
+    },
+    "award_title": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281144,
+      "nonempty": 80358
+    },
+    "unspsc_code": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281249,
+      "nonempty": 80253
+    },
+    "unspsc_description": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281249,
+      "nonempty": 80253
+    },
+    "award_published_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281144,
+      "nonempty": 80358
+    },
+    "award_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281144,
+      "nonempty": 80358
+    },
+    "contract_amount": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281344,
+      "nonempty": 80158
+    },
+    "award_notice_status": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281144,
+      "nonempty": 80358
+    },
+    "notice_to_proceed_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 308219,
+      "nonempty": 53283
+    },
+    "contract_effectivity_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 308219,
+      "nonempty": 53283
+    },
+    "contract_end_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 308219,
+      "nonempty": 53283
+    },
+    "awardee_organization_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281144,
+      "nonempty": 80358
+    },
+    "awardee_country": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281144,
+      "nonempty": 80358
+    },
+    "awardee_region": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281269,
+      "nonempty": 80233
+    },
+    "awardee_province": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281259,
+      "nonempty": 80243
+    },
+    "awardee_city_municipality": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 281203,
+      "nonempty": 80299
+    },
+    "awardee_size": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 283943,
+      "nonempty": 77559
+    },
+    "awardee_joint_venture": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 358154,
+      "nonempty": 3348
+    }
+  },
+  "date_months": {
+    "bid_published_date": {
+      "2025-07": 131373,
+      "2025-08": 112071,
+      "2025-09": 112655
+    },
+    "contract_effectivity_date": {
+      "2022-04": 2,
+      "2022-11": 1,
+      "2023-08": 1,
+      "2023-11": 1,
+      "2024-01": 1,
+      "2024-02": 11,
+      "2024-03": 9,
+      "2024-04": 36,
+      "2024-05": 7,
+      "2024-06": 6,
+      "2024-07": 4,
+      "2024-08": 9,
+      "2024-09": 20,
+      "2024-10": 18,
+      "2024-11": 22,
+      "2024-12": 34,
+      "2025-01": 83,
+      "2025-02": 83,
+      "2025-03": 186,
+      "2025-04": 225,
+      "2025-05": 313,
+      "2025-06": 904,
+      "2025-07": 11445,
+      "2025-08": 21944,
+      "2025-09": 17578,
+      "2025-10": 283,
+      "2025-11": 41,
+      "2025-12": 14,
+      "2026-01": 2
+    },
+    "award_published_date": {
+      "2025-07": 11561,
+      "2025-08": 28063,
+      "2025-09": 40727,
+      "2025-10": 7
+    },
+    "notice_to_proceed_date": {
+      "2022-03": 1,
+      "2022-04": 1,
+      "2022-11": 1,
+      "2023-01": 1,
+      "2023-08": 1,
+      "2023-11": 1,
+      "2024-02": 10,
+      "2024-03": 15,
+      "2024-04": 18,
+      "2024-05": 22,
+      "2024-06": 6,
+      "2024-07": 7,
+      "2024-08": 12,
+      "2024-09": 27,
+      "2024-10": 18,
+      "2024-11": 22,
+      "2024-12": 33,
+      "2025-01": 78,
+      "2025-02": 106,
+      "2025-03": 218,
+      "2025-04": 241,
+      "2025-05": 352,
+      "2025-06": 1129,
+      "2025-07": 12188,
+      "2025-08": 23219,
+      "2025-09": 15556
+    },
+    "contract_end_date": {
+      "2022-04": 1,
+      "2022-11": 2,
+      "2023-09": 1,
+      "2023-11": 1,
+      "2024-01": 1,
+      "2024-02": 1,
+      "2024-03": 1,
+      "2024-04": 17,
+      "2024-05": 4,
+      "2024-06": 22,
+      "2024-07": 11,
+      "2024-08": 12,
+      "2024-09": 8,
+      "2024-10": 18,
+      "2024-11": 24,
+      "2024-12": 35,
+      "2025-01": 30,
+      "2025-02": 43,
+      "2025-03": 121,
+      "2025-04": 136,
+      "2025-05": 205,
+      "2025-06": 614,
+      "2025-07": 5299,
+      "2025-08": 14595,
+      "2025-09": 17449,
+      "2025-10": 7983,
+      "2025-11": 1699,
+      "2025-12": 1885,
+      "2026-01": 448,
+      "2026-02": 733,
+      "2026-03": 404,
+      "2026-04": 343,
+      "2026-05": 191,
+      "2026-06": 178,
+      "2026-07": 166,
+      "2026-08": 305,
+      "2026-09": 235,
+      "2026-10": 9,
+      "2026-11": 5,
+      "2026-12": 4,
+      "2027-02": 4,
+      "2027-03": 2,
+      "2027-05": 1,
+      "2027-07": 2,
+      "2027-08": 4,
+      "2027-09": 2,
+      "2027-12": 4,
+      "2028-06": 3,
+      "2028-07": 1,
+      "2028-08": 6,
+      "2028-09": 7,
+      "2028-10": 1,
+      "2028-12": 1,
+      "2030-07": 1,
+      "2030-08": 1,
+      "2030-09": 3,
+      "2035-08": 1
+    },
+    "award_date": {
+      "2022-03": 1,
+      "2022-04": 1,
+      "2022-11": 1,
+      "2023-08": 2,
+      "2023-09": 1,
+      "2023-10": 1,
+      "2023-11": 1,
+      "2024-01": 5,
+      "2024-02": 21,
+      "2024-03": 29,
+      "2024-04": 24,
+      "2024-05": 5,
+      "2024-06": 9,
+      "2024-07": 8,
+      "2024-08": 10,
+      "2024-09": 38,
+      "2024-10": 22,
+      "2024-11": 48,
+      "2024-12": 82,
+      "2025-01": 110,
+      "2025-02": 187,
+      "2025-03": 333,
+      "2025-04": 343,
+      "2025-05": 626,
+      "2025-06": 1911,
+      "2025-07": 21335,
+      "2025-08": 33499,
+      "2025-09": 21701,
+      "2025-10": 3,
+      "2025-11": 1
+    },
+    "closing_date": {
+      "2025-07": 98778,
+      "2025-08": 112195,
+      "2025-09": 117123,
+      "2025-10": 23425,
+      "2025-11": 14,
+      "2025-12": 2,
+      "2026-01": 3,
+      "2026-03": 1
+    }
+  },
+  "elapsed_seconds": 33.711
+}

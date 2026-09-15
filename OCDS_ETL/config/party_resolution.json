@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "rule_version": "party-resolution-evidence-v1",
+  "name_rule_version": "party-name-v1",
+  "status": "provisional-promotion-enabled",
+  "candidate_scope": "Party mentions whose legal_suffix_name_key has more than one conservative source-name form.",
+  "location_key": {
+    "fields": [
+      "source_country",
+      "source_region",
+      "source_province",
+      "source_city_municipality"
+    ],
+    "operations": [
+      "lowercase",
+      "replace non-ASCII-alphanumeric runs with spaces",
+      "collapse and trim spaces",
+      "retain labeled component positions"
+    ]
+  },
+  "evidence_statuses": {
+    "corroborated_candidate": "At least one non-empty location key occurs under two or more distinct observed name forms.",
+    "partial_context": "Some name forms have location evidence and others do not, with no shared location across forms.",
+    "divergent_location_context": "Every name form has location evidence, but no location is shared across distinct forms.",
+    "name_only": "The group has no location evidence."
+  },
+  "policy": {
+    "resolution_status": "unresolved",
+    "automatic_merge_allowed": false,
+    "canonical_party_id_assigned": false,
+    "warning": "A shared address is supporting evidence, not proof of common legal identity; divergent addresses can represent branches rather than different entities."
+  },
+  "provisional_promotion": {
+    "rule_version": "party-promotion-v1",
+    "canonical_party_id_prefix": "pgca",
+    "identity_status": "provisional",
+    "all_conditions_required": [
+      "candidate_basis is punctuation_or_case",
+      "evidence_status is corroborated_candidate",
+      "every observed name form has location evidence",
+      "the group has exactly one normalized location",
+      "the group has at most one non-empty organization context",
+      "the group does not mix supplier and public-body role families"
+    ],
+    "alias_membership_condition": "The individual party mention must carry the group's corroborating location.",
+    "excluded_from_v1": [
+      "legal-suffix-equivalence groups",
+      "party mentions without location evidence",
+      "mixed supplier/public-body groups",
+      "groups with multiple normalized locations",
+      "groups with multiple non-empty organization contexts"
+    ],
+    "publication_policy": "Provisional canonical IDs are analytical identifiers and must not be published as official organization identifiers."
+  }
+}

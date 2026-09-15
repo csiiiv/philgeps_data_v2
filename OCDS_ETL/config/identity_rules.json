@@ -1,0 +1,141 @@
+{
+  "identity_rules_version": 1,
+  "status": "prototype",
+  "hash": {
+    "algorithm": "sha256",
+    "text_encoding": "UTF-8",
+    "digest_encoding": "lowercase_hex",
+    "payload_encoding": "compact_JSON_array",
+    "null_representation": "JSON null",
+    "prefix_separator": "_"
+  },
+  "source_observation": {
+    "authoritative_key": [
+      "_source_file_id",
+      "_source_row_number"
+    ],
+    "retained_disambiguator": "_source_sheet",
+    "display_format": "{_source_file_id}:{_source_row_number}",
+    "required_validation": "The authoritative key must be unique before IDs are generated."
+  },
+  "process": {
+    "id_prefix": "pgcp",
+    "rules": [
+      {
+        "precedence": 1,
+        "basis": "bid_reference",
+        "required_fields": [
+          "bid_reference_no"
+        ],
+        "excluded_values_case_insensitive": [
+          "0",
+          "00",
+          "000",
+          "-",
+          "N/A",
+          "NA",
+          "NONE",
+          "NULL"
+        ],
+        "payload_fields": [
+          "bid_reference_no"
+        ],
+        "confidence": "high"
+      },
+      {
+        "precedence": 2,
+        "basis": "inferred_content_composite",
+        "required_fields": [
+          "procuring_entity_name_key",
+          "notice_title",
+          "bid_published_date"
+        ],
+        "payload_fields": [
+          "procuring_entity_name_key",
+          "solicitation_no",
+          "notice_title",
+          "bid_published_date"
+        ],
+        "confidence": "medium"
+      },
+      {
+        "precedence": 3,
+        "basis": "source_row",
+        "required_fields": [
+          "_source_file_id",
+          "_source_row_number"
+        ],
+        "payload_fields": [
+          "_source_file_id",
+          "_source_sheet",
+          "_source_row_number"
+        ],
+        "confidence": "low"
+      }
+    ]
+  },
+  "tender": {
+    "id_rule": "One tender per process; derive from process_id.",
+    "solicitation_policy": "Preserve solicitation_no as source data, not as the primary identity."
+  },
+  "item": {
+    "id_prefix": "pgti",
+    "scope": "process",
+    "preferred_basis": "line_item_no",
+    "fallback_basis": "item_content_composite",
+    "fallback_fields": [
+      "item_name",
+      "item_description",
+      "quantity",
+      "unit_of_measurement",
+      "item_budget",
+      "unspsc_code",
+      "unspsc_description"
+    ],
+    "content_changes_policy": "The same item identity may have different content in different observed states."
+  },
+  "award": {
+    "id_prefix": "pgaw",
+    "scope": "process",
+    "preferred_basis": "award_reference_no",
+    "fallback_basis": "award_content_composite",
+    "fallback_fields": [
+      "award_title",
+      "award_date",
+      "award_published_date",
+      "awardee_organization_name_key",
+      "contract_amount"
+    ]
+  },
+  "contract": {
+    "id_prefix": "pgct",
+    "scope": "award",
+    "preferred_basis": "contract_no",
+    "fallback_basis": "contract_content_composite",
+    "fallback_fields": [
+      "contract_amount",
+      "notice_to_proceed_date",
+      "contract_effectivity_date",
+      "contract_end_date"
+    ],
+    "missing_award_policy": "Retain the contract assertion with a missing link status; do not invent an award."
+  },
+  "party": {
+    "id_prefix": "pgpa",
+    "prototype_scope": "process",
+    "basis": "normalized_name_mention",
+    "name_fields": [
+      "procuring_entity_name_key",
+      "client_agency_key",
+      "awardee_organization_name_key"
+    ],
+    "legal_identity_warning": "A normalized name mention is not a legal-entity identifier."
+  },
+  "canonical_timestamp_format": "%Y-%m-%dT%H:%M:%S.%f",
+  "implementation_notes": [
+    "Every payload begins with the identity-rules version, entity type, and identity basis.",
+    "A full 256-bit digest is retained; prototype IDs are not shortened.",
+    "Source breadcrumbs and payload basis remain stored alongside every derived ID.",
+    "IDs never decide which conflicting value is preferred."
+  ]
+}

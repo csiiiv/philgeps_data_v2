@@ -1,0 +1,98 @@
+{
+  "codelist_mapping_version": 1,
+  "status": "draft",
+  "source_profile": "OCDS_ETL/artifacts/codelist_profile.json",
+  "policies": {
+    "preserve_source_label": true,
+    "unmapped_destination": null,
+    "unmapped_publication_allowed": false,
+    "statuses": ["accepted", "proposed", "unresolved"]
+  },
+  "mappings": {
+    "classification": {
+      "destination": "tender.mainProcurementCategory",
+      "closed_codelist": true,
+      "values": {
+        "Goods": {"destination_value": "goods", "status": "accepted"},
+        "Civil Works": {"destination_value": "works", "status": "accepted"},
+        "Consulting Services": {"destination_value": "services", "status": "accepted"},
+        "Goods - General Support Services": {"destination_value": "services", "status": "proposed", "rationale": "The source label is classified under goods administratively but describes services; confirm policy before publication."},
+        "Undefined": {"destination_value": null, "status": "unresolved"}
+      }
+    },
+    "procurement_mode": {
+      "destination": "tender.procurementMethod",
+      "closed_codelist": true,
+      "details_destination": "tender.procurementMethodDetails",
+      "values": {
+        "Public Bidding": {"destination_value": "open", "status": "accepted"},
+        "National Competitive Bidding": {"destination_value": "open", "status": "accepted"},
+        "International Competitive Bidding": {"destination_value": "open", "status": "accepted"},
+        "Limited Source Bidding (Sec. 49)": {"destination_value": "selective", "status": "accepted"},
+        "Direct Contracting (Sec. 50)": {"destination_value": "direct", "status": "accepted"},
+        "Direct Retail Purchase of POL and Airline Tickets (Sec. 53.14)": {"destination_value": "direct", "status": "proposed"},
+        "Shopping": {"destination_value": "limited", "status": "proposed"},
+        "Shopping - Ordinary/Regular Office Supplies & Equipment (Sec. 52.1.b)": {"destination_value": "limited", "status": "proposed"},
+        "Shopping - Unforeseen Contingency (Sec. 52.1.a)": {"destination_value": "limited", "status": "proposed"},
+        "Selection based on Consultants Qualification": {"destination_value": "selective", "status": "proposed"},
+        "Negotiated Procurement": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - Small Value Procurement (Sec. 53.9)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - Two Failed Biddings (Sec. 53.1)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - Emergency Cases (Sec. 53.2)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - Agency to Agency (Sec. 53.5)": {"destination_value": "direct", "status": "proposed"},
+        "NP - Scientific, Scholarly/Artistic Work, Exclusive Tech. & Media Service (53.6)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - Procurement Agent (Sec. 53.6)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - Highly Technical Consultants (Sec. 53.7)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - Defense Cooperation Agreement (Sec. 53.8)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - Lease of Real Property (Sec. 53.10)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - NGO Participation (Sec. 53.11)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - Community Participation (Sec. 53.12)": {"destination_value": null, "status": "unresolved"},
+        "Negotiated Procurement - United Nations Agencies (Sec. 53.13)": {"destination_value": "direct", "status": "proposed"},
+        "Local Purchase": {"destination_value": null, "status": "unresolved"},
+        "Renewal of Regular and Recurring Sevices per Appendix 37": {"destination_value": null, "status": "unresolved"},
+        "Undefined": {"destination_value": null, "status": "unresolved"}
+      }
+    },
+    "bid_notice_status": {
+      "destination": "tender.status",
+      "closed_codelist": true,
+      "values": {
+        "Active": {"destination_value": "active", "status": "accepted"},
+        "Awarded": {"destination_value": "complete", "status": "accepted"},
+        "Failed": {"destination_value": "unsuccessful", "status": "accepted"},
+        "Cancelled": {"destination_value": "cancelled", "status": "accepted"},
+        "Closed": {"destination_value": "complete", "status": "proposed"},
+        "Shortlisted": {"destination_value": "active", "status": "proposed"},
+        "Closed - Pending Opening": {"destination_value": "active", "status": "proposed"},
+        "Disapproved": {"destination_value": "withdrawn", "status": "proposed"}
+      }
+    },
+    "award_notice_status": {
+      "destination": "awards.status",
+      "closed_codelist": true,
+      "values": {
+        "Posted": {"destination_value": "active", "status": "accepted"},
+        "Updated": {"destination_value": "active", "status": "accepted"},
+        "Cancelled": {"destination_value": "cancelled", "status": "accepted"},
+        "For Approval": {"destination_value": "pending", "status": "accepted"}
+      }
+    },
+    "calendar_type": {
+      "destination": "tenders.contract_duration_unit",
+      "closed_codelist": false,
+      "values": {
+        "Day/s": {"destination_value": "day", "status": "accepted", "safe_duration_in_days": true},
+        "Month/s": {"destination_value": "month", "status": "accepted", "safe_duration_in_days": false},
+        "Year/s": {"destination_value": "year", "status": "accepted", "safe_duration_in_days": false}
+      }
+    }
+  },
+  "analytical_only_source_domains": [
+    "notice_type",
+    "trade_agreement",
+    "award_type",
+    "government_branch",
+    "procuring_entity_organization_type_grouped",
+    "awardee_size"
+  ]
+}

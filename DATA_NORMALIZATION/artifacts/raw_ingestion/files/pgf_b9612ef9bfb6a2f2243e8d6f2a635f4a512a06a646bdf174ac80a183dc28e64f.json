@@ -1,0 +1,560 @@
+{
+  "status": "complete",
+  "source_file_id": "pgf_b9612ef9bfb6a2f2243e8d6f2a635f4a512a06a646bdf174ac80a183dc28e64f",
+  "local_file": "files/July-September 2015.xlsx",
+  "normalized_file_name": "2015-07--2015-09.xlsx",
+  "schema_id": "modern_43",
+  "format": "xlsx",
+  "input_size_bytes": 60597364,
+  "output_file": "philgeps_normalized.parquet",
+  "expected_column_count": 43,
+  "physical_data_rows_seen": 245537,
+  "rows_written": 245537,
+  "blank_rows_skipped": 0,
+  "width_counts": {
+    "43": 245537
+  },
+  "malformed_width_row_count": 0,
+  "malformed_width_examples": [],
+  "formula_cell_count": 36,
+  "replacement_character_cell_count": 0,
+  "null_profile": {
+    "procuring_entity_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "client_agency": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 238064,
+      "nonempty": 7473
+    },
+    "bid_reference_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "solicitation_no": {
+      "missing_cell": 0,
+      "blank_string": 1,
+      "null_literal": 191,
+      "nonempty": 245345
+    },
+    "notice_title": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 1,
+      "nonempty": 245536
+    },
+    "notice_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "classification": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "procurement_mode": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "business_category": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "funding_source": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "funding_instrument": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "trade_agreement": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "approved_budget": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "bid_published_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 1532,
+      "nonempty": 244005
+    },
+    "closing_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 3559,
+      "nonempty": 241978
+    },
+    "prebid_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 183788,
+      "nonempty": 61749
+    },
+    "area_of_delivery": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 14265,
+      "nonempty": 231272
+    },
+    "contract_duration": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 596,
+      "nonempty": 244941
+    },
+    "calendar_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 3559,
+      "nonempty": 241978
+    },
+    "line_item_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 96763,
+      "nonempty": 148774
+    },
+    "item_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 96823,
+      "nonempty": 148714
+    },
+    "item_description": {
+      "missing_cell": 1,
+      "blank_string": 38,
+      "null_literal": 96789,
+      "nonempty": 148709
+    },
+    "quantity": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 96763,
+      "nonempty": 148774
+    },
+    "unit_of_measurement": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 96764,
+      "nonempty": 148773
+    },
+    "item_budget": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 96763,
+      "nonempty": 148774
+    },
+    "bid_notice_status": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 245537
+    },
+    "created_by": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 3612,
+      "nonempty": 241925
+    },
+    "award_reference_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186027,
+      "nonempty": 59510
+    },
+    "award_title": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186028,
+      "nonempty": 59509
+    },
+    "award_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186027,
+      "nonempty": 59510
+    },
+    "unspsc_code": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186029,
+      "nonempty": 59508
+    },
+    "unspsc_description": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186029,
+      "nonempty": 59508
+    },
+    "award_published_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186027,
+      "nonempty": 59510
+    },
+    "award_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186027,
+      "nonempty": 59510
+    },
+    "notice_to_proceed_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 207050,
+      "nonempty": 38487
+    },
+    "contract_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 204962,
+      "nonempty": 40575
+    },
+    "contract_amount": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186116,
+      "nonempty": 59421
+    },
+    "contract_effectivity_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 207050,
+      "nonempty": 38487
+    },
+    "contract_end_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 207050,
+      "nonempty": 38487
+    },
+    "award_notice_status": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186027,
+      "nonempty": 59510
+    },
+    "reason_for_award": {
+      "missing_cell": 0,
+      "blank_string": 2,
+      "null_literal": 186027,
+      "nonempty": 59508
+    },
+    "awardee_organization_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186027,
+      "nonempty": 59510
+    },
+    "awardee_contact_person": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 186309,
+      "nonempty": 59228
+    }
+  },
+  "date_months": {
+    "prebid_date": {
+      "2015-03": 1,
+      "2015-06": 2,
+      "2015-07": 17237,
+      "2015-08": 20690,
+      "2015-09": 19678,
+      "2015-10": 4135,
+      "2015-11": 4,
+      "2015-12": 2
+    },
+    "bid_published_date": {
+      "2015-07": 88041,
+      "2015-08": 79120,
+      "2015-09": 76844
+    },
+    "contract_effectivity_date": {
+      "2013-11": 2,
+      "2013-12": 1,
+      "2014-01": 1,
+      "2014-02": 4,
+      "2014-03": 3,
+      "2014-05": 5,
+      "2014-06": 9,
+      "2014-07": 2,
+      "2014-08": 8,
+      "2014-09": 2,
+      "2014-10": 3,
+      "2014-11": 15,
+      "2014-12": 10,
+      "2015-01": 76,
+      "2015-02": 17,
+      "2015-03": 30,
+      "2015-04": 47,
+      "2015-05": 79,
+      "2015-06": 134,
+      "2015-07": 1827,
+      "2015-08": 6731,
+      "2015-09": 10273,
+      "2015-10": 9724,
+      "2015-11": 5134,
+      "2015-12": 2260,
+      "2016-01": 1040,
+      "2016-02": 450,
+      "2016-03": 319,
+      "2016-04": 157,
+      "2016-05": 50,
+      "2016-06": 25,
+      "2016-07": 20,
+      "2016-08": 11,
+      "2016-09": 7,
+      "2016-10": 5,
+      "2016-11": 1,
+      "2016-12": 3,
+      "2017-02": 1,
+      "2017-04": 1
+    },
+    "award_published_date": {
+      "2015-07": 2512,
+      "2015-08": 6111,
+      "2015-09": 11053,
+      "2015-10": 11159,
+      "2015-11": 8424,
+      "2015-12": 5726,
+      "2016-01": 3771,
+      "2016-02": 2222,
+      "2016-03": 1686,
+      "2016-04": 2139,
+      "2016-05": 2110,
+      "2016-06": 784,
+      "2016-07": 975,
+      "2016-08": 663,
+      "2016-09": 17,
+      "2016-10": 15,
+      "2016-11": 11,
+      "2016-12": 23,
+      "2017-01": 4,
+      "2017-02": 3,
+      "2017-03": 22,
+      "2017-04": 6,
+      "2017-05": 60,
+      "2017-06": 7,
+      "2017-07": 1,
+      "2017-08": 3,
+      "2017-09": 3
+    },
+    "notice_to_proceed_date": {
+      "2010-10": 1,
+      "2013-11": 2,
+      "2013-12": 1,
+      "2014-01": 2,
+      "2014-02": 4,
+      "2014-03": 3,
+      "2014-05": 7,
+      "2014-06": 8,
+      "2014-07": 2,
+      "2014-08": 10,
+      "2014-09": 8,
+      "2014-10": 5,
+      "2014-11": 15,
+      "2014-12": 5,
+      "2015-01": 86,
+      "2015-02": 24,
+      "2015-03": 33,
+      "2015-04": 60,
+      "2015-05": 80,
+      "2015-06": 158,
+      "2015-07": 2249,
+      "2015-08": 7199,
+      "2015-09": 10522,
+      "2015-10": 9625,
+      "2015-11": 4510,
+      "2015-12": 2097,
+      "2016-01": 838,
+      "2016-02": 398,
+      "2016-03": 308,
+      "2016-04": 121,
+      "2016-05": 44,
+      "2016-06": 25,
+      "2016-07": 16,
+      "2016-08": 7,
+      "2016-09": 4,
+      "2016-10": 5,
+      "2016-11": 1,
+      "2016-12": 2,
+      "2017-02": 1,
+      "2017-04": 1
+    },
+    "contract_end_date": {
+      "2014-01": 1,
+      "2014-03": 3,
+      "2014-05": 1,
+      "2014-06": 4,
+      "2014-08": 1,
+      "2014-09": 3,
+      "2014-10": 1,
+      "2014-11": 5,
+      "2014-12": 13,
+      "2015-01": 11,
+      "2015-02": 10,
+      "2015-03": 8,
+      "2015-04": 19,
+      "2015-05": 22,
+      "2015-06": 67,
+      "2015-07": 647,
+      "2015-08": 3159,
+      "2015-09": 5210,
+      "2015-10": 7446,
+      "2015-11": 5888,
+      "2015-12": 4960,
+      "2016-01": 3257,
+      "2016-02": 2313,
+      "2016-03": 1621,
+      "2016-04": 1116,
+      "2016-05": 646,
+      "2016-06": 524,
+      "2016-07": 231,
+      "2016-08": 202,
+      "2016-09": 176,
+      "2016-10": 222,
+      "2016-11": 155,
+      "2016-12": 189,
+      "2017-01": 61,
+      "2017-02": 19,
+      "2017-03": 29,
+      "2017-04": 19,
+      "2017-05": 15,
+      "2017-06": 10,
+      "2017-07": 7,
+      "2017-08": 3,
+      "2017-09": 8,
+      "2017-10": 18,
+      "2017-11": 33,
+      "2017-12": 9,
+      "2018-01": 6,
+      "2018-02": 1,
+      "2018-03": 4,
+      "2018-04": 6,
+      "2018-05": 2,
+      "2018-07": 2,
+      "2018-08": 10,
+      "2018-09": 4,
+      "2018-10": 10,
+      "2018-11": 7,
+      "2018-12": 13,
+      "2019-01": 4,
+      "2019-03": 1,
+      "2019-04": 2,
+      "2019-05": 1,
+      "2019-06": 1,
+      "2019-08": 1,
+      "2019-09": 11,
+      "2020-01": 1,
+      "2020-03": 1,
+      "2020-04": 2,
+      "2020-05": 1,
+      "2020-06": 3,
+      "2020-07": 1,
+      "2020-08": 3,
+      "2020-09": 1,
+      "2020-11": 3,
+      "2020-12": 6,
+      "2021-01": 2,
+      "2021-02": 2,
+      "2021-05": 1,
+      "2025-04": 1,
+      "2025-06": 2,
+      "2025-07": 2,
+      "2025-10": 1,
+      "2025-12": 1,
+      "2026-01": 2,
+      "2031-11": 1,
+      "2035-09": 1,
+      "2036-01": 1
+    },
+    "award_date": {
+      "2013-09": 2,
+      "2013-10": 1,
+      "2013-12": 3,
+      "2014-01": 1,
+      "2014-02": 23,
+      "2014-03": 25,
+      "2014-04": 2,
+      "2014-05": 6,
+      "2014-06": 14,
+      "2014-07": 6,
+      "2014-08": 10,
+      "2014-09": 6,
+      "2014-10": 5,
+      "2014-11": 51,
+      "2014-12": 73,
+      "2015-01": 83,
+      "2015-02": 70,
+      "2015-03": 97,
+      "2015-04": 125,
+      "2015-05": 198,
+      "2015-06": 412,
+      "2015-07": 6478,
+      "2015-08": 14115,
+      "2015-09": 18288,
+      "2015-10": 13098,
+      "2015-11": 3624,
+      "2015-12": 1566,
+      "2016-01": 506,
+      "2016-02": 206,
+      "2016-03": 187,
+      "2016-04": 107,
+      "2016-05": 18,
+      "2016-06": 23,
+      "2016-07": 31,
+      "2016-08": 19,
+      "2016-09": 5,
+      "2016-10": 20,
+      "2016-11": 3,
+      "2016-12": 2,
+      "2017-11": 1
+    },
+    "closing_date": {
+      "2015-07": 59711,
+      "2015-08": 77912,
+      "2015-09": 79968,
+      "2015-10": 23886,
+      "2015-11": 306,
+      "2015-12": 126,
+      "2016-01": 19,
+      "2016-02": 10,
+      "2016-03": 10,
+      "2016-04": 4,
+      "2016-05": 1,
+      "2016-06": 13,
+      "2016-07": 2,
+      "2016-08": 1,
+      "2016-09": 4,
+      "2016-10": 1,
+      "2016-12": 3,
+      "2017-03": 1
+    }
+  },
+  "elapsed_seconds": 98.006
+}

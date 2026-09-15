@@ -1,0 +1,23 @@
+{
+  "status": "complete",
+  "source_file_count": 1,
+  "rows_written": 450701,
+  "physical_data_rows_seen": 450701,
+  "blank_rows_skipped": 0,
+  "malformed_width_row_count": 0,
+  "input_size_bytes": 323747076,
+  "output_file": "output\\delta_2023_q3.parquet",
+  "output_size_bytes": 31165451,
+  "compression_ratio_vs_source": 0.0963,
+  "elapsed_seconds": 50.048,
+  "truncated_for_test": false,
+  "files": [
+    {
+      "source_file_id": "pgf_2dea4ced625bf35c6a8987f29ca7c1ecf31ed24c91b2e26120c623a615f63763",
+      "local_file": "files/2023_(JUL-SEPT).csv",
+      "output_file": "delta_2023_q3.parquet",
+      "rows_written": 450701,
+      "malformed_width_row_count": 0
+    }
+  ]
+}

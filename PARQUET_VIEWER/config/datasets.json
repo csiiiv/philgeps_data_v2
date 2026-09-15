@@ -1,0 +1,23 @@
+{
+  "registry_version": 1,
+  "datasets": [
+    {"name": "award_items", "file": "award_items.parquet", "primary_key": ["release_id", "award_id", "item_id"], "record_type": "award_item"},
+    {"name": "award_suppliers", "file": "award_suppliers.parquet", "primary_key": ["award_supplier_assertion_id"], "record_type": "award_supplier_assertion"},
+    {"name": "awards", "file": "awards.parquet", "primary_key": ["release_id", "award_id"], "record_type": "award"},
+    {"name": "canonical_parties", "file": "canonical_parties.parquet", "primary_key": ["canonical_party_id"], "record_type": null, "warning": "Provisional analytical clusters; not official organization identifiers."},
+    {"name": "compiled_processes", "file": "compiled_processes.parquet", "primary_key": ["process_id"], "record_type": null},
+    {"name": "contracting_processes", "file": "contracting_processes.parquet", "primary_key": ["process_id"], "record_type": null},
+    {"name": "contracts", "file": "contracts.parquet", "primary_key": ["release_id", "contract_id"], "record_type": "contract"},
+    {"name": "data_quality_issues", "file": "data_quality_issues.parquet", "primary_key": ["issue_id"], "record_type": "data_quality_issue"},
+    {"name": "parties", "file": "parties.parquet", "primary_key": ["release_id", "party_id"], "record_type": "party"},
+    {"name": "party_aliases", "file": "party_aliases.parquet", "primary_key": ["party_alias_id"], "record_type": null, "warning": "Provisional location-supported aliases."},
+    {"name": "party_name_forms", "file": "party_name_forms.parquet", "primary_key": ["name_form_id"], "record_type": null},
+    {"name": "party_resolution_candidates", "file": "party_resolution_candidates.parquet", "primary_key": ["resolution_candidate_id"], "record_type": null, "warning": "Candidate evidence; not a legal-identity assertion."},
+    {"name": "party_roles", "file": "party_roles.parquet", "primary_key": ["release_id", "party_id", "role"], "record_type": null},
+    {"name": "process_release_history", "file": "process_release_history.parquet", "primary_key": ["release_id"], "record_type": "release"},
+    {"name": "record_sources", "file": "record_sources.parquet", "primary_key": ["record_type", "record_id", "source_file_id", "source_sheet", "source_row_number"], "record_type": null},
+    {"name": "releases", "file": "releases.parquet", "primary_key": ["release_id"], "record_type": "release"},
+    {"name": "tender_items", "file": "tender_items.parquet", "primary_key": ["release_id", "item_id"], "record_type": "tender_item"},
+    {"name": "tenders", "file": "tenders.parquet", "primary_key": ["release_id", "tender_id"], "record_type": "tender"}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "status": "pass",
+  "identity_status": "provisional",
+  "promotion_rule_version": "party-promotion-v1",
+  "canonical_parties": 341,
+  "supported_alias_mentions": 9170,
+  "unresolved_mentions_in_eligible_groups": 9463,
+  "validation": {
+    "unique_canonical_ids": 341,
+    "unique_alias_ids": 9170,
+    "unique_aliased_party_mentions": 9170,
+    "aliases_without_location": 0,
+    "missing_canonical_foreign_keys": 0,
+    "missing_source_breadcrumbs": 0,
+    "official_identifiers_verified": 0
+  },
+  "warning": "Provisional canonical IDs are analytical identifiers and must not be published as official organization identifiers."
+}

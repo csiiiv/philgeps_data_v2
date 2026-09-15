@@ -1,0 +1,394 @@
+{
+  "input": {
+    "parties": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\OCDS_ETL\\outputs\\parquet\\parties.parquet",
+    "party_roles": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\OCDS_ETL\\outputs\\parquet\\party_roles.parquet",
+    "party_name_forms": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\OCDS_ETL\\outputs\\parquet\\party_name_forms.parquet",
+    "record_sources": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\OCDS_ETL\\outputs\\parquet\\record_sources.parquet"
+  },
+  "output": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\OCDS_ETL\\outputs\\parquet\\party_resolution_candidates.parquet",
+  "rule_version": "party-resolution-evidence-v1",
+  "totals": {
+    "candidate_groups": 2004,
+    "candidate_party_mentions": 421317,
+    "candidate_name_forms": 4155,
+    "unresolved_mentions": 421317
+  },
+  "evidence_status_definitions": {
+    "corroborated_candidate": "At least one non-empty location key occurs under two or more distinct observed name forms.",
+    "partial_context": "Some name forms have location evidence and others do not, with no shared location across forms.",
+    "divergent_location_context": "Every name form has location evidence, but no location is shared across distinct forms.",
+    "name_only": "The group has no location evidence."
+  },
+  "status_counts": [
+    {
+      "evidence_status": "partial_context",
+      "candidate_groups": 1224,
+      "party_mentions": 350099
+    },
+    {
+      "evidence_status": "corroborated_candidate",
+      "candidate_groups": 420,
+      "party_mentions": 28066
+    },
+    {
+      "evidence_status": "name_only",
+      "candidate_groups": 218,
+      "party_mentions": 26439
+    },
+    {
+      "evidence_status": "divergent_location_context",
+      "candidate_groups": 142,
+      "party_mentions": 16713
+    }
+  ],
+  "examples": [
+    {
+      "legal_suffix_name_key": "university of the philippines los ba os",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 20676,
+      "distinct_location_count": 2,
+      "example_names": [
+        "UNIVERSITY OF THE PHILIPPINES - LOS BAÑOS",
+        "UNIVERSITY OF THE PHILIPPINES-LOS BAÑOS"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "environmental management bureau denr",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 14096,
+      "distinct_location_count": 1,
+      "example_names": [
+        "ENVIRONMENTAL MANAGEMENT BUREAU - DENR",
+        "ENVIRONMENTAL MANAGEMENT BUREAU, DENR"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "university of the philippines manila",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 13939,
+      "distinct_location_count": 2,
+      "example_names": [
+        "UNIVERSITY OF THE PHILIPPINES - MANILA",
+        "UNIVERSITY OF THE PHILIPPINES MANILA"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "department of agriculture region iv a",
+      "evidence_status": "partial_context",
+      "name_form_count": 3,
+      "party_mentions": 11573,
+      "distinct_location_count": 1,
+      "example_names": [
+        "DEPARTMENT OF AGRICULTURE - REGION IV-A",
+        "DEPARTMENT OF AGRICULTURE - Region IV-A",
+        "DEPARTMENT OF AGRICULTURE REGION IV-A"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "agricultural training institute regional training center x",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 10136,
+      "distinct_location_count": 1,
+      "example_names": [
+        "AGRICULTURAL TRAINING INSTITUTE - REGIONAL TRAINING CENTER X",
+        "AGRICULTURAL TRAINING INSTITUTE-REGIONAL TRAINING CENTER X"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "city of dagupan pangasinan",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 9322,
+      "distinct_location_count": 1,
+      "example_names": [
+        "CITY OF DAGUPAN - PANGASINAN",
+        "CITY OF DAGUPAN, PANGASINAN"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "national transmission corporation transco",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 8894,
+      "distinct_location_count": 1,
+      "example_names": [
+        "NATIONAL TRANSMISSION CORPORATION (TRANSCO )",
+        "NATIONAL TRANSMISSION CORPORATION(TRANSCO)"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "department of social welfare and development ncr",
+      "evidence_status": "partial_context",
+      "name_form_count": 3,
+      "party_mentions": 7625,
+      "distinct_location_count": 1,
+      "example_names": [
+        "DEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT - NCR",
+        "DEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT-NCR",
+        "DEPARTMENT of SOCIAL WELFARE and DEVELOPMENT-NCR"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "municipality of sual pangasinan",
+      "evidence_status": "partial_context",
+      "name_form_count": 3,
+      "party_mentions": 7351,
+      "distinct_location_count": 1,
+      "example_names": [
+        "MUNICIPALITY OF SUAL - PANGASINAN",
+        "MUNICIPALITY OF SUAL, PANGASINAN",
+        "MUNICIPALITY of SUAL, PANGASINAN"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "department of public works and highways bulacan 1st deo",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 7314,
+      "distinct_location_count": 1,
+      "example_names": [
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - BULACAN 1ST DEO",
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS-BULACAN 1ST DEO"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "municipality of sto tomas davao del norte",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 6863,
+      "distinct_location_count": 1,
+      "example_names": [
+        "MUNICIPALITY OF STO. TOMAS, DAVAO DEL NORTE",
+        "MUNICIPALITY OF STO.TOMAS - DAVAO DEL NORTE"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "bureau of fisheries and aquatic resources region iv b",
+      "evidence_status": "partial_context",
+      "name_form_count": 3,
+      "party_mentions": 6728,
+      "distinct_location_count": 1,
+      "example_names": [
+        "BUREAU OF FISHERIES AND AQUATIC RESOURCES - REGION IV - B",
+        "BUREAU OF FISHERIES AND AQUATIC RESOURCES - REGION IV-B",
+        "BUREAU of FISHERIES and AQUATIC RESOURCES - REGION IV - B"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "bangko sentral ng pilipinas security plant complex",
+      "evidence_status": "name_only",
+      "name_form_count": 3,
+      "party_mentions": 6403,
+      "distinct_location_count": 0,
+      "example_names": [
+        "BANGKO SENTRAL NG PILIPINAS - SECURITY PLANT COMPLEX",
+        "BANGKO SENTRAL NG PILIPINAS, SECURITY PLANT COMPLEX",
+        "BANGKO SENTRAL ng PILIPINAS, SECURITY PLANT COMPLEX"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "department of health treatment and rehabilitation center",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 5857,
+      "distinct_location_count": 12,
+      "example_names": [
+        "DEPARTMENT OF HEALTH - TREATMENT AND REHABILITATION CENTER",
+        "DEPARTMENT OF HEALTH - TREATMENT AND REHABILITATION CENTER -"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "municipality of la paz agusan del sur",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 5212,
+      "distinct_location_count": 1,
+      "example_names": [
+        "MUNICIPALITY OF LA PAZ , AGUSAN DEL SUR",
+        "MUNICIPALITY OF LA PAZ, AGUSAN DEL SUR"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "department of social welfare and development region iv a",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 5130,
+      "distinct_location_count": 1,
+      "example_names": [
+        "DEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT - REGION IV-A",
+        "DEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT- REGION IV-A"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "philippine duplicators inc",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 4843,
+      "distinct_location_count": 1,
+      "example_names": [
+        "PHILIPPINE DUPLICATORS INC.",
+        "PHILIPPINE DUPLICATORS, INC."
+      ]
+    },
+    {
+      "legal_suffix_name_key": "municipality of esperanza agusan del sur",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 4207,
+      "distinct_location_count": 1,
+      "example_names": [
+        "MUNICIPALITY OF ESPERANZA , AGUSAN DEL SUR",
+        "MUNICIPALITY OF ESPERANZA, AGUSAN DEL SUR"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "municipality of san luis batangas",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 4011,
+      "distinct_location_count": 1,
+      "example_names": [
+        "MUNICIPALITY OF SAN LUIS , BATANGAS",
+        "MUNICIPALITY OF SAN LUIS BATANGAS"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "gakken philippines inc",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 3950,
+      "distinct_location_count": 1,
+      "example_names": [
+        "GAKKEN PHILIPPINES INC.",
+        "GAKKEN PHILIPPINES, INC."
+      ]
+    },
+    {
+      "legal_suffix_name_key": "department of health chd bicol",
+      "evidence_status": "name_only",
+      "name_form_count": 2,
+      "party_mentions": 3761,
+      "distinct_location_count": 0,
+      "example_names": [
+        "DEPARTMENT OF HEALTH - CHD BICOL",
+        "DEPARTMENT OF HEALTH - CHD, BICOL"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "phil pharmawealth inc",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 3389,
+      "distinct_location_count": 1,
+      "example_names": [
+        "PHIL PHARMAWEALTH, INC.",
+        "PHIL. PHARMAWEALTH, INC."
+      ]
+    },
+    {
+      "legal_suffix_name_key": "municipality of natividad pangasinan",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 3387,
+      "distinct_location_count": 1,
+      "example_names": [
+        "MUNICIPALITY OF NATIVIDAD - PANGASINAN",
+        "MUNICIPALITY OF NATIVIDAD, PANGASINAN"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "municipality of san roque northern samar",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 3346,
+      "distinct_location_count": 1,
+      "example_names": [
+        "MUNICIPALITY OF SAN ROQUE - NORTHERN SAMAR",
+        "MUNICIPALITY OF SAN ROQUE, NORTHERN SAMAR"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "department of public works and highways region iv a",
+      "evidence_status": "partial_context",
+      "name_form_count": 4,
+      "party_mentions": 3343,
+      "distinct_location_count": 2,
+      "example_names": [
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - REGION IV - A",
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - REGION IV-A",
+        "DEPARTMENT OF PUBLIC WORKS and HIGHWAYS - Region IV-A",
+        "DEPARTMENT of PUBLIC WORKS and HIGHWAYS - Region IV - A"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "department of environment and natural resources region i",
+      "evidence_status": "partial_context",
+      "name_form_count": 3,
+      "party_mentions": 3315,
+      "distinct_location_count": 1,
+      "example_names": [
+        "DEPARTMENT OF ENVIRONMENT AND NATURAL RESOURCES - REGION I",
+        "DEPARTMENT OF ENVIRONMENT AND NATURAL RESOURCES-REGION I",
+        "DEPARTMENT OF ENVIRONMENT AND NATURAL RESOURCES-Region I"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "university of science and technology of southern philippines",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 3294,
+      "distinct_location_count": 2,
+      "example_names": [
+        "UNIVERSITY OF SCIENCE AND TECHNOLOGY OF SOUTHERN PHILIPPINES",
+        "UNIVERSITY OF SCIENCE AND TECHNOLOGY OF SOUTHERN PHILIPPINES."
+      ]
+    },
+    {
+      "legal_suffix_name_key": "department of public works and highways northern samar 2nd",
+      "evidence_status": "partial_context",
+      "name_form_count": 2,
+      "party_mentions": 3084,
+      "distinct_location_count": 1,
+      "example_names": [
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - NORTHERN SAMAR 2ND",
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS, NORTHERN SAMAR 2ND"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "municipality of burgos la union",
+      "evidence_status": "corroborated_candidate",
+      "name_form_count": 2,
+      "party_mentions": 3061,
+      "distinct_location_count": 1,
+      "example_names": [
+        "MUNICIPALITY OF BURGOS LA UNION",
+        "MUNICIPALITY OF BURGOS, LA UNION"
+      ]
+    },
+    {
+      "legal_suffix_name_key": "municipality of malapatan sarangani",
+      "evidence_status": "divergent_location_context",
+      "name_form_count": 2,
+      "party_mentions": 3021,
+      "distinct_location_count": 2,
+      "example_names": [
+        "MUNICIPALITY OF MALAPATAN SARANGANI",
+        "MUNICIPALITY OF MALAPATAN, SARANGANI"
+      ]
+    }
+  ],
+  "validation": {
+    "status": "pass",
+    "expected_rows": 421317,
+    "unique_candidate_ids": 421317,
+    "unique_party_mentions": 421317,
+    "missing_party_foreign_keys": 0,
+    "missing_name_form_foreign_keys": 0,
+    "missing_source_breadcrumbs": 0,
+    "automatic_merges": 0
+  }
+}

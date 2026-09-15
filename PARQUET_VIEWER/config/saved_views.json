@@ -1,0 +1,147 @@
+{
+  "views_version": 1,
+  "views": [
+    {
+      "name": "issues_blocking",
+      "label": "Publication-blocking issues",
+      "description": "Quality issues that block publication of their release.",
+      "dataset": "data_quality_issues",
+      "grain": "issue",
+      "filters": [
+        { "column": "publication_blocking", "operator": "eq", "value": true }
+      ],
+      "sort": [
+        { "column": "issue_id", "direction": "asc" }
+      ],
+      "page_size": 50
+    },
+    {
+      "name": "issues_by_category",
+      "label": "Issues by category",
+      "description": "Quality issues grouped by category; add a category filter to narrow.",
+      "dataset": "data_quality_issues",
+      "grain": "issue",
+      "filters": [],
+      "sort": [
+        { "column": "issue_id", "direction": "asc" }
+      ],
+      "page_size": 50
+    },
+    {
+      "name": "tenders_unresolved_status",
+      "label": "Tenders with unresolved status mapping",
+      "description": "Source tender status values that did not map to an OCDS status.",
+      "dataset": "tenders",
+      "grain": "tender",
+      "filters": [
+        { "column": "status", "operator": "is_null" },
+        { "column": "source_status", "operator": "not_null" }
+      ],
+      "sort": [
+        { "column": "release_id", "direction": "asc" }
+      ],
+      "page_size": 50
+    },
+    {
+      "name": "tenders_unresolved_method",
+      "label": "Tenders with unresolved method mapping",
+      "description": "Procurement method could not be derived from the source method details.",
+      "dataset": "tenders",
+      "grain": "tender",
+      "filters": [
+        { "column": "procurement_method", "operator": "is_null" },
+        { "column": "procurement_method_details", "operator": "not_null" }
+      ],
+      "sort": [
+        { "column": "release_id", "direction": "asc" }
+      ],
+      "page_size": 50
+    },
+    {
+      "name": "tenders_closed_unsuccessful_no_award_hint",
+      "label": "Closed tenders",
+      "description": "Tenders whose lifecycle status is complete, unsuccessful, or cancelled.",
+      "dataset": "tenders",
+      "grain": "tender",
+      "filters": [
+        { "column": "status", "operator": "not_null" }
+      ],
+      "sort": [
+        { "column": "closing_date", "direction": "desc" }
+      ],
+      "page_size": 50
+    },
+    {
+      "name": "awards_missing_value",
+      "label": "Awards without a value",
+      "description": "Award records with no amount; publication review may need the source evidence.",
+      "dataset": "awards",
+      "grain": "award",
+      "filters": [
+        { "column": "value_amount", "operator": "is_null" }
+      ],
+      "sort": [
+        { "column": "release_id", "direction": "asc" }
+      ],
+      "page_size": 50
+    },
+    {
+      "name": "contracts_missing_number",
+      "label": "Contracts without a contract number",
+      "description": "Contract records with no source contract number.",
+      "dataset": "contracts",
+      "grain": "contract",
+      "filters": [
+        { "column": "source_contract_number", "operator": "is_null" }
+      ],
+      "sort": [
+        { "column": "release_id", "direction": "asc" }
+      ],
+      "page_size": 50
+    },
+    {
+      "name": "contracts_unmatched_award",
+      "label": "Contracts without a matched award",
+      "description": "award_link_status is not 'matched'; currently zero rows when all contracts matched.",
+      "dataset": "contracts",
+      "grain": "contract",
+      "warning": "Empty result means every contract matched an award — a valid reconciliation answer.",
+      "filters": [
+        { "column": "award_link_status", "operator": "neq", "value": "matched" }
+      ],
+      "sort": [
+        { "column": "release_id", "direction": "asc" }
+      ],
+      "page_size": 50
+    },
+    {
+      "name": "suppliers_unmatched_party",
+      "label": "Award suppliers without a matched party",
+      "description": "party_link_status is not 'matched'; zero rows means every supplier resolved to a party.",
+      "dataset": "award_suppliers",
+      "grain": "supplier assertion",
+      "warning": "Empty result means every supplier assertion matched a party — a valid reconciliation answer.",
+      "filters": [
+        { "column": "party_link_status", "operator": "neq", "value": "matched" }
+      ],
+      "sort": [
+        { "column": "release_id", "direction": "asc" }
+      ],
+      "page_size": 50
+    },
+    {
+      "name": "parties_low_confidence",
+      "label": "Parties with low identity confidence",
+      "description": "identity_confidence is below the high-confidence band.",
+      "dataset": "parties",
+      "grain": "party",
+      "filters": [
+        { "column": "identity_confidence", "operator": "neq", "value": "high" }
+      ],
+      "sort": [
+        { "column": "release_id", "direction": "asc" }
+      ],
+      "page_size": 50
+    }
+  ]
+}

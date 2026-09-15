@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "rule_version": "process-compilation-v1",
+  "status": "accepted",
+  "preferred_release_order": [
+    {"field": "release_date", "direction": "descending", "nulls": "last"},
+    {"field": "lifecycle_completeness", "direction": "descending", "definition": "contract then award then tender evidence"},
+    {"field": "supporting_source_files", "direction": "descending"},
+    {"field": "supporting_observation_rows", "direction": "descending"},
+    {"field": "release_id", "direction": "descending", "purpose": "deterministic final tie-breaker"}
+  ],
+  "principles": {
+    "preferred_is_not_only_source": true,
+    "retain_alternate_release_ids": true,
+    "retain_multi_release_history": true,
+    "do_not_mutate_historical_releases": true,
+    "join_children_by": "preferred_release_id"
+  }
+}

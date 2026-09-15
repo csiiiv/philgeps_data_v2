@@ -1,0 +1,25 @@
+{
+  "parquet_directory": "../OCDS_ETL/outputs/parquet",
+  "normalized_parquet": "../DATA_NORMALIZATION/output/philgeps_normalized.parquet",
+  "cleaned_parquet": "../DATA_NORMALIZATION/output/philgeps_cleaned.parquet",
+  "manifest": "../RAW_DATA_DOWNLOADER/dataset/manifest.json",
+  "cache_directory": ".cache",
+  "duckdb": {
+    "memory_limit": "4GB",
+    "threads": 4,
+    "max_concurrent_queries": 2
+  },
+  "api": {
+    "default_page_size": 100,
+    "maximum_page_size": 1000,
+    "export_row_limit": 10000,
+    "query_timeout_seconds": 60,
+    "cursor_secret": "dev-only-secret-replace-before-network-use",
+    "allowed_hosts": [
+      "127.0.0.1",
+      "localhost",
+      "testserver",
+      "philgeps-v2.simple-systems.dev"
+    ]
+  }
+}

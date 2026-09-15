@@ -1,0 +1,280 @@
+{
+  "status": "complete",
+  "source_file_id": "pgf_4ebb78e86d87f566ca4064901932685b521b93ecc3c56110b41ac7971255c185",
+  "local_file": "files/Bid Notice and Award Details 2000.xlsx",
+  "normalized_file_name": "2000-11--2000-12.xlsx",
+  "schema_id": "legacy_40_uom",
+  "format": "xlsx",
+  "input_size_bytes": 14655,
+  "output_file": ".smoke_timing.parquet",
+  "expected_column_count": 40,
+  "physical_data_rows_seen": 19,
+  "rows_written": 19,
+  "blank_rows_skipped": 0,
+  "width_counts": {
+    "40": 19
+  },
+  "malformed_width_row_count": 0,
+  "malformed_width_examples": [],
+  "formula_cell_count": 0,
+  "replacement_character_cell_count": 0,
+  "null_profile": {
+    "procuring_entity_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "bid_reference_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "solicitation_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "notice_title": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "bid_published_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "classification": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "notice_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "business_category": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "funding_source": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "funding_instrument": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "procurement_mode": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "trade_agreement": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "approved_budget": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "area_of_delivery": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "contract_duration": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 19,
+      "nonempty": 0
+    },
+    "calendar_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 19,
+      "nonempty": 0
+    },
+    "line_item_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 17,
+      "nonempty": 2
+    },
+    "item_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 17,
+      "nonempty": 2
+    },
+    "item_description": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 17,
+      "nonempty": 2
+    },
+    "quantity": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 17,
+      "nonempty": 2
+    },
+    "unit_of_measurement": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 17,
+      "nonempty": 2
+    },
+    "item_budget": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 17,
+      "nonempty": 2
+    },
+    "prebid_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 19,
+      "nonempty": 0
+    },
+    "closing_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "bid_notice_status": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 0,
+      "nonempty": 19
+    },
+    "award_reference_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 15,
+      "nonempty": 4
+    },
+    "award_title": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 15,
+      "nonempty": 4
+    },
+    "award_type": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 15,
+      "nonempty": 4
+    },
+    "unspsc_code": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 19,
+      "nonempty": 0
+    },
+    "unspsc_description": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 19,
+      "nonempty": 0
+    },
+    "awardee_organization_name": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 19,
+      "nonempty": 0
+    },
+    "contract_amount": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 15,
+      "nonempty": 4
+    },
+    "contract_no": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 15,
+      "nonempty": 4
+    },
+    "award_published_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 15,
+      "nonempty": 4
+    },
+    "award_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 15,
+      "nonempty": 4
+    },
+    "notice_to_proceed_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 19,
+      "nonempty": 0
+    },
+    "contract_effectivity_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 19,
+      "nonempty": 0
+    },
+    "contract_end_date": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 19,
+      "nonempty": 0
+    },
+    "reason_for_award": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 15,
+      "nonempty": 4
+    },
+    "award_notice_status": {
+      "missing_cell": 0,
+      "blank_string": 0,
+      "null_literal": 15,
+      "nonempty": 4
+    }
+  },
+  "date_months": {
+    "closing_date": {
+      "2000-12": 15,
+      "2001-01": 4
+    },
+    "award_published_date": {
+      "2000-12": 4
+    },
+    "bid_published_date": {
+      "2000-12": 19
+    },
+    "award_date": {
+      "2000-12": 4
+    }
+  },
+  "xlsx_load_seconds": 0.003,
+  "elapsed_seconds": 1.705
+}

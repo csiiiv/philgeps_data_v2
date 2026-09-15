@@ -1,0 +1,1087 @@
+{
+  "input": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\OCDS_ETL\\outputs\\parquet\\parties.parquet",
+  "candidate_rule_version": 1,
+  "candidate_rule": "lowercase; punctuation to spaces; collapse spaces; canonicalize terminal incorporated/corporation/company/limited",
+  "overview": {
+    "party_mentions": 14181024,
+    "distinct_source_names": 177189,
+    "distinct_conservative_keys": 176727,
+    "distinct_punctuation_keys": 174778,
+    "distinct_lexical_keys": 174646,
+    "candidate_merge_groups": 1962,
+    "punctuation_candidate_groups": 1838,
+    "legal_suffix_candidate_groups": 132,
+    "mentions_in_candidate_merge_groups": 399154
+  },
+  "suffixes": [
+    {
+      "suffix_family": "inc",
+      "distinct_names": 15710,
+      "party_mentions": 553589
+    },
+    {
+      "suffix_family": "corporation",
+      "distinct_names": 6771,
+      "party_mentions": 393678
+    },
+    {
+      "suffix_family": "corp",
+      "distinct_names": 2747,
+      "party_mentions": 89648
+    },
+    {
+      "suffix_family": "incorporated",
+      "distinct_names": 1225,
+      "party_mentions": 42797
+    },
+    {
+      "suffix_family": "co",
+      "distinct_names": 958,
+      "party_mentions": 26974
+    },
+    {
+      "suffix_family": "company",
+      "distinct_names": 388,
+      "party_mentions": 14556
+    },
+    {
+      "suffix_family": "ltd",
+      "distinct_names": 324,
+      "party_mentions": 2611
+    },
+    {
+      "suffix_family": "limited",
+      "distinct_names": 103,
+      "party_mentions": 675
+    }
+  ],
+  "candidate_merge_examples": [
+    {
+      "lexical_key": "university of the philippines los ba os",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 19522,
+      "example_names": [
+        "UNIVERSITY OF THE PHILIPPINES - LOS BAÑOS",
+        "UNIVERSITY OF THE PHILIPPINES-LOS BAÑOS"
+      ]
+    },
+    {
+      "lexical_key": "environmental management bureau denr",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 13519,
+      "example_names": [
+        "ENVIRONMENTAL MANAGEMENT BUREAU - DENR",
+        "ENVIRONMENTAL MANAGEMENT BUREAU, DENR"
+      ]
+    },
+    {
+      "lexical_key": "university of the philippines manila",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 13293,
+      "example_names": [
+        "UNIVERSITY OF THE PHILIPPINES - MANILA",
+        "UNIVERSITY OF THE PHILIPPINES MANILA"
+      ]
+    },
+    {
+      "lexical_key": "department of agriculture region iv a",
+      "conservative_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 10966,
+      "example_names": [
+        "DEPARTMENT OF AGRICULTURE - REGION IV-A",
+        "DEPARTMENT OF AGRICULTURE - Region IV-A",
+        "DEPARTMENT OF AGRICULTURE REGION IV-A"
+      ]
+    },
+    {
+      "lexical_key": "agricultural training institute regional training center x",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 9587,
+      "example_names": [
+        "AGRICULTURAL TRAINING INSTITUTE - REGIONAL TRAINING CENTER X",
+        "AGRICULTURAL TRAINING INSTITUTE-REGIONAL TRAINING CENTER X"
+      ]
+    },
+    {
+      "lexical_key": "city of dagupan pangasinan",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 9044,
+      "example_names": [
+        "CITY OF DAGUPAN - PANGASINAN",
+        "CITY OF DAGUPAN, PANGASINAN"
+      ]
+    },
+    {
+      "lexical_key": "national transmission corporation transco",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 8791,
+      "example_names": [
+        "NATIONAL TRANSMISSION CORPORATION (TRANSCO )",
+        "NATIONAL TRANSMISSION CORPORATION(TRANSCO)"
+      ]
+    },
+    {
+      "lexical_key": "department of social welfare and development ncr",
+      "conservative_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 7290,
+      "example_names": [
+        "DEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT - NCR",
+        "DEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT-NCR",
+        "DEPARTMENT of SOCIAL WELFARE and DEVELOPMENT-NCR"
+      ]
+    },
+    {
+      "lexical_key": "municipality of sual pangasinan",
+      "conservative_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 7030,
+      "example_names": [
+        "MUNICIPALITY OF SUAL - PANGASINAN",
+        "MUNICIPALITY OF SUAL, PANGASINAN",
+        "MUNICIPALITY of SUAL, PANGASINAN"
+      ]
+    },
+    {
+      "lexical_key": "department of public works and highways bulacan 1st deo",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 6922,
+      "example_names": [
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - BULACAN 1ST DEO",
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS-BULACAN 1ST DEO"
+      ]
+    },
+    {
+      "lexical_key": "municipality of sto tomas davao del norte",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 6565,
+      "example_names": [
+        "MUNICIPALITY OF STO. TOMAS, DAVAO DEL NORTE",
+        "MUNICIPALITY OF STO.TOMAS - DAVAO DEL NORTE"
+      ]
+    },
+    {
+      "lexical_key": "bureau of fisheries and aquatic resources region iv b",
+      "conservative_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 6553,
+      "example_names": [
+        "BUREAU OF FISHERIES AND AQUATIC RESOURCES - REGION IV - B",
+        "BUREAU OF FISHERIES AND AQUATIC RESOURCES - REGION IV-B",
+        "BUREAU of FISHERIES and AQUATIC RESOURCES - REGION IV - B"
+      ]
+    },
+    {
+      "lexical_key": "bangko sentral ng pilipinas security plant complex",
+      "conservative_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 6332,
+      "example_names": [
+        "BANGKO SENTRAL NG PILIPINAS - SECURITY PLANT COMPLEX",
+        "BANGKO SENTRAL NG PILIPINAS, SECURITY PLANT COMPLEX",
+        "BANGKO SENTRAL ng PILIPINAS, SECURITY PLANT COMPLEX"
+      ]
+    },
+    {
+      "lexical_key": "department of health treatment and rehabilitation center",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 5471,
+      "example_names": [
+        "DEPARTMENT OF HEALTH - TREATMENT AND REHABILITATION CENTER",
+        "DEPARTMENT OF HEALTH - TREATMENT AND REHABILITATION CENTER -"
+      ]
+    },
+    {
+      "lexical_key": "municipality of la paz agusan del sur",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 4931,
+      "example_names": [
+        "MUNICIPALITY OF LA PAZ , AGUSAN DEL SUR",
+        "MUNICIPALITY OF LA PAZ, AGUSAN DEL SUR"
+      ]
+    },
+    {
+      "lexical_key": "department of social welfare and development region iv a",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 4788,
+      "example_names": [
+        "DEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT - REGION IV-A",
+        "DEPARTMENT OF SOCIAL WELFARE AND DEVELOPMENT- REGION IV-A"
+      ]
+    },
+    {
+      "lexical_key": "philippine duplicators inc",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 4567,
+      "example_names": [
+        "PHILIPPINE DUPLICATORS INC.",
+        "PHILIPPINE DUPLICATORS, INC."
+      ]
+    },
+    {
+      "lexical_key": "municipality of esperanza agusan del sur",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 3862,
+      "example_names": [
+        "MUNICIPALITY OF ESPERANZA , AGUSAN DEL SUR",
+        "MUNICIPALITY OF ESPERANZA, AGUSAN DEL SUR"
+      ]
+    },
+    {
+      "lexical_key": "municipality of san luis batangas",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 3829,
+      "example_names": [
+        "MUNICIPALITY OF SAN LUIS , BATANGAS",
+        "MUNICIPALITY OF SAN LUIS BATANGAS"
+      ]
+    },
+    {
+      "lexical_key": "department of health chd bicol",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 3745,
+      "example_names": [
+        "DEPARTMENT OF HEALTH - CHD BICOL",
+        "DEPARTMENT OF HEALTH - CHD, BICOL"
+      ]
+    },
+    {
+      "lexical_key": "gakken philippines inc",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 3694,
+      "example_names": [
+        "GAKKEN PHILIPPINES INC.",
+        "GAKKEN PHILIPPINES, INC."
+      ]
+    },
+    {
+      "lexical_key": "municipality of natividad pangasinan",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 3304,
+      "example_names": [
+        "MUNICIPALITY OF NATIVIDAD - PANGASINAN",
+        "MUNICIPALITY OF NATIVIDAD, PANGASINAN"
+      ]
+    },
+    {
+      "lexical_key": "municipality of san roque northern samar",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 3207,
+      "example_names": [
+        "MUNICIPALITY OF SAN ROQUE - NORTHERN SAMAR",
+        "MUNICIPALITY OF SAN ROQUE, NORTHERN SAMAR"
+      ]
+    },
+    {
+      "lexical_key": "department of environment and natural resources region i",
+      "conservative_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 3175,
+      "example_names": [
+        "DEPARTMENT OF ENVIRONMENT AND NATURAL RESOURCES - REGION I",
+        "DEPARTMENT OF ENVIRONMENT AND NATURAL RESOURCES-REGION I",
+        "DEPARTMENT OF ENVIRONMENT AND NATURAL RESOURCES-Region I"
+      ]
+    },
+    {
+      "lexical_key": "department of public works and highways region iv a",
+      "conservative_keys": 2,
+      "source_spellings": 4,
+      "party_mentions": 3144,
+      "example_names": [
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - REGION IV - A",
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - REGION IV-A",
+        "DEPARTMENT OF PUBLIC WORKS and HIGHWAYS - Region IV-A",
+        "DEPARTMENT of PUBLIC WORKS and HIGHWAYS - Region IV - A"
+      ]
+    },
+    {
+      "lexical_key": "phil pharmawealth inc",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 3141,
+      "example_names": [
+        "PHIL PHARMAWEALTH, INC.",
+        "PHIL. PHARMAWEALTH, INC."
+      ]
+    },
+    {
+      "lexical_key": "department of public works and highways northern samar 2nd",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2954,
+      "example_names": [
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - NORTHERN SAMAR 2ND",
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS, NORTHERN SAMAR 2ND"
+      ]
+    },
+    {
+      "lexical_key": "municipality of burgos la union",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2951,
+      "example_names": [
+        "MUNICIPALITY OF BURGOS LA UNION",
+        "MUNICIPALITY OF BURGOS, LA UNION"
+      ]
+    },
+    {
+      "lexical_key": "university of science and technology of southern philippines",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2950,
+      "example_names": [
+        "UNIVERSITY OF SCIENCE AND TECHNOLOGY OF SOUTHERN PHILIPPINES",
+        "UNIVERSITY OF SCIENCE AND TECHNOLOGY OF SOUTHERN PHILIPPINES."
+      ]
+    },
+    {
+      "lexical_key": "municipality of malapatan sarangani",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2812,
+      "example_names": [
+        "MUNICIPALITY OF MALAPATAN SARANGANI",
+        "MUNICIPALITY OF MALAPATAN, SARANGANI"
+      ]
+    },
+    {
+      "lexical_key": "university of the philippines mindanao",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2795,
+      "example_names": [
+        "UNIVERSITY OF THE PHILIPPINES - MINDANAO",
+        "UNIVERSITY OF THE PHILIPPINES MINDANAO"
+      ]
+    },
+    {
+      "lexical_key": "department of public works and highways kalinga deo",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2774,
+      "example_names": [
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - KALINGA DEO",
+        "DEPARTMENT OF PUBLIC WORKS AND HIGHWAYS - KALINGA-DEO"
+      ]
+    },
+    {
+      "lexical_key": "philippine health insurance corporation region iv a",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2732,
+      "example_names": [
+        "PHILIPPINE HEALTH INSURANCE CORPORATION - REGION - IV A",
+        "PHILIPPINE HEALTH INSURANCE CORPORATION, REGION - IV A"
+      ]
+    },
+    {
+      "lexical_key": "municipality of nasipit agusan del norte",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2631,
+      "example_names": [
+        "MUNICIPALITY OF NASIPIT , AGUSAN DEL NORTE",
+        "MUNICIPALITY OF NASIPIT, AGUSAN DEL NORTE"
+      ]
+    },
+    {
+      "lexical_key": "city of lipa batangas",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2552,
+      "example_names": [
+        "CITY OF LIPA - BATANGAS",
+        "CITY OF LIPA, BATANGAS"
+      ]
+    },
+    {
+      "lexical_key": "university of the philippines baguio",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2443,
+      "example_names": [
+        "UNIVERSITY OF THE PHILIPPINES - BAGUIO",
+        "UNIVERSITY OF THE PHILIPPINES BAGUIO"
+      ]
+    },
+    {
+      "lexical_key": "bicol university polangui campus",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2435,
+      "example_names": [
+        "BICOL UNIVERSITY - POLANGUI CAMPUS",
+        "BICOL UNIVERSITY POLANGUI CAMPUS"
+      ]
+    },
+    {
+      "lexical_key": "department of education division of surigao del sur",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2410,
+      "example_names": [
+        "DEPARTMENT OF EDUCATION - DIVISION OF SURIGAO DEL SUR",
+        "DEPARTMENT OF EDUCATION- DIVISION OF SURIGAO DEL SUR"
+      ]
+    },
+    {
+      "lexical_key": "department of education division of samar",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2261,
+      "example_names": [
+        "DEPARTMENT OF EDUCATION - DIVISION OF SAMAR",
+        "DEPARTMENT OF EDUCATION DIVISION OF SAMAR"
+      ]
+    },
+    {
+      "lexical_key": "emcor inc",
+      "conservative_keys": 5,
+      "source_spellings": 5,
+      "party_mentions": 2199,
+      "example_names": [
+        "EMCOR INC",
+        "EMCOR INC.",
+        "EMCOR, INC",
+        "EMCOR, INC.",
+        "EMCOR, INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "municipality of magpet north cotabato",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2178,
+      "example_names": [
+        "MUNICIPALITY OF MAGPET - NORTH COTABATO",
+        "MUNICIPALITY OF MAGPET, NORTH COTABATO"
+      ]
+    },
+    {
+      "lexical_key": "philippine amusement and gaming corporation angeles",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 2077,
+      "example_names": [
+        "PHILIPPINE AMUSEMENT AND GAMING CORPORATION - ANGELES",
+        "PHILIPPINE AMUSEMENT AND GAMING CORPORATION-ANGELES"
+      ]
+    },
+    {
+      "lexical_key": "department of national defense procurement unit",
+      "conservative_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 1820,
+      "example_names": [
+        "DEPARTMENT OF NATIONAL DEFENSE - PROCUREMENT UNIT",
+        "DEPARTMENT OF NATIONAL DEFENSE-PROCUREMENT UNIT",
+        "DEPARTMENT OF NATIONAL DEFENSE-Procurement Unit"
+      ]
+    },
+    {
+      "lexical_key": "municipality of mawab compostela valley",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 1765,
+      "example_names": [
+        "MUNICIPALITY OF MAWAB - COMPOSTELA VALLEY",
+        "MUNICIPALITY OF MAWAB, COMPOSTELA VALLEY"
+      ]
+    },
+    {
+      "lexical_key": "philippine health insurance corporation region v",
+      "conservative_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 1759,
+      "example_names": [
+        "PHILIPPINE HEALTH INSURANCE CORPORATION - REGION V",
+        "PHILIPPINE HEALTH INSURANCE CORPORATION-REGION V",
+        "PHILIPPINE HEALTH INSURANCE CORPORATION-Region V"
+      ]
+    },
+    {
+      "lexical_key": "department of agrarian reform negros occidental 2 south",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 1738,
+      "example_names": [
+        "DEPARTMENT OF AGRARIAN REFORM - NEGROS OCCIDENTAL 2 (SOUTH)",
+        "DEPARTMENT OF AGRARIAN REFORM-NEGROS OCCIDENTAL 2 (SOUTH)"
+      ]
+    },
+    {
+      "lexical_key": "american technologies inc",
+      "conservative_keys": 3,
+      "source_spellings": 3,
+      "party_mentions": 1730,
+      "example_names": [
+        "AMERICAN TECHNOLOGIES INC.",
+        "AMERICAN TECHNOLOGIES INC.,",
+        "AMERICAN TECHNOLOGIES, INC."
+      ]
+    },
+    {
+      "lexical_key": "municipality of magsingal ilocos sur",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 1696,
+      "example_names": [
+        "MUNICIPALITY OF MAGSINGAL - ILOCOS SUR",
+        "MUNICIPALITY OF MAGSINGAL, ILOCOS SUR"
+      ]
+    },
+    {
+      "lexical_key": "department of education division of batangas",
+      "conservative_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 1675,
+      "example_names": [
+        "DEPARTMENT OF EDUCATION - DIVISION OF BATANGAS",
+        "DEPARTMENT OF EDUCATION - Division of Batangas",
+        "DEPARTMENT OF EDUCATION, DIVISION OF BATANGAS"
+      ]
+    },
+    {
+      "lexical_key": "department of labor and employment region xi",
+      "conservative_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 1667,
+      "example_names": [
+        "DEPARTMENT OF LABOR AND EMPLOYMENT - REGION XI",
+        "DEPARTMENT OF LABOR AND EMPLOYMENT REGION - XI"
+      ]
+    }
+  ],
+  "legal_suffix_examples": [
+    {
+      "lexical_key": "emcor inc",
+      "punctuation_keys": 2,
+      "source_spellings": 5,
+      "party_mentions": 2199,
+      "example_names": [
+        "EMCOR INC",
+        "EMCOR INC.",
+        "EMCOR, INC",
+        "EMCOR, INC.",
+        "EMCOR, INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "azitsorog inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 1095,
+      "example_names": [
+        "AZITSOROG INCORPORATED",
+        "AZITSOROG, INC."
+      ]
+    },
+    {
+      "lexical_key": "alpha omega gen contractor development corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 879,
+      "example_names": [
+        "ALPHA & OMEGA GEN. CONTRACTOR & DEVELOPMENT CORP.",
+        "ALPHA & OMEGA GEN. CONTRACTOR & DEVELOPMENT CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "guill bern corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 618,
+      "example_names": [
+        "GUILL BERN CORP",
+        "GUILL-BERN CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "harnwell chemicals corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 580,
+      "example_names": [
+        "HARNWELL CHEMICALS CORP.",
+        "HARNWELL CHEMICALS CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "medilines distributors inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 526,
+      "example_names": [
+        "MEDILINES DISTRIBUTORS INCORPORATED",
+        "MEDILINES DISTRIBUTORS, INC."
+      ]
+    },
+    {
+      "lexical_key": "superior motor corp",
+      "punctuation_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 462,
+      "example_names": [
+        "SUPERIOR MOTOR CORP",
+        "SUPERIOR MOTOR CORP.",
+        "SUPERIOR MOTOR CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "monark equipment corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 444,
+      "example_names": [
+        "MONARK EQUIPMENT CORP.",
+        "MONARK EQUIPMENT CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "certeza infosys corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 437,
+      "example_names": [
+        "CERTEZA INFOSYS CORP.",
+        "CERTEZA INFOSYS CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "filcrafters inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 422,
+      "example_names": [
+        "FILCRAFTERS INCORPORATED",
+        "FILCRAFTERS, INC."
+      ]
+    },
+    {
+      "lexical_key": "gendiesel philippines inc",
+      "punctuation_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 415,
+      "example_names": [
+        "GENDIESEL PHILIPPINES INC",
+        "GENDIESEL PHILIPPINES INC.",
+        "GENDIESEL PHILIPPINES INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "aeromart commercial industrial corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 397,
+      "example_names": [
+        "AEROMART COMMERCIAL & INDUSTRIAL CORP.",
+        "AEROMART COMMERCIAL & INDUSTRIAL CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "iloilo city hardware inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 346,
+      "example_names": [
+        "ILOILO CITY HARDWARE INC.",
+        "ILOILO CITY HARDWARE INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "gemarc enterprises inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 321,
+      "example_names": [
+        "GEMARC ENTERPRISES, INC.",
+        "GEMARC ENTERPRISES, INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "first sta rosa hotel corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 267,
+      "example_names": [
+        "FIRST STA. ROSA HOTEL CORP",
+        "FIRST STA. ROSA HOTEL CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "d paragon aa corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 250,
+      "example_names": [
+        "D' PARAGON AA CORP",
+        "D' PARAGON AA CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "des marketing inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 244,
+      "example_names": [
+        "DES MARKETING, INC.",
+        "DES MARKETING, INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "pryce gases inc",
+      "punctuation_keys": 2,
+      "source_spellings": 5,
+      "party_mentions": 235,
+      "example_names": [
+        "PRYCE GASES INC.",
+        "PRYCE GASES INCORPORATED",
+        "PRYCE GASES, INC",
+        "PRYCE GASES, INC.",
+        "PRYCE GASES,INC."
+      ]
+    },
+    {
+      "lexical_key": "conrado b bautista const supply corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 218,
+      "example_names": [
+        "CONRADO B. BAUTISTA CONST. & SUPPLY CORP.",
+        "CONRADO B. BAUTISTA CONST. & SUPPLY CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "dynalab corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 207,
+      "example_names": [
+        "DYNALAB CORP.",
+        "DYNALAB CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "velox energy philippines corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 181,
+      "example_names": [
+        "VELOX ENERGY PHILIPPINES CORP.",
+        "VELOX ENERGY PHILIPPINES CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "sm prime holdings inc",
+      "punctuation_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 179,
+      "example_names": [
+        "SM PRIME HOLDINGS INC",
+        "SM PRIME HOLDINGS INCORPORATED",
+        "SM PRIME HOLDINGS, INC."
+      ]
+    },
+    {
+      "lexical_key": "faire technologies inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 155,
+      "example_names": [
+        "FAIRE TECHNOLOGIES INCORPORATED",
+        "FAIRE TECHNOLOGIES, INC."
+      ]
+    },
+    {
+      "lexical_key": "mhr health care co",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 155,
+      "example_names": [
+        "MHR HEALTH CARE COMPANY",
+        "MHR HEALTH CARE, CO."
+      ]
+    },
+    {
+      "lexical_key": "meter king inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 153,
+      "example_names": [
+        "METER KING INC.",
+        "METER KING INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "saveyour home enterprises inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 114,
+      "example_names": [
+        "SAVEYOUR HOME ENTERPRISES INCORPORATED",
+        "SAVEYOUR HOME ENTERPRISES,INC."
+      ]
+    },
+    {
+      "lexical_key": "ecpac systems corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 108,
+      "example_names": [
+        "ECPAC SYSTEMS CORP.",
+        "ECPAC SYSTEMS CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "bizbox inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 99,
+      "example_names": [
+        "BIZBOX INC.",
+        "BIZBOX, INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "general electric philippines inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 86,
+      "example_names": [
+        "GENERAL ELECTRIC PHILIPPINES INCORPORATED",
+        "GENERAL ELECTRIC PHILIPPINES, INC"
+      ]
+    },
+    {
+      "lexical_key": "golden arches development corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 79,
+      "example_names": [
+        "GOLDEN ARCHES DEVELOPMENT CORP",
+        "GOLDEN ARCHES DEVELOPMENT CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "pixeltone multimedia co",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 79,
+      "example_names": [
+        "PIXELTONE MULTIMEDIA CO.",
+        "PIXELTONE MULTIMEDIA COMPANY"
+      ]
+    },
+    {
+      "lexical_key": "kservico trade inc",
+      "punctuation_keys": 2,
+      "source_spellings": 3,
+      "party_mentions": 76,
+      "example_names": [
+        "KSERVICO TRADE INC.",
+        "KSERVICO TRADE INCORPORATED",
+        "KSERVICO TRADE, INC."
+      ]
+    },
+    {
+      "lexical_key": "surgicare corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 64,
+      "example_names": [
+        "SURGICARE CORP.",
+        "SURGICARE CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "dynasty management and development corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 63,
+      "example_names": [
+        "DYNASTY MANAGEMENT AND DEVELOPMENT CORP.",
+        "DYNASTY MANAGEMENT AND DEVELOPMENT CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "itbs information technology business solutions corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 62,
+      "example_names": [
+        "ITBS INFORMATION TECHNOLOGY BUSINESS SOLUTIONS CORP.",
+        "ITBS INFORMATION TECHNOLOGY BUSINESS SOLUTIONS CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "pycor inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 62,
+      "example_names": [
+        "PYCOR INC.",
+        "PYCOR INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "anchor human resources development corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 58,
+      "example_names": [
+        "ANCHOR HUMAN RESOURCES DEVELOPMENT CORP.",
+        "ANCHOR HUMAN RESOURCES DEVELOPMENT CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "pan resort and events place corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 57,
+      "example_names": [
+        "PAN RESORT AND EVENTS PLACE CORP.",
+        "PAN RESORT AND EVENTS PLACE CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "united motoliance network corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 54,
+      "example_names": [
+        "UNITED MOTOLIANCE NETWORK CORP.",
+        "UNITED MOTOLIANCE NETWORK CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "mg gateway south corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 51,
+      "example_names": [
+        "MG GATEWAY SOUTH CORP",
+        "MG GATEWAY SOUTH CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "people s broadcasting service inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 51,
+      "example_names": [
+        "PEOPLE'S BROADCASTING SERVICE INCORPORATED",
+        "PEOPLE'S BROADCASTING SERVICE, INC."
+      ]
+    },
+    {
+      "lexical_key": "hervelyn intertrading builders corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 50,
+      "example_names": [
+        "HERVELYN INTERTRADING & BUILDERS CORP.",
+        "HERVELYN INTERTRADING & BUILDERS CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "leads environmental health products corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 50,
+      "example_names": [
+        "LEADS ENVIRONMENTAL HEALTH PRODUCTS CORP.",
+        "LEADS ENVIRONMENTAL HEALTH PRODUCTS CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "monrio industrial corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 50,
+      "example_names": [
+        "MONRIO INDUSTRIAL CORP.",
+        "MONRIO INDUSTRIAL CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "central corrugated box corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 49,
+      "example_names": [
+        "CENTRAL CORRUGATED BOX CORP.",
+        "CENTRAL CORRUGATED BOX CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "diorella printshop international corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 49,
+      "example_names": [
+        "DIORELLA PRINTSHOP INTERNATIONAL CORP.",
+        "DIORELLA PRINTSHOP INTERNATIONAL CORPORATION"
+      ]
+    },
+    {
+      "lexical_key": "linmer pharma inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 48,
+      "example_names": [
+        "LINMER PHARMA INC",
+        "LINMER PHARMA INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "iconic dealership inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 47,
+      "example_names": [
+        "ICONIC DEALERSHIP INC.",
+        "ICONIC DEALERSHIP INCORPORATED"
+      ]
+    },
+    {
+      "lexical_key": "pishon industries inc",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 47,
+      "example_names": [
+        "PISHON INDUSTRIES INCORPORATED",
+        "PISHON INDUSTRIES, INC."
+      ]
+    },
+    {
+      "lexical_key": "industria philippines and global corp",
+      "punctuation_keys": 2,
+      "source_spellings": 2,
+      "party_mentions": 46,
+      "example_names": [
+        "INDUSTRIA PHILIPPINES AND GLOBAL CORP.",
+        "INDUSTRIA PHILIPPINES AND GLOBAL CORPORATION"
+      ]
+    }
+  ]
+}

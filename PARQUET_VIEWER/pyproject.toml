@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "philgeps-parquet-viewer"
+version = "0.1.0"
+description = "Read-only local validation viewer for PhilGEPS Parquet outputs"
+requires-python = ">=3.11"
+dependencies = [
+  "duckdb>=1.5,<2",
+  "fastapi>=0.136,<1",
+  "pydantic>=2.7,<3",
+  "uvicorn>=0.46,<1"
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["backend*"]

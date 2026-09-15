@@ -1,0 +1,23 @@
+{
+  "status": "complete",
+  "source_file_count": 1,
+  "rows_written": 19,
+  "physical_data_rows_seen": 19,
+  "blank_rows_skipped": 0,
+  "malformed_width_row_count": 0,
+  "input_size_bytes": 14655,
+  "output_file": "output\\.smoke_timing.parquet",
+  "output_size_bytes": 20446,
+  "compression_ratio_vs_source": 1.3952,
+  "elapsed_seconds": 1.742,
+  "truncated_for_test": false,
+  "files": [
+    {
+      "source_file_id": "pgf_4ebb78e86d87f566ca4064901932685b521b93ecc3c56110b41ac7971255c185",
+      "local_file": "files/Bid Notice and Award Details 2000.xlsx",
+      "output_file": ".smoke_timing.parquet",
+      "rows_written": 19,
+      "malformed_width_row_count": 0
+    }
+  ]
+}

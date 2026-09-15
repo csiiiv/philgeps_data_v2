@@ -1,0 +1,506 @@
+{
+  "status": "complete",
+  "source_file_count": 70,
+  "rows_written": 18515260,
+  "physical_data_rows_seen": 19178334,
+  "blank_rows_skipped": 663074,
+  "malformed_width_row_count": 0,
+  "input_size_bytes": 8393825341,
+  "output_file": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\DATA_NORMALIZATION\\output\\philgeps_normalized.parquet",
+  "output_size_bytes": 1309312456,
+  "compression_ratio_vs_source": 0.156,
+  "elapsed_seconds": 4941.469,
+  "truncated_for_test": false,
+  "files": [
+    {
+      "source_file_id": "pgf_d0193c5ae5d8ad56542b931a3d2331d8eb3faa1d9f3926cf77b77d120d05563d",
+      "local_file": "files/2021_Aprl-Jun.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 468622,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_a757d1091f0813007bd072bc91bd84e17b22e92d893ee67f15b7787dc665c28a",
+      "local_file": "files/2021_Jan-Mar.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 456114,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_eb9dd9e5d65e46089658416d7934ad398415fe9102d1aca08d2ebb11638ee66c",
+      "local_file": "files/2021_Jul-Sep.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 478311,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_4e24ca80916a38a76954acfc8e8434f98fb44501f1b1ed02fa63d6f70997f9f9",
+      "local_file": "files/2021_Oct-Dec.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 501645,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_194ea1b5d0cb6117852e0051942ceeebd0c694a55afe43ec49676d0a4188619a",
+      "local_file": "files/2022 _Jul-Sep.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 428358,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_791d7936a75758123215e00846686a04f8f0fc2f6ad94c1f3bbf3528a49ef07b",
+      "local_file": "files/2022 _Oct-Dec.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 504833,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_e75661739ca491d4629e1c5af5dbbd925ff535df590d13beb83cbf3cbccd5284",
+      "local_file": "files/2022_Apr-Jun.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 369554,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_e9a86e687d4243575fb20ece7a2520e8e487e44d1afb0b532fe583170ca062e6",
+      "local_file": "files/2023_(APR-JUN).csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 436736,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_ea95bead55eb7ac9acba62bd1aa0654a2466125ecc0911cd3863ec88db1fd023",
+      "local_file": "files/2023_(JAN-MAR).csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 405796,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_2dea4ced625bf35c6a8987f29ca7c1ecf31ed24c91b2e26120c623a615f63763",
+      "local_file": "files/2023_(JUL-SEPT).csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 450701,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_6aa40a10758a3e1e64fbda6e72cf127c11526a011166b7fee3e41fbc91c63529",
+      "local_file": "files/2023_(OCT-DEC).csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 450311,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_18dbea9974657c0e547cafb24c5b7b50dbc612facce1465e48f1065c95c076ab",
+      "local_file": "files/2024_Apr-Jun.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 474381,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_4e14881e3f41973ef17e6ec274a01fa37c9740d81aebdd0092ac05381d11cea4",
+      "local_file": "files/2024_Jan-Mar.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 440342,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_20ecb0818896325e555435fd0e529cc27d9a0bc14d2711f90222b38745760584",
+      "local_file": "files/2024_Jul-Sep.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 469108,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_2266e5f97fafc121828197ac5297d48f21053c219c7f42ea307e22f982007ce9",
+      "local_file": "files/2024_Oct-Dec.csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 512719,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_9108892e7d23b948992bfe1976654f679930bd99f101ca4ebe0d1ae8355fecbf",
+      "local_file": "files/2025_(APR-JUN).csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 372122,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_c9ef533d330d509de0fef405848c23c087de03affd357797279a5a5601cb5ec7",
+      "local_file": "files/2025_(JAN-MAR).csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 469569,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_f195e9153cd82a326aac3008f9993b1efbe6a737a4d744f652440fcbcc0a4ec9",
+      "local_file": "files/2025_(JUL-SEPT).csv",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 361502,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_d3cabe5f83829f28a1c475a38a464236ba4be6eea6546b6f4288dc1a72a09b78",
+      "local_file": "files/April-June 2011.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 93416,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_2146c509a66bef0cc180c7b40366aabc0e634ba4beeaf737ce3c8d4a1cfbc849",
+      "local_file": "files/April-June 2012.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 124651,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_6660b1a4698a3f3393215492c326b1fadc15b9e249df59504eaa5876f6f97e61",
+      "local_file": "files/April-June 2013.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 136399,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_e035750a08b2c35340254c7e3d10ddb10c88fa5002f12901449c62ae5e60f65e",
+      "local_file": "files/April-June 2014.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 175382,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_36f9b03a2d7b67815450f4d2a68ccba7faa033efd25d37958e8bdbefd790480d",
+      "local_file": "files/April-June 2015.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 223866,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_de33ca7923330b0ab775f21edb8f33a4c5a23e7ed43c5aff12e82f8daa3037b0",
+      "local_file": "files/April-June 2016.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 217560,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_db472d9747cd270defabd725cfa46a59159cdeda3809c62a654e29d4f9e0b9b7",
+      "local_file": "files/April-June 2017.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 257362,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_ca009383f6abdeab460f473286797a412ab9ac7e84e6c66b981a823624f66ff6",
+      "local_file": "files/April-June 2018.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 283350,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_5cb3c9078e92fdeb831cdfda5b2013e51a92553d6549aae978e81d5c336bd487",
+      "local_file": "files/April-June 2019.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 227733,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_53dce673cb012e13950ff42124a9f213d804a19cb9019ed9fd28238ad8b24ed8",
+      "local_file": "files/April-June 2020.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 163986,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_4ebb78e86d87f566ca4064901932685b521b93ecc3c56110b41ac7971255c185",
+      "local_file": "files/Bid Notice and Award Details 2000.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 19,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_e8024f279dbc04a32b99613c67c5d8824957b95dbb17389db644ea9f55310942",
+      "local_file": "files/Bid Notice and Award Details 2001.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 2299,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_f1816ab85c9c034db3440ecabbe26c4df1f634a0c66487a4f8dcc716bf72c662",
+      "local_file": "files/Bid Notice and Award Details 2002.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 11778,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_78a7cd53a1fa1c7eab0210ba3dd8379cbe86e3eaa211296b401d760339fc768d",
+      "local_file": "files/Bid Notice and Award Details 2003.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 20895,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_d917690902b9c64bb3c3adfdfeef551c40c271bd33b4be95cc40ab68527d736f",
+      "local_file": "files/Bid Notice and Award Details 2004.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 50789,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_c416128f7d9e807e78ae719e01fc5b97d8a5100dcb54e5232d24fe1fdea5139a",
+      "local_file": "files/Bid Notice and Award Details 2005.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 99161,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_f208209c7fa21ba24856afc6c69f8ce22cda8c74b49f79a1d251141b51ef08f2",
+      "local_file": "files/Bid Notice and Award Details 2006.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 150791,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_51aee6649bdc04d8c481904217a1d3fd2bc0ee7b56d6c3cc2fab6457ececc5dc",
+      "local_file": "files/Bid Notice and Award Details 2007.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 215309,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_e234e3459d714c506e4a8d68e14f59f133d18228548cc2cfd8f8ec41d329d289",
+      "local_file": "files/Bid Notice and Award Details 2008.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 289795,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_bd707e1e735efa8cc5955b6abb39b432f9507615274d66668b4266a89d642601",
+      "local_file": "files/Bid Notice and Award Details 2009.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 389583,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_41fc8c0a7efaafeef63fe0fe4fa7aa2edba03433d2d7c3ae4d11ddb65076ae75",
+      "local_file": "files/Bid Notice and Award Details 2010.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 365065,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_9e6c99e0cb34ff634004664875fbb36bfcb55a12e55d12f474e795f6fb0a5ac8",
+      "local_file": "files/Bid Notice and Award Details Oct-Dec 2017.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 324509,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_7d28563824c2dbd9d5848f0655a677ddbbb3ba57ed6f683f3d99a5cbb2389d30",
+      "local_file": "files/January-March 2011.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 85521,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_226d68edb514e6ea013ab5d6c8e963b6a0916f9d9f0495f65b57368591080e32",
+      "local_file": "files/January-March 2012.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 112779,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_741bd633d390b0fe2a2c7de2413d9a77f95733ac859a73fc190c0d24c0c61abd",
+      "local_file": "files/January-March 2013.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 160104,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_20eda273fd4bee5dee34ee97143d53502906cf73d991ade67b08712d8a558685",
+      "local_file": "files/January-March 2014.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 151208,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_0a8fb819ac61b34e7d84bedfed1c153e8f3833e6ddfe004253a160688d567279",
+      "local_file": "files/January-March 2015.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 188069,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_1411c78bd91182859909ab764f57df7268fc1262adf1529932b4a755cf45cf46",
+      "local_file": "files/January-March 2016.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 244775,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_ffcfab6f15c7b9a8c49dc2f11a698b852ff3b9dff0fa833ffcaf2037f68f103a",
+      "local_file": "files/January-March 2017.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 223753,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_6c2264b3ead812eacbcae550415d2f7da6138bdb4504864a0a14d5944b5c6eda",
+      "local_file": "files/January-March 2018.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 242328,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_0999f110da82603d3a68f3f3326fd5dc493bd43a913151516c1f19bb9769ec42",
+      "local_file": "files/January-March 2019.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 268172,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_29870b2ac766883203a2f1fb26ce3462619afa33f92bfa67f8b28f6d7d567b81",
+      "local_file": "files/January-March 2020.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 250141,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_bbb6631d1441972d4059ab822b5597081cf31c17bff1cd032e6a111b3ea35c40",
+      "local_file": "files/January-March 2022.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 334652,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_35a540614dfbccb861221320a21a59a46816db435d8749bfcb28470e224abb63",
+      "local_file": "files/July-September 2011.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 100913,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_a12b6e75ed3300a2889d5e8d7828fe072e62f828aa684f6b9eb6751fd8b72e55",
+      "local_file": "files/July-September 2012.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 127427,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_e1854d38dbf997dfd1950199ac169cc052b749e20bf12da2f3ee6a7c50dd4cb3",
+      "local_file": "files/July-September 2013.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 164979,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_2fbc19ca5df2ef65bef3ad35acc484994e253928753c9249c03de572442e777c",
+      "local_file": "files/July-September 2014.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 197472,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_b9612ef9bfb6a2f2243e8d6f2a635f4a512a06a646bdf174ac80a183dc28e64f",
+      "local_file": "files/July-September 2015.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 245537,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_442b1ee3f2109e624cefbfd28909b743ac8d3bc3787dc83974f85f66be7976df",
+      "local_file": "files/July-September 2016.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 257949,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_eb1d6784481539ec5ba8155a2e7c14b1dddb2fa0fedb0324b712d01c48e6db46",
+      "local_file": "files/July-September 2017.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 281271,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_aac323664a822214f0212bd228641164ea36247e5104e59362236bf7ee5c750a",
+      "local_file": "files/July-September 2018.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 311743,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_35857451432ec4d33245d0743fa57d047d93f4c2966717b2633f123d14a96b44",
+      "local_file": "files/July-September 2019.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 322440,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_f77cf3ac1b549ffd858ae7ba86f7db50df1f92970ee14a254c5451d5d8037a59",
+      "local_file": "files/July-September 2020.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 200152,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_8dde7a55eb0a8d3ecbd31e279fa96aaa2fa3f04ae53ae8efd4543b040feb9542",
+      "local_file": "files/October-December 2011.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 106946,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_9bdbb86cddc26606f9b50926008f194cc468757a57be32bf0f9190fcea922cda",
+      "local_file": "files/October-December 2012.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 145823,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_0f36e130d9075ff648270c2ec6f8644841f71e8383a89e4d97d57cf16a696060",
+      "local_file": "files/October-December 2013.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 169553,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_25023d9f4dc55d1ec76333473c6b809d68ed177525ca985a1817f4e9473ff0dc",
+      "local_file": "files/October-December 2014.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 207668,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_d1bd0e8b3839b504cbbae358a5ceed2e9db2a70edc2cca53f8012953d35dfaa9",
+      "local_file": "files/October-December 2015.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 267053,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_fcf202b108598675407a31afe5d0c56e4b897a3623a93349e3324892a3bca277",
+      "local_file": "files/October-December 2016.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 267335,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_8a8e20070d6def6933bfba08c3a8aea72833b791db31aa97e85241c79e9cd0b8",
+      "local_file": "files/October-December 2018.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 378827,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_78ff2e56f029b99be0d7e77cf8731beeb070d9ac3215610bab702d54a2352901",
+      "local_file": "files/October-December 2019.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 375746,
+      "malformed_width_row_count": 0
+    },
+    {
+      "source_file_id": "pgf_4e38592561c47aa0b82aa3256d45abe4bb8fd36ff932acff31ecb92d0d8ece56",
+      "local_file": "files/October-December 2020.xlsx",
+      "output_file": "philgeps_normalized.parquet",
+      "rows_written": 250502,
+      "malformed_width_row_count": 0
+    }
+  ]
+}

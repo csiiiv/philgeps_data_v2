@@ -1,0 +1,488 @@
+{
+  "input": "C:\\WORK\\BetterGovPH\\PHILGEPS_DATA_REWORK\\DATA_NORMALIZATION\\output\\philgeps_cleaned.parquet",
+  "observation_rows": 17528727,
+  "fields": {
+    "classification": {
+      "distinct_non_null": 5,
+      "null_observations": 1,
+      "values": [
+        {
+          "source_value": "Goods",
+          "observation_rows": 14674715
+        },
+        {
+          "source_value": "Civil Works",
+          "observation_rows": 1983408
+        },
+        {
+          "source_value": "Goods - General Support Services",
+          "observation_rows": 487869
+        },
+        {
+          "source_value": "Undefined",
+          "observation_rows": 285205
+        },
+        {
+          "source_value": "Consulting Services",
+          "observation_rows": 97529
+        }
+      ]
+    },
+    "notice_type": {
+      "distinct_non_null": 14,
+      "null_observations": 7149713,
+      "values": [
+        {
+          "source_value": "Request for Quotation (RFQ)",
+          "observation_rows": 5393338
+        },
+        {
+          "source_value": "Invitation to Bid (ITB)",
+          "observation_rows": 3828889
+        },
+        {
+          "source_value": "Invitation to Apply for Eligibility and to Bid",
+          "observation_rows": 584607
+        },
+        {
+          "source_value": "Notice for Negotiated Procurement",
+          "observation_rows": 390319
+        },
+        {
+          "source_value": "Request for Proposal (RFP)",
+          "observation_rows": 74476
+        },
+        {
+          "source_value": "Request for Expression of Interest",
+          "observation_rows": 40352
+        },
+        {
+          "source_value": "Notice for Direct Contracting",
+          "observation_rows": 25671
+        },
+        {
+          "source_value": "Notice of Proposed Procurement (NPP)",
+          "observation_rows": 22525
+        },
+        {
+          "source_value": "Advance Contract Award Notice (ACAN)",
+          "observation_rows": 6968
+        },
+        {
+          "source_value": "Invitation to Prequalify and Bid (IPB)",
+          "observation_rows": 5960
+        },
+        {
+          "source_value": "Request for Information (RFI)",
+          "observation_rows": 2127
+        },
+        {
+          "source_value": "Invitation to Prequalify (IPQ)",
+          "observation_rows": 1457
+        },
+        {
+          "source_value": "Notice of Emergency Purchase",
+          "observation_rows": 1189
+        },
+        {
+          "source_value": "Request for Qualification (RQA)",
+          "observation_rows": 1136
+        }
+      ]
+    },
+    "procurement_mode": {
+      "distinct_non_null": 26,
+      "null_observations": 1,
+      "values": [
+        {
+          "source_value": "Public Bidding",
+          "observation_rows": 6686135
+        },
+        {
+          "source_value": "Negotiated Procurement - Small Value Procurement (Sec. 53.9)",
+          "observation_rows": 5856985
+        },
+        {
+          "source_value": "Shopping",
+          "observation_rows": 2568863
+        },
+        {
+          "source_value": "Shopping - Ordinary/Regular Office Supplies & Equipment (Sec. 52.1.b)",
+          "observation_rows": 1432252
+        },
+        {
+          "source_value": "Negotiated Procurement - Two Failed Biddings (Sec. 53.1)",
+          "observation_rows": 278758
+        },
+        {
+          "source_value": "Negotiated Procurement",
+          "observation_rows": 155071
+        },
+        {
+          "source_value": "Direct Contracting (Sec. 50)",
+          "observation_rows": 138660
+        },
+        {
+          "source_value": "Negotiated Procurement - Lease of Real Property (Sec. 53.10)",
+          "observation_rows": 82133
+        },
+        {
+          "source_value": "Negotiated Procurement - Emergency Cases (Sec. 53.2)",
+          "observation_rows": 70271
+        },
+        {
+          "source_value": "Shopping - Unforeseen Contingency (Sec. 52.1.a)",
+          "observation_rows": 61224
+        },
+        {
+          "source_value": "Undefined",
+          "observation_rows": 38461
+        },
+        {
+          "source_value": "Negotiated Procurement - Community Participation (Sec. 53.12)",
+          "observation_rows": 27346
+        },
+        {
+          "source_value": "National Competitive Bidding",
+          "observation_rows": 24683
+        },
+        {
+          "source_value": "Negotiated Procurement - Agency to Agency (Sec. 53.5)",
+          "observation_rows": 22588
+        },
+        {
+          "source_value": "Local Purchase",
+          "observation_rows": 16772
+        },
+        {
+          "source_value": "Negotiated Procurement - NGO Participation (Sec. 53.11)",
+          "observation_rows": 14876
+        },
+        {
+          "source_value": "NP - Scientific, Scholarly/Artistic Work, Exclusive Tech. & Media Service (53.6)",
+          "observation_rows": 12063
+        },
+        {
+          "source_value": "Direct Retail Purchase of POL and Airline Tickets (Sec. 53.14)",
+          "observation_rows": 8199
+        },
+        {
+          "source_value": "Negotiated Procurement - Highly Technical Consultants (Sec. 53.7)",
+          "observation_rows": 7743
+        },
+        {
+          "source_value": "Negotiated Procurement - Procurement Agent (Sec. 53.6)",
+          "observation_rows": 7007
+        },
+        {
+          "source_value": "Selection based on Consultants Qualification",
+          "observation_rows": 6923
+        },
+        {
+          "source_value": "International Competitive Bidding",
+          "observation_rows": 4783
+        },
+        {
+          "source_value": "Renewal of Regular and Recurring Sevices per Appendix 37",
+          "observation_rows": 3086
+        },
+        {
+          "source_value": "Limited Source Bidding (Sec. 49)",
+          "observation_rows": 3021
+        },
+        {
+          "source_value": "Negotiated Procurement - Defense Cooperation Agreement (Sec. 53.8)",
+          "observation_rows": 494
+        },
+        {
+          "source_value": "Negotiated Procurement - United Nations Agencies (Sec. 53.13)",
+          "observation_rows": 329
+        }
+      ]
+    },
+    "trade_agreement": {
+      "distinct_non_null": 12,
+      "null_observations": 1,
+      "values": [
+        {
+          "source_value": "Implementing Rules and Regulations",
+          "observation_rows": 16969436
+        },
+        {
+          "source_value": "Others",
+          "observation_rows": 362100
+        },
+        {
+          "source_value": "ADB Procurement Guidelines",
+          "observation_rows": 72753
+        },
+        {
+          "source_value": "WB Procurement Guidelines",
+          "observation_rows": 44027
+        },
+        {
+          "source_value": "Undefined",
+          "observation_rows": 36621
+        },
+        {
+          "source_value": "Local Government Code",
+          "observation_rows": 20543
+        },
+        {
+          "source_value": "International / Executive Agreement",
+          "observation_rows": 13744
+        },
+        {
+          "source_value": "ADB Guidelines on the use of Consultants",
+          "observation_rows": 4458
+        },
+        {
+          "source_value": "WB Guidelines on the use of Consultants",
+          "observation_rows": 3512
+        },
+        {
+          "source_value": "International Funding",
+          "observation_rows": 1024
+        },
+        {
+          "source_value": "Foreign Borrowings Act",
+          "observation_rows": 485
+        },
+        {
+          "source_value": "World Trade Organization",
+          "observation_rows": 23
+        }
+      ]
+    },
+    "calendar_type": {
+      "distinct_non_null": 3,
+      "null_observations": 606523,
+      "values": [
+        {
+          "source_value": "Day/s",
+          "observation_rows": 16679658
+        },
+        {
+          "source_value": "Month/s",
+          "observation_rows": 159433
+        },
+        {
+          "source_value": "Year/s",
+          "observation_rows": 83113
+        }
+      ]
+    },
+    "bid_notice_status": {
+      "distinct_non_null": 8,
+      "null_observations": 1,
+      "values": [
+        {
+          "source_value": "Closed",
+          "observation_rows": 10485984
+        },
+        {
+          "source_value": "Awarded",
+          "observation_rows": 5810513
+        },
+        {
+          "source_value": "Failed",
+          "observation_rows": 691117
+        },
+        {
+          "source_value": "Cancelled",
+          "observation_rows": 512519
+        },
+        {
+          "source_value": "Active",
+          "observation_rows": 23102
+        },
+        {
+          "source_value": "Shortlisted",
+          "observation_rows": 5323
+        },
+        {
+          "source_value": "Closed - Pending Opening",
+          "observation_rows": 167
+        },
+        {
+          "source_value": "Disapproved",
+          "observation_rows": 1
+        }
+      ]
+    },
+    "award_type": {
+      "distinct_non_null": 19,
+      "null_observations": 14484121,
+      "values": [
+        {
+          "source_value": "Award Notice",
+          "observation_rows": 2860592
+        },
+        {
+          "source_value": "Award Notice (Direct Contracting)",
+          "observation_rows": 38672
+        },
+        {
+          "source_value": "Award Notice (Negotiated Procurement - Emergency C",
+          "observation_rows": 35957
+        },
+        {
+          "source_value": "Award Notice (Shopping - Unforeseen Contingency)",
+          "observation_rows": 33165
+        },
+        {
+          "source_value": "Negotiated Procurement",
+          "observation_rows": 19599
+        },
+        {
+          "source_value": "Public Bidding",
+          "observation_rows": 18342
+        },
+        {
+          "source_value": "Award Notice (Negotiated Procurement - Agency-to-A",
+          "observation_rows": 10481
+        },
+        {
+          "source_value": "Direct Contracting",
+          "observation_rows": 5929
+        },
+        {
+          "source_value": "Award Notice (NP - Scientific, Scholarly/Artistic",
+          "observation_rows": 4728
+        },
+        {
+          "source_value": "Emergency Purchase",
+          "observation_rows": 4721
+        },
+        {
+          "source_value": "Repeat Order",
+          "observation_rows": 3093
+        },
+        {
+          "source_value": "Award Notice (Negotiated Procurement - Highly Tech",
+          "observation_rows": 2754
+        },
+        {
+          "source_value": "Negotiated Procurement (Adjacent / Contiguous)",
+          "observation_rows": 2611
+        },
+        {
+          "source_value": "Emergency",
+          "observation_rows": 1918
+        },
+        {
+          "source_value": "Award Notice (Negotiated Procurement - NGO Partici",
+          "observation_rows": 641
+        },
+        {
+          "source_value": "Negotiated Purchase",
+          "observation_rows": 585
+        },
+        {
+          "source_value": "Negotiated Procurement (Take-over of contracts)",
+          "observation_rows": 454
+        },
+        {
+          "source_value": "Re-Award",
+          "observation_rows": 310
+        },
+        {
+          "source_value": "Award Notice (Negotiated Procurement - Defense Coo",
+          "observation_rows": 54
+        }
+      ]
+    },
+    "award_notice_status": {
+      "distinct_non_null": 4,
+      "null_observations": 11029606,
+      "values": [
+        {
+          "source_value": "Updated",
+          "observation_rows": 4513071
+        },
+        {
+          "source_value": "Posted",
+          "observation_rows": 1965218
+        },
+        {
+          "source_value": "Cancelled",
+          "observation_rows": 20825
+        },
+        {
+          "source_value": "For Approval",
+          "observation_rows": 7
+        }
+      ]
+    },
+    "government_branch": {
+      "distinct_non_null": 5,
+      "null_observations": 10379015,
+      "values": [
+        {
+          "source_value": "Executive",
+          "observation_rows": 7100571
+        },
+        {
+          "source_value": "Legislative",
+          "observation_rows": 26710
+        },
+        {
+          "source_value": "Judiciary",
+          "observation_rows": 22329
+        },
+        {
+          "source_value": "Local Government Unit (LGU)",
+          "observation_rows": 98
+        },
+        {
+          "source_value": "Constitutional Office",
+          "observation_rows": 4
+        }
+      ]
+    },
+    "procuring_entity_organization_type_grouped": {
+      "distinct_non_null": 4,
+      "null_observations": 10379015,
+      "values": [
+        {
+          "source_value": "National Government Agencies (NGA)",
+          "observation_rows": 3311291
+        },
+        {
+          "source_value": "Local Government Units (LGU)",
+          "observation_rows": 2877601
+        },
+        {
+          "source_value": "Government Owned and Controlled Corporations (GOCC)",
+          "observation_rows": 521931
+        },
+        {
+          "source_value": "State Universities and Colleges (SUC)",
+          "observation_rows": 438889
+        }
+      ]
+    },
+    "awardee_size": {
+      "distinct_non_null": 4,
+      "null_observations": 14244325,
+      "values": [
+        {
+          "source_value": "Micro",
+          "observation_rows": 2335681
+        },
+        {
+          "source_value": "Medium",
+          "observation_rows": 626739
+        },
+        {
+          "source_value": "Large",
+          "observation_rows": 321743
+        },
+        {
+          "source_value": "Small",
+          "observation_rows": 239
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "status": "pass",
+  "failures": [],
+  "source_columns": 66,
+  "configured_fields": 66,
+  "missing_fields": [],
+  "extra_fields": [],
+  "codelist_domains": {
+    "classification": {
+      "source_distinct_values": 5,
+      "configured_values": 5,
+      "unmapped_source_values": [],
+      "configured_values_not_in_source": []
+    },
+    "procurement_mode": {
+      "source_distinct_values": 26,
+      "configured_values": 26,
+      "unmapped_source_values": [],
+      "configured_values_not_in_source": []
+    },
+    "bid_notice_status": {
+      "source_distinct_values": 8,
+      "configured_values": 8,
+      "unmapped_source_values": [],
+      "configured_values_not_in_source": []
+    },
+    "award_notice_status": {
+      "source_distinct_values": 4,
+      "configured_values": 4,
+      "unmapped_source_values": [],
+      "configured_values_not_in_source": []
+    },
+    "calendar_type": {
+      "source_distinct_values": 3,
+      "configured_values": 3,
+      "unmapped_source_values": [],
+      "configured_values_not_in_source": []
+    }
+  }
+}

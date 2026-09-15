@@ -1,0 +1,152 @@
+{
+  "status": "PASS",
+  "sample_rows_per_headerless_file": 5000,
+  "headered_reference_files": 12,
+  "headered_reference_rows": 4992,
+  "results": [
+    {
+      "local_file": "files/2021_Oct-Dec.csv",
+      "sampled_rows": 5000,
+      "row_widths": {
+        "46": 5000
+      },
+      "candidate_schemas_by_width": [
+        "location_46"
+      ],
+      "mean_type_distance_from_headered_location_46": 0.0248,
+      "semantic_anchor_match_rates": {
+        "approved_budget_is_number": 1.0,
+        "published_date_is_date": 1.0,
+        "line_item_number_is_number": 1.0,
+        "quantity_is_number": 1.0,
+        "item_budget_is_number": 1.0,
+        "bid_status_matches_reference": 0.9988,
+        "award_reference_is_number": 1.0,
+        "unspsc_is_number": 1.0,
+        "award_published_is_date": 1.0,
+        "award_date_is_date": 1.0,
+        "contract_amount_is_number": 1.0,
+        "award_status_matches_reference": 1.0,
+        "country_matches_reference": 0.9923
+      },
+      "schema_decision": "location_46",
+      "schema_status": "PASS",
+      "normalized_file_name": "2021-10--2021-12.csv",
+      "sample_published_months": {
+        "2024-12": 1106,
+        "2024-11": 927,
+        "2024-10": 840
+      },
+      "published_period_match_rate": 0.0,
+      "period_status": "REVIEW"
+    },
+    {
+      "local_file": "files/2022_Apr-Jun.csv",
+      "sampled_rows": 5000,
+      "row_widths": {
+        "46": 5000
+      },
+      "candidate_schemas_by_width": [
+        "location_46"
+      ],
+      "mean_type_distance_from_headered_location_46": 0.0172,
+      "semantic_anchor_match_rates": {
+        "approved_budget_is_number": 1.0,
+        "published_date_is_date": 1.0,
+        "line_item_number_is_number": 1.0,
+        "quantity_is_number": 1.0,
+        "item_budget_is_number": 1.0,
+        "bid_status_matches_reference": 1.0,
+        "award_reference_is_number": 1.0,
+        "unspsc_is_number": 1.0,
+        "award_published_is_date": 1.0,
+        "award_date_is_date": 1.0,
+        "contract_amount_is_number": 1.0,
+        "award_status_matches_reference": 1.0,
+        "country_matches_reference": 0.9956
+      },
+      "schema_decision": "location_46",
+      "schema_status": "PASS",
+      "normalized_file_name": "2022-04--2022-06.csv",
+      "sample_published_months": {
+        "2022-06": 1019,
+        "2022-05": 904,
+        "2022-04": 820
+      },
+      "published_period_match_rate": 1.0,
+      "period_status": "PASS"
+    },
+    {
+      "local_file": "files/2022 _Jul-Sep.csv",
+      "sampled_rows": 5000,
+      "row_widths": {
+        "46": 5000
+      },
+      "candidate_schemas_by_width": [
+        "location_46"
+      ],
+      "mean_type_distance_from_headered_location_46": 0.0181,
+      "semantic_anchor_match_rates": {
+        "approved_budget_is_number": 1.0,
+        "published_date_is_date": 1.0,
+        "line_item_number_is_number": 1.0,
+        "quantity_is_number": 1.0,
+        "item_budget_is_number": 1.0,
+        "bid_status_matches_reference": 1.0,
+        "award_reference_is_number": 1.0,
+        "unspsc_is_number": 1.0,
+        "award_published_is_date": 1.0,
+        "award_date_is_date": 1.0,
+        "contract_amount_is_number": 1.0,
+        "award_status_matches_reference": 1.0,
+        "country_matches_reference": 0.995
+      },
+      "schema_decision": "location_46",
+      "schema_status": "PASS",
+      "normalized_file_name": "2022-07--2022-09.csv",
+      "sample_published_months": {
+        "2022-09": 989,
+        "2022-07": 974,
+        "2022-08": 860
+      },
+      "published_period_match_rate": 1.0,
+      "period_status": "PASS"
+    },
+    {
+      "local_file": "files/2022 _Oct-Dec.csv",
+      "sampled_rows": 5000,
+      "row_widths": {
+        "46": 5000
+      },
+      "candidate_schemas_by_width": [
+        "location_46"
+      ],
+      "mean_type_distance_from_headered_location_46": 0.0303,
+      "semantic_anchor_match_rates": {
+        "approved_budget_is_number": 1.0,
+        "published_date_is_date": 1.0,
+        "line_item_number_is_number": 1.0,
+        "quantity_is_number": 1.0,
+        "item_budget_is_number": 1.0,
+        "bid_status_matches_reference": 0.998,
+        "award_reference_is_number": 1.0,
+        "unspsc_is_number": 1.0,
+        "award_published_is_date": 1.0,
+        "award_date_is_date": 1.0,
+        "contract_amount_is_number": 1.0,
+        "award_status_matches_reference": 1.0,
+        "country_matches_reference": 0.9957
+      },
+      "schema_decision": "location_46",
+      "schema_status": "PASS",
+      "normalized_file_name": "2022-10--2022-12.csv",
+      "sample_published_months": {
+        "2022-12": 1108,
+        "2022-11": 1060,
+        "2022-10": 816
+      },
+      "published_period_match_rate": 1.0,
+      "period_status": "PASS"
+    }
+  ]
+}

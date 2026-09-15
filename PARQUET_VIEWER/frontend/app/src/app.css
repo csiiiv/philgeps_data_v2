@@ -277,6 +277,11 @@ td.cell-amount {
   font-variant-numeric: tabular-nums;
 }
 .warning-badge { background: #3a2d12; color: #e0b45c; }
+/* Item award-linkage (§16): linked vs not-awarded line items */
+.badge-link-linked { background: rgba(72,199,142,0.14); color: #7ee2b8; }
+.badge-link-missing { background: #3a2d12; color: #e0b45c; }
+.item-linkage-bar { display: flex; gap: 8px; margin: 0 0 10px; flex-wrap: wrap; }
+.warning-chip { border-color: rgba(255,193,7,0.55); color: #ffd76a; }
 .money-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin: 14px 0; }
 .money-tile {
   display: flex; flex-direction: column; gap: 4px; padding: 12px;

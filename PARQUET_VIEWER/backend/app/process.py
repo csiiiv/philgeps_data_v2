@@ -637,9 +637,13 @@ class ProcessService:
         )
 
         item_structure = (
-            self._item_structure(release_id, lit)
+            self._item_structure(release_id, lit, items_by_award=items_by_award)
             if "tender_items" in paths
-            else {"items": [], "item_total": 0, "truncated": False}
+            else {
+                "items": [], "item_total": 0, "truncated": False,
+                "linkage_evidence": bool(items_by_award),
+                "linked_count": 0, "unlinked_count": 0,
+            }
         )
 
         # value chain: awards and contracts in one UNION ALL pass
@@ -1279,12 +1283,22 @@ class ProcessService:
             "truncated": len(award_list) > 50,
         }
 
-    def _item_structure(self, release_id: str, lit: dict[str, str]) -> dict[str, Any]:
-        """Tender line items for per-unit pricing checks.
+    def _item_structure(
+        self,
+        release_id: str,
+        lit: dict[str, str],
+        *,
+        items_by_award: dict[str, list[dict[str, Any]]] | None = None,
+    ) -> dict[str, Any]:
+        """Tender line items for per-unit pricing checks, with award linkage.
 
         Surfaces PhilGEPS item fields (line number, name, description,
         quantity, unit, budget) plus a derived unit price when both
-        quantity and budget are present.
+        quantity and budget are present. When award-items evidence is
+        supplied (or already fetched by the caller), each item carries its
+        linkage state per docs/11 §16: `linked` names its award(s),
+        `missing` means no award ever referenced the item — the unawarded
+        line-item view.
         """
         sql = f"""
             SELECT item_id, source_line_item_number, title, description,
@@ -1297,11 +1311,51 @@ class ProcessService:
         names, rows, _ = execute_bounded(
             self.pool, sql, [release_id], self.settings.api.query_timeout_seconds
         )
-        items = [self._item_entry(self._row(names, row)) for row in rows[:100]]
+        if items_by_award is None and "award_items" in lit:
+            items_by_award = self._award_items_by_award(release_id, lit)
+        items_by_award = items_by_award or {}
+        items = []
+        for row in rows[:100]:
+            entry = self._item_entry(self._row(names, row))
+            linked_to = sorted(
+                award_id
+                for award_id, linked in items_by_award.items()
+                if any(i["item_id"] == entry["item_id"] for i in linked)
+            )
+            if linked_to:
+                entry["award_link"] = {
+                    "state": "linked",
+                    "award_ids": linked_to,
+                    "metadata": relationship_metadata(
+                        source_table="award_items",
+                        status_column="item_id",
+                        raw_status="linked",
+                    ),
+                }
+            else:
+                entry["award_link"] = {
+                    "state": "missing",
+                    "award_ids": [],
+                    "metadata": relationship_metadata(
+                        source_table="award_items",
+                        status_column="item_id",
+                        raw_status=None,
+                    ),
+                }
+            items.append(entry)
+        linked_count = sum(
+            1 for i in items if i["award_link"]["state"] == "linked"
+        )
         return {
             "items": items,
             "item_total": len(rows),
             "truncated": len(rows) > 100,
+            # Rollup only meaningful when the release has any award-item
+            # evidence at all; otherwise "unawarded" would just mean the
+            # ETL did not record linkages (docs/13: zero links ≠ partial).
+            "linkage_evidence": bool(items_by_award),
+            "linked_count": linked_count,
+            "unlinked_count": len(items) - linked_count,
         }
 
     def _award_items_by_award(

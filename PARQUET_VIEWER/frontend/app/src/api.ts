@@ -423,6 +423,13 @@ export interface AwardStructure {
   truncated: boolean;
 }
 
+/** §16 award linkage for a line item (award_items evidence). */
+export interface ItemAwardLink {
+  state: 'linked' | 'missing';
+  award_ids: string[];
+  metadata: DerivationMetadata;
+}
+
 export interface ItemEntry {
   item_id: string;
   line_item_number: number | null;
@@ -432,12 +439,18 @@ export interface ItemEntry {
   unit_name: string | null;
   budget: MoneyValue | null;
   unit_price: MoneyValue | null;
+  /** Present when the payload carries award-items evidence. */
+  award_link?: ItemAwardLink;
 }
 
 export interface ItemStructure {
   items: ItemEntry[];
   item_total: number;
   truncated: boolean;
+  /** True when the release has any award-item evidence at all. */
+  linkage_evidence?: boolean;
+  linked_count?: number;
+  unlinked_count?: number;
 }
 
 export interface TimelineEvent {

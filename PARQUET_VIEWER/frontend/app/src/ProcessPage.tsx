@@ -13,7 +13,8 @@ import {
   fetchReleaseSources,
 } from './api';
 import { ModalHeader } from './ModalHost';
-import { AwardItemsPanel, ItemTable } from './itemTable';
+import { AwardItemsPanel } from './itemTable';
+import { ItemsPanel } from './ItemsPanel';
 import { renderMoney } from './money';
 
 const moneyNotRecorded = <span className="null">not recorded</span>;
@@ -859,36 +860,11 @@ function SummaryBody({
       </div>
 
       {tab === 'items' && (
-        <section
-          className="process-tab-panel trace-section"
-          role="tabpanel"
-          id="process-panel-items"
-          aria-labelledby="process-tab-items"
-        >
-          {itemCount === 0 ? (
-            <p className="null">No line items recorded for this procurement.</p>
-          ) : (
-            <>
-              <ItemTable items={summary.item_structure.items} />
-              <p className="hint">
-                Per-unit shows item budget ÷ quantity — use it to check whether
-                unit pricing looks reasonable before comparing to award amounts.
-              </p>
-              {summary.item_structure.truncated && (
-                <p className="hint">Showing the first 100 line items; more exist.</p>
-              )}
-              {releaseId && (
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() => onOpenRecords(releaseId, 'tender_items')}
-                >
-                  View all item records
-                </button>
-              )}
-            </>
-          )}
-        </section>
+        <ItemsPanel
+          itemStructure={summary.item_structure}
+          releaseId={releaseId}
+          onOpenRecords={onOpenRecords}
+        />
       )}
 
       {tab === 'awards' && (

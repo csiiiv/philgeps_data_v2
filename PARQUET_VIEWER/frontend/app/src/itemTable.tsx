@@ -96,6 +96,26 @@ export function renderItemCell(key: string, item: ItemEntry) {
       </>
     );
   }
+  if (key === 'award_link') {
+    const link = item.award_link;
+    if (!link) return <span className="null">—</span>;
+    if (link.state === 'linked') {
+      const n = link.award_ids.length;
+      return (
+        <span className="badge badge-link-linked" title={`Awarded under ${n} award${n === 1 ? '' : 's'} (award_items linkage, rule relationship-status-v1)`}>
+          awarded{n > 1 ? ` ×${n}` : ''}
+        </span>
+      );
+    }
+    return (
+      <span
+        className="badge warning-badge badge-link-missing"
+        title="No award in this release references this line item (award_items linkage, rule relationship-status-v1) — listed but not awarded."
+      >
+        not awarded
+      </span>
+    );
+  }
   return <span className="null">—</span>;
 }
 
@@ -117,11 +137,22 @@ export function ItemTable({
     () => items.some((item) => item.description && item.description.trim()),
     [items],
   );
+  // Award-linkage column only when the payload carries evidence for any
+  // item — never show a bare "unlinked" column when nothing was measured.
+  const hasLinkage = useMemo(
+    () => items.some((item) => item.award_link != null),
+    [items],
+  );
 
   const columns = useMemo(() => {
-    if (!collapseDescriptions || showDescriptions) return ITEM_TABLE_COLUMNS;
-    return ITEM_TABLE_COLUMNS.filter((column) => column.key !== 'description');
-  }, [collapseDescriptions, showDescriptions]);
+    const base =
+      !collapseDescriptions || showDescriptions
+        ? ITEM_TABLE_COLUMNS
+        : ITEM_TABLE_COLUMNS.filter((column) => column.key !== 'description');
+    return hasLinkage
+      ? [...base, { key: 'award_link', label: 'Award linkage' }]
+      : base;
+  }, [collapseDescriptions, showDescriptions, hasLinkage]);
 
   if (items.length === 0) {
     return <p className="null">{emptyMessage}</p>;

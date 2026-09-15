@@ -174,23 +174,24 @@ def build_project(root: Path, *, query_timeout_seconds: float = 60.0) -> None:
         ) TO '{_lit(parquet_dir / "releases.parquet")}' (FORMAT PARQUET)
         """
     )
-    # Tender child rows for the preferred release (drill-through + summary).
+    # Tender child rows for both releases (preferred + alternate) so the
+    # release-compare endpoint can exercise field-level diffs.
     connection.execute(
         f"""
         COPY (
-            SELECT
-                '{FIXTURE_RELEASE_ID_1}' AS release_id,
-                'pgtn_fixture01' AS tender_id,
-                '11495158' AS source_bid_reference,
-                NULL::VARCHAR AS solicitation_number,
-                'Fixture tender title' AS title,
-                'open' AS procurement_method,
-                'complete' AS status,
-                'Closed' AS source_status,
-                TIMESTAMP '2024-02-01 00:00:00' AS closing_date,
-                CAST('5000.0000' AS DECIMAL(38,4)) AS value_amount,
-                'PHP' AS value_currency,
-                DATE '2024-01-20' AS date_published
+            SELECT * FROM (VALUES
+                ('{FIXTURE_RELEASE_ID_1}', 'pgtn_fixture01', '11495158',
+                 NULL::VARCHAR, 'Fixture tender title', 'open', 'complete', 'Closed',
+                 TIMESTAMP '2024-02-01 00:00:00',
+                 CAST('5000.0000' AS DECIMAL(38,4)), 'PHP', DATE '2024-01-20'),
+                -- Alternate release: earlier announcement with a lower budget.
+                ('{FIXTURE_RELEASE_ID_2}', 'pgtn_fixture02', '11495158',
+                 NULL::VARCHAR, 'Fixture tender title (draft)', 'open', 'active', 'Active',
+                 TIMESTAMP '2024-01-10 00:00:00',
+                 CAST('4500.0000' AS DECIMAL(38,4)), 'PHP', DATE '2024-01-05')
+            ) AS t(release_id, tender_id, source_bid_reference, solicitation_number,
+                   title, procurement_method, status, source_status, closing_date,
+                   value_amount, value_currency, date_published)
         ) TO '{_lit(parquet_dir / "tenders.parquet")}' (FORMAT PARQUET)
         """
     )

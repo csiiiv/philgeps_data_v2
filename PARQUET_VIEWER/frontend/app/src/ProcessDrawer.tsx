@@ -2,11 +2,16 @@ import { useCallback, useEffect, useState } from 'react';
 import {
   ApiError,
   type ChildCountsResponse,
+  type CollectionDiff,
+  type FieldDiff,
   type ProcessDetail,
+  type ReleaseCompareResponse,
+  type SingletonDiff,
   type TimelineResponse,
   fetchChildCounts,
   fetchProcessDetail,
   fetchProcessTimeline,
+  fetchReleaseCompare,
 } from './api';
 
 /** Grid dataset names for drill-through from a release. */
@@ -35,6 +40,9 @@ export default function ProcessDrawer({
   const [timeline, setTimeline] = useState<TimelineResponse | null>(null);
   const [counts, setCounts] = useState<Record<string, ChildCountsResponse>>({});
   const [activeRelease, setActiveRelease] = useState<string | null>(null);
+  const [compareAgainst, setCompareAgainst] = useState<string | null>(null);
+  const [compare, setCompare] = useState<ReleaseCompareResponse | null>(null);
+  const [compareLoading, setCompareLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -44,6 +52,8 @@ export default function ProcessDrawer({
       setTimeline(null);
       setCounts({});
       setActiveRelease(null);
+      setCompareAgainst(null);
+      setCompare(null);
       setError(null);
       return;
     }
@@ -54,6 +64,8 @@ export default function ProcessDrawer({
     setTimeline(null);
     setCounts({});
     setActiveRelease(null);
+    setCompareAgainst(null);
+    setCompare(null);
     (async () => {
       try {
         const detailPayload = await fetchProcessDetail(processId);
@@ -92,7 +104,40 @@ export default function ProcessDrawer({
     if (activeRelease) void loadCounts(activeRelease);
   }, [activeRelease, loadCounts]);
 
+  useEffect(() => {
+    if (!processId || !activeRelease || !compareAgainst) {
+      setCompare(null);
+      return;
+    }
+    if (activeRelease === compareAgainst) {
+      setCompare(null);
+      return;
+    }
+    let cancelled = false;
+    setCompareLoading(true);
+    fetchReleaseCompare(processId, compareAgainst, activeRelease)
+      .then((payload) => {
+        if (!cancelled) setCompare(payload);
+      })
+      .catch((err: unknown) => {
+        if (!cancelled) {
+          setError(err instanceof ApiError ? err.message : String(err));
+          setCompare(null);
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setCompareLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [processId, activeRelease, compareAgainst]);
+
   if (!processId) return null;
+
+  const otherReleases = (timeline?.releases ?? []).filter(
+    (r) => r.release_id !== activeRelease,
+  );
 
   return (
     <div className="inspector-backdrop" onClick={onClose}>
@@ -119,9 +164,38 @@ export default function ProcessDrawer({
               timeline={timeline}
               preferredId={detail?.preferred_release_id ?? null}
               activeRelease={activeRelease}
-              onSelect={setActiveRelease}
+              onSelect={(id) => {
+                setActiveRelease(id);
+                if (id === compareAgainst) setCompareAgainst(null);
+              }}
             />
           )}
+          {activeRelease && otherReleases.length > 0 && (
+            <section className="trace-section">
+              <h4>Compare with another release</h4>
+              <label className="compare-select">
+                <span className="visually-hidden">Baseline release</span>
+                <select
+                  value={compareAgainst ?? ''}
+                  onChange={(e) => setCompareAgainst(e.target.value || null)}
+                >
+                  <option value="">— no comparison —</option>
+                  {otherReleases.map((r) => (
+                    <option key={r.release_id} value={r.release_id}>
+                      {(r.release_date ?? 'undated').slice(0, 19)} · {r.release_id.slice(0, 18)}…
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <p className="hint">
+                Diffs the selected baseline against the active release above.
+                Added / removed / changed / unchanged are reported honestly —
+                awards and contracts are matched by PhilGEPS source references.
+              </p>
+            </section>
+          )}
+          {compareLoading && <p className="query-status">Comparing releases…</p>}
+          {compare && <CompareBlock compare={compare} />}
           {activeRelease && counts[activeRelease] && (
             <ChildCountsBlock
               counts={counts[activeRelease]}
@@ -204,10 +278,119 @@ function TimelineBlock({
       ))}
       <p className="hint">
         Dates use each release&rsquo;s own basis; the preferred release is the
-        compiled selection, shown first in the timeline.
+        compiled selection. Click a row to inspect its child counts.
       </p>
     </section>
   );
+}
+
+function CompareBlock({ compare }: { compare: ReleaseCompareResponse }) {
+  return (
+    <section className="trace-section compare-section">
+      <h4>Field differences</h4>
+      <p className="compare-meta">
+        Baseline {(compare.left.release_date ?? '—').slice(0, 19)}
+        {' → '}
+        Active {(compare.right.release_date ?? '—').slice(0, 19)}
+      </p>
+      <SingletonDiffBlock title="Tender" diff={compare.tender} />
+      <CollectionDiffBlock title="Awards" diff={compare.awards} />
+      <CollectionDiffBlock title="Contracts" diff={compare.contracts} />
+    </section>
+  );
+}
+
+function SingletonDiffBlock({ title, diff }: { title: string; diff: SingletonDiff }) {
+  if (!diff.available) {
+    return <p className="null">{title}: dataset not available</p>;
+  }
+  if (diff.status === 'absent') {
+    return <p className="null">{title}: not present on either release</p>;
+  }
+  return (
+    <div className="compare-block">
+      <h5>
+        {title}{' '}
+        <span className={`badge change-${diff.status}`}>{diff.status}</span>
+      </h5>
+      <FieldDiffTable fields={diff.fields} />
+    </div>
+  );
+}
+
+function CollectionDiffBlock({ title, diff }: { title: string; diff: CollectionDiff }) {
+  if (!diff.available) {
+    return <p className="null">{title}: dataset not available</p>;
+  }
+  const { summary } = diff;
+  const total =
+    summary.unchanged + summary.changed + summary.added + summary.removed;
+  if (total === 0) {
+    return <p className="null">{title}: none on either release</p>;
+  }
+  const entries = [
+    ...diff.matched.filter((e) => e.status === 'changed'),
+    ...diff.only_right,
+    ...diff.only_left,
+  ];
+  return (
+    <div className="compare-block">
+      <h5>
+        {title}{' '}
+        <span className="compare-summary">
+          {summary.changed} changed · {summary.added} added · {summary.removed}{' '}
+          removed · {summary.unchanged} unchanged
+        </span>
+      </h5>
+      {entries.length === 0 ? (
+        <p className="null">All {total} matched with no field changes.</p>
+      ) : (
+        entries.map((entry) => (
+          <details key={`${entry.status}-${entry.key}`} className="compare-entry">
+            <summary>
+              <span className={`badge change-${entry.status}`}>{entry.status}</span>{' '}
+              {entry.key}
+            </summary>
+            <FieldDiffTable fields={entry.fields} />
+          </details>
+        ))
+      )}
+    </div>
+  );
+}
+
+function FieldDiffTable({ fields }: { fields: FieldDiff[] }) {
+  return (
+    <table className="compare-table">
+      <thead>
+        <tr>
+          <th>Field</th>
+          <th>Baseline</th>
+          <th>Active</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {fields.map((f) => (
+          <tr key={f.field} className={`change-row-${f.change}`}>
+            <td>{f.field}</td>
+            <td className="cell-detail">{fmt(f.left)}</td>
+            <td className="cell-detail">{fmt(f.right)}</td>
+            <td>
+              {f.change !== 'unchanged' && (
+                <span className={`badge change-${f.change}`}>{f.change}</span>
+              )}
+            </td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+function fmt(value: string | number | null): string {
+  if (value == null) return '—';
+  return String(value);
 }
 
 function ChildCountsBlock({

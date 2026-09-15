@@ -73,6 +73,8 @@ class ProcessService:
     @staticmethod
     def _row(names: list[str], values: tuple) -> dict[str, Any]:
         def clean(value: Any) -> Any:
+            if isinstance(value, Decimal):
+                return str(value)
             if isinstance(value, (bytes, bytearray)):
                 return value.hex()
             if hasattr(value, "isoformat"):
@@ -162,6 +164,321 @@ class ProcessService:
         while len(self._timeline_cache) > TIMELINE_CACHE_LIMIT:
             self._timeline_cache.popitem(last=False)
         return payload
+
+    # ----------------------------------------------------- release compare
+
+    # Scalar tender fields compared side-by-side. Keys are researcher-facing
+    # labels; values are the Parquet column names.
+    TENDER_COMPARE_FIELDS: tuple[tuple[str, str], ...] = (
+        ("title", "title"),
+        ("status", "status"),
+        ("procurement_method", "procurement_method"),
+        ("value_amount", "value_amount"),
+        ("value_currency", "value_currency"),
+        ("closing_date", "closing_date"),
+        ("bid_reference", "source_bid_reference"),
+    )
+    AWARD_COMPARE_FIELDS: tuple[tuple[str, str], ...] = (
+        ("title", "title"),
+        ("value_amount", "value_amount"),
+        ("value_currency", "value_currency"),
+        ("date", "date"),
+        ("award_reference", "source_award_reference"),
+    )
+    CONTRACT_COMPARE_FIELDS: tuple[tuple[str, str], ...] = (
+        ("contract_number", "source_contract_number"),
+        ("value_amount", "value_amount"),
+        ("value_currency", "value_currency"),
+        ("period_start", "period_start"),
+        ("period_end", "period_end"),
+        ("award_reference", "source_award_reference"),
+    )
+
+    def compare_releases(
+        self,
+        process_id: str,
+        left_release_id: str,
+        right_release_id: str,
+    ) -> dict[str, Any]:
+        """Field-level diff of two releases belonging to the same process.
+
+        Distinguishes added / removed / changed / unchanged for:
+          - tender scalars (0–1 row per release)
+          - awards keyed by ``source_award_reference`` (falls back to title+amount)
+          - contracts keyed by ``source_contract_number`` (falls back to award ref)
+
+        Honest-data rules: releases that do not belong to ``process_id`` are
+        rejected; missing datasets degrade that section rather than 500-ing.
+        """
+        started = perf_counter()
+        if left_release_id == right_release_id:
+            raise QueryError(
+                "invalid_compare", "left and right release ids must differ"
+            )
+        # Confirm both releases belong to this process.
+        releases = self._path("releases")
+        sql = f"""
+            SELECT release_id, release_date, release_date_basis, content_hash,
+                   has_tender, has_award, has_contract
+            FROM read_parquet({sql_literal_path(releases)})
+            WHERE process_id = ? AND release_id IN (?, ?)
+        """
+        names, rows, _ = execute_bounded(
+            self.pool,
+            sql,
+            [process_id, left_release_id, right_release_id],
+            self.settings.api.query_timeout_seconds,
+        )
+        by_id = {row[0]: self._row(names, row) for row in rows}
+        if left_release_id not in by_id or right_release_id not in by_id:
+            raise QueryError(
+                PROCESS_ERROR_UNKNOWN,
+                "One or both releases are missing from this process",
+            )
+
+        tender = self._compare_singleton(
+            "tenders",
+            left_release_id,
+            right_release_id,
+            self.TENDER_COMPARE_FIELDS,
+            """
+            SELECT title, status, procurement_method, value_amount, value_currency,
+                   closing_date, source_bid_reference
+            FROM read_parquet({path})
+            WHERE release_id = ?
+            LIMIT 1
+            """,
+        )
+        awards = self._compare_collection(
+            "awards",
+            left_release_id,
+            right_release_id,
+            self.AWARD_COMPARE_FIELDS,
+            """
+            SELECT award_id, title, value_amount, value_currency, date,
+                   source_award_reference
+            FROM read_parquet({path})
+            WHERE release_id = ?
+            ORDER BY source_award_reference NULLS LAST, award_id
+            """,
+            key_fn=self._award_match_key,
+        )
+        contracts = self._compare_collection(
+            "contracts",
+            left_release_id,
+            right_release_id,
+            self.CONTRACT_COMPARE_FIELDS,
+            """
+            SELECT contract_id, source_contract_number, value_amount, value_currency,
+                   period_start, period_end, source_award_reference
+            FROM read_parquet({path})
+            WHERE release_id = ?
+            ORDER BY source_contract_number NULLS LAST, contract_id
+            """,
+            key_fn=self._contract_match_key,
+        )
+        return {
+            "process_id": process_id,
+            "left": by_id[left_release_id],
+            "right": by_id[right_release_id],
+            "tender": tender,
+            "awards": awards,
+            "contracts": contracts,
+            "elapsed_ms": round((perf_counter() - started) * 1000, 1),
+        }
+
+    def _compare_singleton(
+        self,
+        dataset: str,
+        left_id: str,
+        right_id: str,
+        fields: tuple[tuple[str, str], ...],
+        sql_template: str,
+    ) -> dict[str, Any]:
+        try:
+            path = self._path(dataset)
+        except QueryError:
+            return {"available": False, "fields": [], "status": "absent"}
+        sql = sql_template.format(path=sql_literal_path(path))
+        left = self._fetch_one(sql, [left_id])
+        right = self._fetch_one(sql, [right_id])
+        if left is None and right is None:
+            return {"available": True, "fields": [], "status": "absent"}
+        if left is None:
+            return {
+                "available": True,
+                "status": "added",
+                "fields": self._field_diffs(None, right, fields),
+            }
+        if right is None:
+            return {
+                "available": True,
+                "status": "removed",
+                "fields": self._field_diffs(left, None, fields),
+            }
+        diffs = self._field_diffs(left, right, fields)
+        status = (
+            "changed"
+            if any(d["change"] != "unchanged" for d in diffs)
+            else "unchanged"
+        )
+        return {"available": True, "status": status, "fields": diffs}
+
+    def _compare_collection(
+        self,
+        dataset: str,
+        left_id: str,
+        right_id: str,
+        fields: tuple[tuple[str, str], ...],
+        sql_template: str,
+        *,
+        key_fn,
+    ) -> dict[str, Any]:
+        try:
+            path = self._path(dataset)
+        except QueryError:
+            return {
+                "available": False,
+                "matched": [],
+                "only_left": [],
+                "only_right": [],
+                "summary": {"unchanged": 0, "changed": 0, "added": 0, "removed": 0},
+            }
+        sql = sql_template.format(path=sql_literal_path(path))
+        left_rows = self._fetch_all(sql, [left_id])
+        right_rows = self._fetch_all(sql, [right_id])
+        left_map: OrderedDict[str, dict[str, Any]] = OrderedDict()
+        for row in left_rows:
+            left_map[key_fn(row)] = row
+        right_map: OrderedDict[str, dict[str, Any]] = OrderedDict()
+        for row in right_rows:
+            right_map[key_fn(row)] = row
+        matched: list[dict[str, Any]] = []
+        only_left: list[dict[str, Any]] = []
+        only_right: list[dict[str, Any]] = []
+        summary = {"unchanged": 0, "changed": 0, "added": 0, "removed": 0}
+        for key, left_row in left_map.items():
+            if key in right_map:
+                right_row = right_map.pop(key)
+                diffs = self._field_diffs(left_row, right_row, fields)
+                status = (
+                    "changed"
+                    if any(d["change"] != "unchanged" for d in diffs)
+                    else "unchanged"
+                )
+                summary[status] += 1
+                matched.append(
+                    {
+                        "key": key,
+                        "status": status,
+                        "fields": diffs,
+                        "left_id": left_row.get("award_id")
+                        or left_row.get("contract_id"),
+                        "right_id": right_row.get("award_id")
+                        or right_row.get("contract_id"),
+                    }
+                )
+            else:
+                summary["removed"] += 1
+                only_left.append(
+                    {
+                        "key": key,
+                        "status": "removed",
+                        "fields": self._field_diffs(left_row, None, fields),
+                        "left_id": left_row.get("award_id")
+                        or left_row.get("contract_id"),
+                    }
+                )
+        for key, right_row in right_map.items():
+            summary["added"] += 1
+            only_right.append(
+                {
+                    "key": key,
+                    "status": "added",
+                    "fields": self._field_diffs(None, right_row, fields),
+                    "right_id": right_row.get("award_id")
+                    or right_row.get("contract_id"),
+                }
+            )
+        return {
+            "available": True,
+            "matched": matched,
+            "only_left": only_left,
+            "only_right": only_right,
+            "summary": summary,
+        }
+
+    def _fetch_one(self, sql: str, params: list[Any]) -> dict[str, Any] | None:
+        names, rows, _ = execute_bounded(
+            self.pool, sql, params, self.settings.api.query_timeout_seconds
+        )
+        if not rows:
+            return None
+        return self._row(names, rows[0])
+
+    def _fetch_all(self, sql: str, params: list[Any]) -> list[dict[str, Any]]:
+        names, rows, _ = execute_bounded(
+            self.pool, sql, params, self.settings.api.query_timeout_seconds
+        )
+        return [self._row(names, row) for row in rows]
+
+    @staticmethod
+    def _field_diffs(
+        left: dict[str, Any] | None,
+        right: dict[str, Any] | None,
+        fields: tuple[tuple[str, str], ...],
+    ) -> list[dict[str, Any]]:
+        diffs: list[dict[str, Any]] = []
+        for label, column in fields:
+            lv = None if left is None else left.get(column)
+            rv = None if right is None else right.get(column)
+            # Normalize Decimals / dates already handled by _row; stringify for
+            # stable equality of numeric amounts that arrive as str vs Decimal.
+            lv_n = ProcessService._norm(lv)
+            rv_n = ProcessService._norm(rv)
+            if left is None:
+                change = "added"
+            elif right is None:
+                change = "removed"
+            elif lv_n == rv_n:
+                change = "unchanged"
+            else:
+                change = "changed"
+            diffs.append(
+                {
+                    "field": label,
+                    "left": lv_n,
+                    "right": rv_n,
+                    "change": change,
+                }
+            )
+        return diffs
+
+    @staticmethod
+    def _norm(value: Any) -> Any:
+        if value is None:
+            return None
+        if isinstance(value, Decimal):
+            return str(value)
+        return value
+
+    @staticmethod
+    def _award_match_key(row: dict[str, Any]) -> str:
+        ref = row.get("source_award_reference")
+        if ref:
+            return f"ref:{ref}"
+        # Fallback when PhilGEPS award reference is missing: title + amount.
+        return f"title:{row.get('title')}|{row.get('value_amount')}"
+
+    @staticmethod
+    def _contract_match_key(row: dict[str, Any]) -> str:
+        number = row.get("source_contract_number")
+        if number:
+            return f"no:{number}"
+        ref = row.get("source_award_reference")
+        if ref:
+            return f"award:{ref}"
+        return f"id:{row.get('contract_id')}"
 
     # -------------------------------------------------------- child counts
 

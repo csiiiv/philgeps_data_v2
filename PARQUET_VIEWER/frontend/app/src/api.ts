@@ -305,6 +305,58 @@ export function fetchProcessTimeline(processId: string): Promise<TimelineRespons
   );
 }
 
+export type FieldChange = 'unchanged' | 'changed' | 'added' | 'removed';
+
+export interface FieldDiff {
+  field: string;
+  left: string | number | null;
+  right: string | number | null;
+  change: FieldChange;
+}
+
+export interface SingletonDiff {
+  available: boolean;
+  status: FieldChange | 'absent';
+  fields: FieldDiff[];
+}
+
+export interface CollectionDiffEntry {
+  key: string;
+  status: FieldChange;
+  fields: FieldDiff[];
+  left_id?: string | null;
+  right_id?: string | null;
+}
+
+export interface CollectionDiff {
+  available: boolean;
+  matched: CollectionDiffEntry[];
+  only_left: CollectionDiffEntry[];
+  only_right: CollectionDiffEntry[];
+  summary: { unchanged: number; changed: number; added: number; removed: number };
+}
+
+export interface ReleaseCompareResponse {
+  process_id: string;
+  left: TimelineRelease;
+  right: TimelineRelease;
+  tender: SingletonDiff;
+  awards: CollectionDiff;
+  contracts: CollectionDiff;
+  elapsed_ms: number;
+}
+
+export function fetchReleaseCompare(
+  processId: string,
+  left: string,
+  right: string,
+): Promise<ReleaseCompareResponse> {
+  const params = new URLSearchParams({ left, right });
+  return request<ReleaseCompareResponse>(
+    `/api/processes/${encodeURIComponent(processId)}/compare?${params}`,
+  );
+}
+
 // ------------------------------------------------- process summary (UI)
 
 export interface MoneyValue {

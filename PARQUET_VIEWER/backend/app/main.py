@@ -238,6 +238,21 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def process_timeline(process_id: str, limit: int = Query(default=200, ge=1, le=1000)):
         return processes.timeline(process_id, limit)
 
+    @app.get("/api/processes/{process_id}/compare")
+    def process_compare(
+        process_id: str,
+        left: str = Query(..., min_length=1, description="Left release id"),
+        right: str = Query(..., min_length=1, description="Right release id"),
+    ):
+        """Field-level diff of two releases on the same process."""
+        try:
+            return processes.compare_releases(process_id, left, right)
+        except QueryError as error:
+            status = 404 if error.code == "unknown_process" else 400
+            raise HTTPException(
+                status_code=status, detail={"code": error.code, "message": str(error)}
+            ) from error
+
     @app.get("/api/source-files/{source_file_id}/rows")
     def source_file_rows(source_file_id: str, start_row: int, end_row: int):
         try:

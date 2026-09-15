@@ -148,6 +148,33 @@ th .sort-btn:hover { color: var(--accent); }
 }
 .badge.preferred { background: #3a2d12; color: #e0b45c; }
 .badge-list { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+
+/* ----- multi-release field compare ----- */
+.compare-select select {
+  width: 100%; max-width: 520px; margin: 4px 0 8px;
+  padding: 6px 10px; border-radius: 8px;
+  background: #0d1a16; border: 1px solid var(--line); color: var(--text);
+}
+.compare-meta { color: #71877d; font-size: 12px; margin: 0 0 10px; }
+.compare-block { margin: 10px 0 14px; }
+.compare-block h5 { margin: 0 0 6px; font-size: 13px; }
+.compare-summary { color: #71877d; font-weight: 400; font-size: 12px; }
+.compare-entry { margin: 4px 0; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; }
+.compare-entry summary { cursor: pointer; }
+.compare-table {
+  width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 6px;
+}
+.compare-table th, .compare-table td {
+  text-align: left; padding: 4px 8px; border-bottom: 1px solid var(--line);
+  vertical-align: top; white-space: normal; overflow-wrap: anywhere;
+}
+.compare-table th { color: #71877d; font-weight: 500; }
+.change-row-unchanged td { color: #71877d; }
+.badge.change-changed { background: rgba(212, 167, 64, 0.18); color: #e2c47d; }
+.badge.change-added { background: rgba(72, 199, 142, 0.16); color: #9fe0bf; }
+.badge.change-removed { background: rgba(224, 106, 106, 0.16); color: #eda6a6; }
+.badge.change-unchanged { background: #16332a; color: #71877d; }
+
 .count-grid { list-style: none; display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; padding: 0; margin: 8px 0; }
 .count-tile {
   display: flex; flex-direction: column; align-items: center; gap: 2px;

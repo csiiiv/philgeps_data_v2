@@ -296,9 +296,14 @@ Status markers:
   dataset+filters+sort into the explorer (URL-encoded, shareable).
   Live-verified: all 10 run in 0.35–2.2s; reconciliation views return 0 rows
   with explicit empty-result warnings.)
-- [~] Multi-release comparison with field-level changes. (Timeline and
-  per-release drill-through exist via the process explorer; field-level
-  diff of two releases' child rows remains open.)
+- [x] Multi-release comparison with field-level changes.
+  (Shipped 2026-09-16: `GET /api/processes/{id}/compare?left=&right=` diffs
+  tender scalars, awards (keyed by `source_award_reference`), and contracts
+  (keyed by `source_contract_number`) between any two releases on the same
+  process — added / removed / changed / unchanged. ProcessDrawer gains a
+  "Compare with another release" selector that renders the field table.
+  Verified live: closing_date 2019-09-24 → 2019-10-14 on a real 2-release
+  process; fixture covers title/amount changes + identical-id rejection.)
 - [x] Quality-issue queue with severity and publication-gate filters.
   (The issue dataset has a single severity value today (`warning`), so the
   queue is served by the saved-views system: `issues_blocking` and

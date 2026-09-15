@@ -71,6 +71,44 @@ class ProcessDetailTests(unittest.TestCase):
         self.assertEqual(payload["counts"]["awards"]["count"], 2)
         self.assertEqual(payload["counts"]["contracts"]["count"], 1)
 
+    def test_compare_releases_reports_tender_field_changes(self):
+        # left = earlier alternate, right = preferred: title/status/amount changed.
+        response = self.client.get(
+            f"/api/processes/{FIXTURE_PROCESS_ID}/compare",
+            params={
+                "left": FIXTURE_RELEASE_ID_2,
+                "right": FIXTURE_RELEASE_ID_1,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        payload = response.json()
+        self.assertEqual(payload["left"]["release_id"], FIXTURE_RELEASE_ID_2)
+        self.assertEqual(payload["right"]["release_id"], FIXTURE_RELEASE_ID_1)
+        tender = payload["tender"]
+        self.assertTrue(tender["available"])
+        self.assertEqual(tender["status"], "changed")
+        by_field = {f["field"]: f for f in tender["fields"]}
+        self.assertEqual(by_field["title"]["change"], "changed")
+        self.assertEqual(by_field["title"]["left"], "Fixture tender title (draft)")
+        self.assertEqual(by_field["title"]["right"], "Fixture tender title")
+        self.assertEqual(by_field["value_amount"]["left"], "4500.0000")
+        self.assertEqual(by_field["value_amount"]["right"], "5000.0000")
+        self.assertEqual(by_field["bid_reference"]["change"], "unchanged")
+        # Awards exist only on the preferred release → counted as added.
+        self.assertEqual(payload["awards"]["summary"]["added"], 2)
+        self.assertEqual(payload["awards"]["summary"]["removed"], 0)
+
+    def test_compare_rejects_identical_release_ids(self):
+        response = self.client.get(
+            f"/api/processes/{FIXTURE_PROCESS_ID}/compare",
+            params={
+                "left": FIXTURE_RELEASE_ID_1,
+                "right": FIXTURE_RELEASE_ID_1,
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json()["detail"]["code"], "invalid_compare")
+
 
 class ProcessSummaryTests(unittest.TestCase):
     @classmethod

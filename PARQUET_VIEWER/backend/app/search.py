@@ -56,6 +56,19 @@ PROCUREMENT_LIMIT = 20
 PARTY_LIMIT = 12
 MAX_PAGE = 50
 
+# Canonical process outcomes (docs/13, process-outcomes-v1). The funnel,
+# facet, and filter all use this closed set.
+OUTCOME_VALUES = (
+    "contracted",
+    "awarded",
+    "partially_awarded",
+    "cancelled",
+    "unsuccessful",
+    "closed_unknown",
+    "active",
+    "conflicting_evidence",
+)
+
 # Facet filters accepted by /api/search (applied to procurement cards).
 # "none" is the honest label for rows with no recorded OCDS status.
 SEARCH_STATUSES = ("complete", "unsuccessful", "cancelled", "active", "none")
@@ -76,9 +89,12 @@ def _procurement_filter_clause(
     statuses: tuple[str, ...],
     year_from: int | None,
     year_to: int | None,
+    outcomes: tuple[str, ...] = (),
 ) -> tuple[str, list[Any]]:
-    """WHERE fragment + params for status/year filters over `procurements`.
+    """WHERE fragment + params for status/year/outcome filters.
 
+    Status/year apply to `procurements`; outcome applies to the joined
+    `outcomes` table (callers must join it when the clause is non-empty).
     "none" maps to `status IS NULL` (no OCDS status recorded). Returns an
     empty clause when nothing is selected so unfiltered searches keep the
     exact pre-filter SQL shape.
@@ -96,6 +112,11 @@ def _procurement_filter_clause(
             parts.append(f"status IN ({placeholders})")
             params.extend(valued)
         fragments.append(f"({' OR '.join(parts)})")
+    normalized_outcomes = tuple(o for o in outcomes if o in OUTCOME_VALUES)
+    if normalized_outcomes:
+        placeholders = ", ".join("?" for _ in normalized_outcomes)
+        fragments.append(f"o.outcome IN ({placeholders})")
+        params.extend(normalized_outcomes)
     if year_from is not None:
         fragments.append("year(closing_date) >= ?")
         params.append(year_from)
@@ -106,12 +127,15 @@ def _procurement_filter_clause(
         return "", []
     return " AND " + " AND ".join(fragments), params
 
-INDEX_SOURCE_DATASETS = ("tenders", "compiled_processes", "parties", "party_roles")
+INDEX_SOURCE_DATASETS = (
+    "tenders", "compiled_processes", "parties", "party_roles",
+    "awards", "contracts", "award_items", "tender_items",
+)
 
 # Bump when the index SCHEMA changes (tables/columns added). Source-file
 # fingerprints alone cannot detect code changes, so this version is stored
 # in the built database and mismatch forces a rebuild.
-INDEX_SCHEMA_VERSION = 4
+INDEX_SCHEMA_VERSION = 6
 
 
 class SearchIndex:
@@ -266,6 +290,7 @@ class SearchIndex:
                 f"""
                 CREATE TABLE procurements AS
                 SELECT cp.process_id, t.title, t.status,
+                       t.source_status,
                        t.value_amount, t.value_currency, t.closing_date,
                        lower(t.title) AS title_lower
                 FROM read_parquet({lit['compiled_processes']}) cp
@@ -288,6 +313,85 @@ class SearchIndex:
                        count(*)::BIGINT AS n
                 FROM procurements
                 WHERE closing_date IS NOT NULL
+                GROUP BY 1, 2
+                """
+            )
+            # Process outcomes (docs/13, rule process-outcomes-v1): one row
+            # per process classifying its lifecycle evidence, plus year x
+            # outcome facet counts. Evidence from the preferred release
+            # joins the already-materialized `procurements` table.
+            connection.execute(
+                f"""
+                CREATE TABLE outcomes AS
+                WITH award_evidence AS (
+                    SELECT cp.process_id,
+                           count(a.award_id) AS award_count,
+                           count(c.contract_id) FILTER (
+                               WHERE c.award_link_status = 'matched'
+                           ) AS matched_contract_count,
+                           count(DISTINCT ai.item_id) AS linked_item_count
+                    FROM read_parquet({lit['compiled_processes']}) cp
+                    LEFT JOIN read_parquet({lit['awards']}) a
+                      ON a.release_id = cp.preferred_release_id
+                    LEFT JOIN read_parquet({lit['contracts']}) c
+                      ON c.release_id = cp.preferred_release_id
+                       AND c.award_id = a.award_id
+                    LEFT JOIN read_parquet({lit['award_items']}) ai
+                      ON ai.release_id = cp.preferred_release_id
+                       AND ai.award_id = a.award_id
+                    GROUP BY cp.process_id
+                ),
+                tender_item_counts AS (
+                    SELECT cp.process_id,
+                           count(ti.item_id) AS tender_item_count
+                    FROM read_parquet({lit['compiled_processes']}) cp
+                    JOIN read_parquet({lit['tender_items']}) ti
+                      ON ti.release_id = cp.preferred_release_id
+                    GROUP BY cp.process_id
+                ),
+                classified AS (
+                    SELECT p.process_id,
+                           CASE
+                               WHEN coalesce(e.award_count, 0) > 0
+                                    AND p.source_status = 'Failed'
+                                    THEN 'conflicting_evidence'
+                               WHEN coalesce(e.award_count, 0) > 0
+                                    AND p.source_status = 'Cancelled'
+                                    THEN 'conflicting_evidence'
+                               WHEN coalesce(e.award_count, 0) > 0
+                                    AND coalesce(tic.tender_item_count, 0) > 0
+                                    AND coalesce(e.linked_item_count, 0) > 0
+                                    AND e.linked_item_count < tic.tender_item_count
+                                    THEN 'partially_awarded'
+                               WHEN coalesce(e.award_count, 0) > 0
+                                    AND coalesce(e.matched_contract_count, 0) > 0
+                                    THEN 'contracted'
+                               WHEN coalesce(e.award_count, 0) > 0
+                                    THEN 'awarded'
+                               WHEN p.source_status = 'Cancelled' THEN 'cancelled'
+                               WHEN p.source_status = 'Failed' THEN 'unsuccessful'
+                               WHEN p.source_status IN ('Active', 'Shortlisted',
+                                                        'Closed - Pending Opening')
+                                    THEN 'active'
+                               ELSE 'closed_unknown'
+                           END AS outcome
+                    FROM procurements p
+                    LEFT JOIN award_evidence e ON e.process_id = p.process_id
+                    LEFT JOIN tender_item_counts tic
+                      ON tic.process_id = p.process_id
+                )
+                SELECT process_id, outcome FROM classified
+                """
+            )
+            connection.execute(
+                """
+                CREATE TABLE outcome_stats AS
+                SELECT o.outcome,
+                       year(p.closing_date) AS closing_year,
+                       count(*)::BIGINT AS n
+                FROM outcomes o
+                JOIN procurements p ON p.process_id = o.process_id
+                WHERE p.closing_date IS NOT NULL
                 GROUP BY 1, 2
                 """
             )
@@ -441,16 +545,25 @@ class SearchIndex:
         statuses: tuple[str, ...] = (),
         year_from: int | None = None,
         year_to: int | None = None,
+        outcomes: tuple[str, ...] = (),
     ) -> tuple[list[dict[str, Any]], int] | None:
         # LIKE on the pre-lowered column instead of ILIKE: skips per-row
         # case folding over 11M rows. Count and fetch are separate for the
         # same reason as before (early-terminating LIMIT).
         needle = query.lower()
-        where, params = _procurement_filter_clause(statuses, year_from, year_to)
+        needs_outcome_join = bool(outcomes)
+        where, params = _procurement_filter_clause(
+            statuses, year_from, year_to, outcomes
+        )
+        join = (
+            " JOIN outcomes o ON o.process_id = procurements.process_id"
+            if needs_outcome_join
+            else ""
+        )
         count_rows = self._query(
             paths,
             f"""
-            SELECT count(*) FROM procurements
+            SELECT count(*) FROM procurements{join}
             WHERE title_lower LIKE '%' || ? || '%'{where}
             """,
             [needle, *params],
@@ -463,9 +576,9 @@ class SearchIndex:
         rows = self._query(
             paths,
             f"""
-            SELECT process_id, title, status, value_amount, value_currency,
-                   closing_date
-            FROM procurements
+            SELECT procurements.process_id, title, status, value_amount,
+                   value_currency, closing_date
+            FROM procurements{join}
             WHERE title_lower LIKE '%' || ? || '%'{where}
             ORDER BY closing_date DESC NULLS LAST, title
             LIMIT {PROCUREMENT_LIMIT} OFFSET ?
@@ -481,7 +594,7 @@ class SearchIndex:
         return [dict(zip(keys, row)) for row in rows], total
 
     def filter_facets(self, paths: dict[str, Path]) -> dict[str, Any] | None:
-        """Status and closing-year facet counts over all indexed processes."""
+        """Status, closing-year, and outcome facet counts."""
         rows = self._query(
             paths,
             """
@@ -492,6 +605,13 @@ class SearchIndex:
             [],
         )
         if rows is None:
+            return None
+        outcome_rows = self._query(
+            paths,
+            "SELECT outcome, n FROM outcome_stats ORDER BY n DESC",
+            [],
+        )
+        if outcome_rows is None:
             return None
         statuses: dict[str, int] = {}
         years: dict[int, int] = {}
@@ -505,6 +625,10 @@ class SearchIndex:
                 for key, value in sorted(statuses.items(), key=lambda kv: -kv[1])
             ],
             "years": [{"year": key, "count": value} for key, value in sorted(years.items())],
+            "outcomes": [
+                {"outcome": outcome, "count": count}
+                for outcome, count in outcome_rows
+            ],
         }
 
     def search_parties(
@@ -719,6 +843,7 @@ class SearchService:
         statuses: tuple[str, ...] = (),
         year_from: int | None = None,
         year_to: int | None = None,
+        outcomes: tuple[str, ...] = (),
         party_page: int = 0,
     ) -> dict[str, Any]:
         query = raw_query.strip()
@@ -734,6 +859,17 @@ class SearchService:
         normalized_statuses = tuple(
             s for s in statuses if s in SEARCH_STATUSES
         )
+        unknown_outcomes = tuple(
+            o for o in outcomes if o not in OUTCOME_VALUES
+        )
+        if unknown_outcomes:
+            # A typo like "partially-awarded" must not silently return an
+            # unfiltered population.
+            raise QueryError(
+                SEARCH_ERROR_INVALID,
+                f"unknown outcome filter(s): {', '.join(unknown_outcomes)}",
+            )
+        normalized_outcomes = tuple(outcomes)
         if not (MIN_FILTER_YEAR <= (year_from or MIN_FILTER_YEAR) <= MAX_FILTER_YEAR):
             raise QueryError(SEARCH_ERROR_INVALID, "year_from out of range")
         if not (MIN_FILTER_YEAR <= (year_to or MIN_FILTER_YEAR) <= MAX_FILTER_YEAR):
@@ -743,7 +879,8 @@ class SearchService:
         snapshot = self.catalog.snapshot()
         fingerprint = snapshot["dataset_fingerprint"]
         cache_key = (
-            fingerprint, query.lower(), page, normalized_statuses, year_from, year_to, party_page
+            fingerprint, query.lower(), page, normalized_statuses, year_from,
+            year_to, normalized_outcomes, party_page,
         )
         cached = self._cache.get(cache_key)
         if cached is not None:
@@ -770,11 +907,20 @@ class SearchService:
             statuses=normalized_statuses,
             year_from=year_from,
             year_to=year_to,
+            outcomes=normalized_outcomes,
         )
         party_cards = self.index.search_parties(paths, query, party_page * PARTY_LIMIT)
         index_state = self.index.state(paths)
         if titles is None or party_cards is None:
             if titles is None:
+                # Direct fallback cannot answer outcome filters honestly
+                # (it has no outcome projection); refuse rather than
+                # silently ignoring the filter.
+                if normalized_outcomes:
+                    raise QueryError(
+                        SEARCH_ERROR_INVALID,
+                        "outcome filters need the search index, which is still building",
+                    )
                 titles = self._search_titles_direct(
                     paths,
                     query,
@@ -813,6 +959,7 @@ class SearchService:
                 "statuses": list(normalized_statuses),
                 "year_from": year_from,
                 "year_to": year_to,
+                "outcomes": list(normalized_outcomes),
             },
             "procurements": procurements,
             "procurement_total": procurement_total,

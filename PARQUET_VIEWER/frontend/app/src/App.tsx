@@ -21,6 +21,7 @@ import ProcessDrawer from './ProcessDrawer';
 import SearchLanding from './SearchLanding';
 import AboutPage from './AboutPage';
 import HealthPage from './HealthPage';
+import CoveragePage from './CoveragePage';
 import ModalHost, { useModalStack } from './ModalHost';
 import ProcessPage from './ProcessPage';
 import PartyPage from './PartyPage';
@@ -112,15 +113,20 @@ export default function App() {
   const [traceError, setTraceError] = useState<string | null>(null);
   const [processExplorerId, setProcessExplorerId] = useState<string | null>(null);
   const [viewsState, setViewsState] = useState<{ views: SavedView[]; problems: string[] } | null>(null);
-  const [mode, setMode] = useState<'search' | 'health' | 'explorer' | 'about'>(() =>
+  const [mode, setMode] = useState<'search' | 'coverage' | 'health' | 'explorer' | 'about'>(() =>
     new URLSearchParams(window.location.search).get('view') === 'explorer'
       ? 'explorer'
       : new URLSearchParams(window.location.search).get('view') === 'health'
         ? 'health'
-        : new URLSearchParams(window.location.search).get('view') === 'about'
-          ? 'about'
-          : 'search',
+        : new URLSearchParams(window.location.search).get('view') === 'coverage'
+          ? 'coverage'
+          : new URLSearchParams(window.location.search).get('view') === 'about'
+            ? 'about'
+            : 'search',
   );
+  // Outcome drill-through from the coverage funnel: remembered until
+  // SearchLanding mounts, then consumed once.
+  const [pendingOutcome, setPendingOutcome] = useState<string | null>(null);
   // Layered researcher modals: search → party → procurement → records/sources.
   const modals = useModalStack();
   const [, setModalInit] = useState(false);
@@ -402,6 +408,15 @@ export default function App() {
             <button
               type="button"
               role="tab"
+              aria-selected={mode === 'coverage'}
+              className={mode === 'coverage' ? 'active' : ''}
+              onClick={() => setMode('coverage')}
+            >
+              Coverage
+            </button>
+            <button
+              type="button"
+              role="tab"
               aria-selected={mode === 'health'}
               className={mode === 'health' ? 'active' : ''}
               onClick={() => setMode('health')}
@@ -435,7 +450,10 @@ export default function App() {
         <SearchLanding
           onOpenProcess={(pid) => modals.openProcess(pid)}
           onOpenParty={(name) => modals.push({ kind: 'party', name })}
+          initialOutcomeFilter={pendingOutcome}
         />
+      ) : mode === 'coverage' ? (
+        <CoveragePage onFilterOutcome={(outcome) => { setMode('search'); setPendingOutcome(outcome); }} />
       ) : mode === 'health' ? (
         <HealthPage onOpenView={openSavedViewByName} />
       ) : mode === 'about' ? (

@@ -49,6 +49,7 @@ The active implementation checklist is maintained in [TODO.md](TODO.md).
 8. [Search, filtering, and common views](docs/08_search_filter_and_common_views.md)
 9. [Cross-year supplier contract queries](docs/09_supplier_contract_queries.md)
 10. [Data model ERD (Mermaid)](docs/10_data_erd.md)
+11. [Product improvement opportunities](docs/11_product_improvement_opportunities.md)
 
 ## Data sources
 
@@ -104,14 +105,27 @@ Open `http://127.0.0.1:5173`; Vite proxies `/api` to FastAPI on port 8765.
 ### End-to-end smoke test
 
 With a server running (either mode), verify the full researcher path —
-health → catalog → search → process summary → party stats → identity →
-provenance sources:
+health → catalog → search → process summary (timeline, quality flags,
+outcome) → outcome funnel and facets → outcome-filtered search → party
+stats → identity → provenance sources:
 
 ```powershell
 python scripts\smoke_e2e.py
 ```
 
 All checks print PASS/FAIL; a non-zero exit code means something regressed.
+
+### Benchmarks
+
+Measure the hot paths against the adopted latency targets
+(docs/12_benchmark_baseline.md):
+
+```powershell
+python scripts\benchmark.py --json docs\benchmark_results.json
+```
+
+Requires the search index to be built (start the server once, or delete
+`.cache\` to also measure the rebuild).
 
 ### Windows notes (no admin / no execution-policy change needed)
 

@@ -137,6 +137,17 @@ export default function AboutPage() {
             canonical parties (<code>pgca_…</code>) are analytical clusters, not
             verified legal identities.
           </li>
+          <li>
+            <strong>Outcomes are derived, not recorded</strong> — every process
+            is classified by rule <code>process-outcomes-v1</code> from
+            observed evidence (tender status, awards, contract links, item
+            linkage) into one of eight outcomes such as <em>contracted</em>,{' '}
+            <em>partially awarded</em>, or <em>closed, outcome unknown</em>.
+            The Coverage tab shows the whole population; a badge on each
+            procurement page declares the rule version. Contradictory
+            evidence surfaces as <em>conflicting</em>, never silently
+            resolved.
+          </li>
         </ul>
       </div>
 

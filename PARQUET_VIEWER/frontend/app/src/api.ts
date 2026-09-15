@@ -506,6 +506,7 @@ export interface ProcessSummary {
   release_count: number;
   quality_flags: string[];
   award_vs_tender?: AwardVsTender;
+  outcome?: OutcomeInfo;
   technical: {
     process_id: string;
     preferred_release_id: string;
@@ -548,6 +549,7 @@ export interface SearchFilters {
   statuses: string[];
   year_from: number | null;
   year_to: number | null;
+  outcomes?: string[];
 }
 
 export interface SearchResponse {
@@ -573,7 +575,57 @@ export interface FacetEntry {
 export interface SearchFacetsResponse {
   statuses: FacetEntry[];
   years: FacetEntry[];
+  outcomes?: OutcomeFacetEntry[];
   available: boolean;
+}
+
+export interface OutcomeFacetEntry {
+  outcome: string;
+  count: number;
+}
+
+export interface DerivationMetadata {
+  origin: string;
+  rule: string;
+  rule_version: string;
+  source_fields: string[];
+  basis: string;
+  confidence: string;
+  source_count: number;
+}
+
+export interface OutcomeInfo {
+  outcome: string;
+  label: string;
+  metadata: DerivationMetadata;
+}
+
+export interface OutcomeFunnelStage {
+  outcome: string;
+  label: string;
+  count: number;
+  undated: number;
+}
+
+export interface OutcomeFunnelResponse {
+  available: boolean;
+  rule: string;
+  rule_version: string;
+  metadata: DerivationMetadata;
+  filters: { year_from: number | null; year_to: number | null };
+  total_processes: number;
+  dated_total: number;
+  stages: OutcomeFunnelStage[];
+}
+
+export function fetchOutcomeFunnel(
+  yearFrom?: number | null,
+  yearTo?: number | null,
+): Promise<OutcomeFunnelResponse> {
+  const params = new URLSearchParams();
+  if (yearFrom != null) params.set('year_from', String(yearFrom));
+  if (yearTo != null) params.set('year_to', String(yearTo));
+  return request<OutcomeFunnelResponse>(`/api/outcomes/funnel?${params.toString()}`);
 }
 
 export interface CanonicalPartyInfo {
@@ -660,11 +712,17 @@ export function fetchViewCounts(): Promise<ViewCountsResponse> {
 export function searchAll(
   q: string,
   page = 0,
-  filters?: { statuses?: string[]; year_from?: number | null; year_to?: number | null },
+  filters?: {
+    statuses?: string[];
+    year_from?: number | null;
+    year_to?: number | null;
+    outcomes?: string[];
+  },
   partyPage = 0,
 ): Promise<SearchResponse> {
   const params = new URLSearchParams({ q, page: String(page), party_page: String(partyPage) });
   for (const status of filters?.statuses ?? []) params.append('status', status);
+  for (const outcome of filters?.outcomes ?? []) params.append('outcome', outcome);
   if (filters?.year_from != null) params.set('year_from', String(filters.year_from));
   if (filters?.year_to != null) params.set('year_to', String(filters.year_to));
   return request<SearchResponse>(`/api/search?${params.toString()}`);

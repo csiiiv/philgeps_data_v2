@@ -17,6 +17,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from .catalog import Catalog
 from .config import Settings, load_settings
 from .database import DuckDBPool
+from .outcomes import OutcomesService
 from .provenance import ProvenanceCache
 from .process import ProcessService
 from .query import QueryError, TableQuery, TableQueryService, to_csv
@@ -40,6 +41,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     processes = ProcessService(settings, pool, catalog)
     saved_views = SavedViewsService(settings, catalog)
     search = SearchService(settings, pool, catalog)
+    outcomes = OutcomesService(settings, pool, catalog, search.index)
     # Saved-view counts are expensive (full-filter scans); memoize per
     # dataset fingerprint, keeping only the latest snapshot's entry.
     _counts_cache: OrderedDict[str, dict] = OrderedDict()
@@ -171,6 +173,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         status: list[str] = Query(default=[]),
         year_from: int | None = Query(default=None, ge=1990, le=2100),
         year_to: int | None = Query(default=None, ge=1990, le=2100),
+        outcome: list[str] = Query(default=[]),
         party_page: int = Query(default=0, ge=0),
     ):
         try:
@@ -180,12 +183,25 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 statuses=tuple(status),
                 year_from=year_from,
                 year_to=year_to,
+                outcomes=tuple(outcome),
                 party_page=party_page,
             )
         except QueryError as error:
             raise HTTPException(
                 status_code=400, detail={"code": error.code, "message": str(error)}
             ) from error
+
+    @app.get("/api/outcomes/funnel")
+    def outcome_funnel(
+        year_from: int | None = Query(default=None, ge=1990, le=2100),
+        year_to: int | None = Query(default=None, ge=1990, le=2100),
+    ):
+        """Coverage funnel: process counts per canonical outcome."""
+        return outcomes.funnel(year_from, year_to)
+
+    @app.get("/api/outcomes/facets")
+    def outcome_facets():
+        return outcomes.outcome_facets()
 
     @app.get("/api/search/facets")
     def search_facets_endpoint():

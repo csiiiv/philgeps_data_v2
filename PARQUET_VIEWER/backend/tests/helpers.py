@@ -306,6 +306,7 @@ def build_project(root: Path, *, query_timeout_seconds: float = 60.0) -> None:
                 'pgaw_fixture01' AS award_id,
                 '5708843' AS source_award_reference,
                 'CT-2024-001' AS source_contract_number,
+                'matched' AS award_link_status,
                 CAST('4800.0000' AS DECIMAL(38,4)) AS value_amount,
                 'PHP' AS value_currency,
                 TIMESTAMP '2024-02-10 00:00:00' AS period_start,

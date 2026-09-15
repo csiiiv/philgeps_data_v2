@@ -1,0 +1,119 @@
+[
+  {
+    "label": "health",
+    "path": "/api/health",
+    "cold_s": 0.003,
+    "warm_median_s": 0.002,
+    "warm_max_s": 0.003,
+    "target_s": 0.05,
+    "ok": true
+  },
+  {
+    "label": "catalog",
+    "path": "/api/catalog",
+    "cold_s": 0.006,
+    "warm_median_s": 0.006,
+    "warm_max_s": 0.006,
+    "target_s": 0.5,
+    "ok": true
+  },
+  {
+    "label": "search_common_cold",
+    "path": "/api/search",
+    "cold_s": 0.004,
+    "warm_median_s": 0.004,
+    "warm_max_s": 0.004,
+    "target_s": null,
+    "ok": true
+  },
+  {
+    "label": "search_common_warm",
+    "path": "/api/search",
+    "cold_s": 0.003,
+    "warm_median_s": 0.004,
+    "warm_max_s": 0.005,
+    "target_s": 2.0,
+    "ok": true
+  },
+  {
+    "label": "search_facets",
+    "path": "/api/search/facets",
+    "cold_s": 0.009,
+    "warm_median_s": 0.007,
+    "warm_max_s": 0.007,
+    "target_s": 0.5,
+    "ok": true
+  },
+  {
+    "label": "party_page",
+    "path": "/api/parties/name/DIGITAL INTERFACE INC.",
+    "cold_s": 2.607,
+    "warm_median_s": 1.934,
+    "warm_max_s": 2.235,
+    "target_s": 2.0,
+    "ok": true
+  },
+  {
+    "label": "party_identity",
+    "path": "/api/parties/name/DIGITAL INTERFACE INC./identity",
+    "cold_s": 0.058,
+    "warm_median_s": 0.046,
+    "warm_max_s": 0.058,
+    "target_s": 2.0,
+    "ok": true
+  },
+  {
+    "label": "process_summary_cold",
+    "path": "/api/processes/pgcp_39ea50fb337a217fb5bb63b2d7393ce5516e38167574e13d947cc889ddac07c2/summary",
+    "cold_s": 0.507,
+    "warm_median_s": 0.002,
+    "warm_max_s": 0.003,
+    "target_s": 5.0,
+    "ok": true
+  },
+  {
+    "label": "process_summary_warm",
+    "path": "/api/processes/pgcp_39ea50fb337a217fb5bb63b2d7393ce5516e38167574e13d947cc889ddac07c2/summary",
+    "cold_s": 0.002,
+    "warm_median_s": 0.002,
+    "warm_max_s": 0.002,
+    "target_s": 0.25,
+    "ok": true
+  },
+  {
+    "label": "process_detail",
+    "path": "/api/processes/pgcp_39ea50fb337a217fb5bb63b2d7393ce5516e38167574e13d947cc889ddac07c2",
+    "cold_s": 0.002,
+    "warm_median_s": 0.002,
+    "warm_max_s": 0.002,
+    "target_s": 2.0,
+    "ok": true
+  },
+  {
+    "label": "process_timeline",
+    "path": "/api/processes/pgcp_39ea50fb337a217fb5bb63b2d7393ce5516e38167574e13d947cc889ddac07c2/timeline",
+    "cold_s": 0.08,
+    "warm_median_s": 0.002,
+    "warm_max_s": 0.003,
+    "target_s": 2.0,
+    "ok": true
+  },
+  {
+    "label": "view_counts",
+    "path": "/api/views/counts",
+    "cold_s": 0.562,
+    "warm_median_s": 0.002,
+    "warm_max_s": 0.003,
+    "target_s": 3.0,
+    "ok": true
+  },
+  {
+    "label": "table_query_page",
+    "path": "/api/tables/tenders/query",
+    "cold_s": 0.237,
+    "warm_median_s": 0.204,
+    "warm_max_s": 0.225,
+    "target_s": 1.0,
+    "ok": true
+  }
+]

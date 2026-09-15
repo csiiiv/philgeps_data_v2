@@ -378,19 +378,39 @@ Status markers:
   compact "Contracts by start year" strip in the stats header. No new
   identity decisions are made by this view; it aggregates whatever spelling
   scope the user selected.)
+- [x] Canonical process outcomes + coverage funnel (docs/11 §1–§2, first slice).
+  (Shipped 2026-09-16, rule `process-outcomes-v1` per docs/13: eight-state
+  closed taxonomy (contracted, awarded, partially_awarded, active,
+  closed_unknown, unsuccessful, cancelled, conflicting_evidence) with a
+  documented decision order. Shared pure classifier
+  (`OutcomesService.classify`) is mirrored by the SQL projection in the
+  search index (schema v5 — forces one rebuild) so page badge and funnel
+  cannot drift; a decision-table test pins both. `partially_awarded`
+  requires SOME-but-not-all item links (zero links = linkage unknown, never
+  reported as unawarded items). New: `/api/outcomes/funnel` (process-grain
+  counts, year-filterable, undated counted separately),
+  `/api/outcomes/facets`, `outcome` filter on `/api/search` (unknown values
+  rejected 400, direct-scan fallback refuses outcome filters rather than
+  silently ignoring them), `outcome` block with derivation metadata on the
+  process summary. UI: Coverage tab (funnel bars drill through to outcome-
+  filtered search), outcome filter chips with counts, colored outcome badge
+  on the process page. Fixture matrix covers every outcome class; 126/126
+  backend tests green.)
 - [ ] Preserve missing and ambiguous relationships as visible incomplete data,
   not broken or falsely resolved links.
 
 ## Search and performance
 
-- [~] Benchmark cold and warm queries against the full Parquets.
-  (2026-09-13 measurements: `process_id`/`release_id` point lookups 0.1s warm
-  page cache / up to ~9s cold first touch; process detail join 0.2–9s;
-  per-release child counts ~7s first (tenders, award_suppliers,
-  data_quality_issues lack zone-map pruning on `release_id`), ~10ms memoized;
-  provenance cache lookups ~300ms warm. A systematic benchmark harness with
-  latency targets remains open.)
-- [ ] Define latency and memory targets before adding caches.
+- [x] Benchmark cold and warm queries against the full Parquets.
+  (2026-09-16: `scripts/benchmark.py` drives the real app in-process across
+  13 hot-path cases with defined targets; baseline recorded in
+  docs/12_benchmark_baseline.md — 13/13 PASS, party page closest to its
+  2s target at 1.93s warm.)
+- [x] Define latency and memory targets before adding caches.
+  (2026-09-16: targets adopted in docs/12 per path class — trivial 0.5s,
+  search/party 2s, process pages 0.25s warm / 5s first, aggregates 3s,
+  bounded table queries 1s. A projection is justified only on a measured
+  miss.)
 - [x] Build disposable exact-ID and breadcrumb lookup projections if justified.
   (Record-keyed provenance cache `backend/app/provenance.py`; record→sources
   lookups served from `.cache/provenance.duckdb` sorted by `record_key`,
@@ -423,6 +443,22 @@ Status markers:
   (2026-09-16: `scripts/smoke_e2e.py` walks health → catalog → search →
   process summary (timeline + flags) → party stats + contracts_by_year →
   identity endpoint → release sources; 9/9 checks pass against live data.)
+
+## ETL-side tickets (block viewer roadmap items)
+
+These live in `OCDS_ETL`, not `PARQUET_VIEWER`; recorded 2026-09-16 from the
+doc-11 verification (docs/11 → "Known review findings"):
+
+- [ ] Recompute or re-document `publication_blocking` in
+  `data_quality_issues` — it is `true` on ~99.96% of the 14.6M rows, which
+  looks like a defaulted flag, not a computed gate. Blocks §19 (OCDS export
+  validation) and skews the `issues_blocking` saved view.
+- [ ] Define meaningful severities in the ETL rule catalog — all issue rows
+  are `warning` today, so severity-grouped quality dashboards (§17) are
+  impossible until the ETL emits more than one level.
+- [ ] Extract tenderer/bidder-count evidence if the source rows contain it —
+  `tenders.parquet` has no such columns, so competition indicators (§11)
+  have ~0% coverage and cannot be built viewer-side.
 
 ## Deferred decisions
 

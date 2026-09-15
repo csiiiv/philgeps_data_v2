@@ -80,8 +80,40 @@ def main() -> int:
             "summary carries timeline + quality flags",
             "timeline" in body and "quality_flags" in body,
         )
+        outcome = body.get("outcome") or {}
+        check(
+            "summary carries outcome with derivation metadata",
+            outcome.get("outcome") in (
+                "contracted", "awarded", "partially_awarded", "active",
+                "closed_unknown", "unsuccessful", "cancelled",
+                "conflicting_evidence",
+            )
+            and outcome.get("metadata", {}).get("rule") == "process-outcomes-v1",
+            f"outcome={outcome.get('outcome')}",
+        )
     else:
         check("process summary resolves", False, "no process_id from search")
+
+    # 4b. Outcome funnel + facet + outcome-filtered search
+    status, body = get(base, "/api/outcomes/funnel")
+    stages = {s["outcome"]: s["count"] for s in body.get("stages", [])}
+    check(
+        "outcome funnel answers with totals",
+        status == 200 and body.get("available") is True
+        and body.get("total_processes", 0) > 0,
+        f"total={body.get('total_processes')}",
+    )
+    status, body = get(base, "/api/outcomes/facets")
+    check(
+        "outcome facets answer",
+        status == 200 and len(body.get("outcomes", [])) > 0,
+        f"{len(body.get('outcomes', []))} outcome buckets",
+    )
+    status, body = get(base, "/api/search?q=office+supplies&outcome=awarded")
+    check(
+        "search accepts outcome filter",
+        status == 200 and "awarded" in (body.get("filters", {}).get("outcomes") or []),
+    )
 
     # 5. Party page with stats and contracts-by-year
     party = parse.quote("Gencorp Supplies Inc.")

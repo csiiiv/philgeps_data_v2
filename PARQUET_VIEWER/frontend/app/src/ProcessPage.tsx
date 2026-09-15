@@ -716,6 +716,16 @@ function SummaryBody({
           {summary.procurement_method ? ` · ${summary.procurement_method}` : ''}{' '}
           {summary.closing_date ? ` · closed ${summary.closing_date}` : ''}
         </div>
+        {summary.outcome && (
+          <p className="badge-list">
+            <span
+              className={`badge outcome-badge outcome-${summary.outcome.outcome}`}
+              title={`Derived outcome (rule ${summary.outcome.metadata.rule} v${summary.outcome.metadata.rule_version}, basis: ${summary.outcome.metadata.basis}). Derived from observed status, awards, contracts, and item links — not a source field.`}
+            >
+              {summary.outcome.label}
+            </span>
+          </p>
+        )}
         {(summary.bid_reference || summary.solicitation_number) && (
           <div className="process-refs" title="PhilGEPS identifiers for looking up notices and attached documents">
             {summary.bid_reference && (

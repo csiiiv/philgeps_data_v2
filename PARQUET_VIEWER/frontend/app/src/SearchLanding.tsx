@@ -20,10 +20,13 @@ import { renderMoneyParts } from './money';
 export default function SearchLanding({
   onOpenProcess,
   onOpenParty,
+  initialOutcomeFilter,
 }: {
   onOpenProcess: (processId: string) => void;
   /** Opens the party page for one observed name (researcher view). */
   onOpenParty: (name: string) => void;
+  /** Pre-applied outcome filter (coverage funnel drill-through). */
+  initialOutcomeFilter?: string | null;
 }) {
   const [term, setTerm] = useState('');
   const [result, setResult] = useState<SearchResponse | null>(null);
@@ -31,10 +34,13 @@ export default function SearchLanding({
   const [error, setError] = useState<string | null>(null);
   const [catalog, setCatalog] = useState<CatalogSnapshot | null>(null);
   const [facets, setFacets] = useState<SearchFacetsResponse | null>(null);
-  // Filter state: selected statuses (multi) + optional year range.
+  // Filter state: selected statuses (multi) + optional year range + outcomes.
   const [statusFilter, setStatusFilter] = useState<string[]>([]);
   const [yearFrom, setYearFrom] = useState<number | null>(null);
   const [yearTo, setYearTo] = useState<number | null>(null);
+  const [outcomeFilter, setOutcomeFilter] = useState<string[]>(
+    initialOutcomeFilter ? [initialOutcomeFilter] : [],
+  );
   // Parties page independently from procurements (12/page vs 20/page).
   const [partyPage, setPartyPage] = useState(0);
   const seq = useRef(0);
@@ -78,6 +84,7 @@ export default function SearchLanding({
         statuses: statusFilter,
         year_from: yearFrom,
         year_to: yearTo,
+        outcomes: outcomeFilter,
       })
         .then((payload) => {
           if (current === seq.current) {
@@ -98,7 +105,7 @@ export default function SearchLanding({
     }, 400);
     return () => clearTimeout(timer);
     // Filters re-run the search (first page) like a new query.
-  }, [term, statusFilter, yearFrom, yearTo]);
+  }, [term, statusFilter, yearFrom, yearTo, outcomeFilter]);
 
   const loadMore = () => {
     if (!result) return;
@@ -108,6 +115,7 @@ export default function SearchLanding({
       statuses: statusFilter,
       year_from: yearFrom,
       year_to: yearTo,
+      outcomes: outcomeFilter,
     })
       .then((payload) => {
         if (current === seq.current) {
@@ -134,6 +142,7 @@ export default function SearchLanding({
         statuses: statusFilter,
         year_from: yearFrom,
         year_to: yearTo,
+        outcomes: outcomeFilter,
       },
       next,
     )
@@ -165,13 +174,22 @@ export default function SearchLanding({
     );
   };
 
+  const toggleOutcome = (outcome: string) => {
+    setOutcomeFilter((current) =>
+      current.includes(outcome)
+        ? current.filter((o) => o !== outcome)
+        : [...current, outcome],
+    );
+  };
+
   const hasActiveFilters =
-    statusFilter.length > 0 || yearFrom != null || yearTo != null;
+    statusFilter.length > 0 || yearFrom != null || yearTo != null || outcomeFilter.length > 0;
 
   const clearFilters = () => {
     setStatusFilter([]);
     setYearFrom(null);
     setYearTo(null);
+    setOutcomeFilter([]);
   };
 
   const shown = result?.procurements.length ?? 0;
@@ -210,9 +228,16 @@ export default function SearchLanding({
         </p>
       )}
 
-      {term.trim().length >= 2 && (
+      {(term.trim().length >= 2 || outcomeFilter.length > 0) && (
         <div className="search-filters" aria-label="Filter procurement results">
           <span className="search-filter-label">Filters</span>
+          {term.trim().length < 2 && outcomeFilter.length > 0 && (
+            <span className="search-filter-note" role="status">
+              Filtered to {OUTCOME_CHIP_LABELS[outcomeFilter[0]] ?? outcomeFilter[0]} —
+              type at least 2 characters to search within it.
+            </span>
+          )}
+          {term.trim().length >= 2 && (
           <div className="search-filter-statuses" role="group" aria-label="Status">
             {STATUS_ORDER.filter((s) => facetHasStatus(facets, s)).map((status) => (
               <button
@@ -231,6 +256,26 @@ export default function SearchLanding({
               </button>
             ))}
           </div>
+          )}
+          <div className="search-filter-outcomes" role="group" aria-label="Outcome">
+            {OUTCOME_ORDER.filter((o) => facetOutcomeCount(facets, o) != null).map((outcome) => (
+              <button
+                key={outcome}
+                type="button"
+                className={`filter-chip outcome-chip${outcomeFilter.includes(outcome) ? ' active' : ''}`}
+                aria-pressed={outcomeFilter.includes(outcome)}
+                onClick={() => toggleOutcome(outcome)}
+              >
+                {OUTCOME_CHIP_LABELS[outcome] ?? outcome}
+                {facetOutcomeCount(facets, outcome) != null && (
+                  <span className="filter-chip-count">
+                    {facetOutcomeCount(facets, outcome)!.toLocaleString()}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+          {term.trim().length >= 2 && (
           <div className="search-filter-years" role="group" aria-label="Closing year range">
             <label>
               <span className="visually-hidden">Year from</span>
@@ -262,6 +307,7 @@ export default function SearchLanding({
               </select>
             </label>
           </div>
+          )}
           {hasActiveFilters && (
             <button type="button" className="filter-clear" onClick={clearFilters}>
               Clear filters
@@ -400,6 +446,36 @@ function facetHasStatus(facets: SearchFacetsResponse | null, status: string): bo
 
 function facetStatusCount(facets: SearchFacetsResponse | null, status: string): number | null {
   const entry = facets?.statuses?.find((s) => s.status === status);
+  return entry ? entry.count : null;
+}
+
+/** Display order + labels for the outcome facet (docs/13). */
+const OUTCOME_ORDER = [
+  'contracted',
+  'awarded',
+  'partially_awarded',
+  'active',
+  'closed_unknown',
+  'unsuccessful',
+  'cancelled',
+  'conflicting_evidence',
+];
+const OUTCOME_CHIP_LABELS: Record<string, string> = {
+  contracted: 'Contracted',
+  awarded: 'Awarded',
+  partially_awarded: 'Partially awarded',
+  active: 'Active',
+  closed_unknown: 'Closed, outcome unknown',
+  unsuccessful: 'Unsuccessful',
+  cancelled: 'Cancelled',
+  conflicting_evidence: 'Conflicting evidence',
+};
+
+function facetOutcomeCount(
+  facets: SearchFacetsResponse | null,
+  outcome: string,
+): number | null {
+  const entry = facets?.outcomes?.find((o) => o.outcome === outcome);
   return entry ? entry.count : null;
 }
 

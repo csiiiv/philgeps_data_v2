@@ -24,6 +24,8 @@ from typing import Any
 from .catalog import Catalog
 from .config import Settings
 from .database import DuckDBPool, execute_bounded, sql_literal_path
+from .derivation import outcome_metadata
+from .outcomes import OUTCOME_LABELS, OutcomesService
 from .query import QueryError
 
 PROCESS_ERROR_UNKNOWN = "unknown_process"
@@ -675,6 +677,12 @@ class ProcessService:
         )
         timeline_events = self._flatten_timeline(timeline)
 
+        # Canonical outcome (docs/13): classified from the same evidence
+        # the summary assembled, via the shared pure rule. Contracts count
+        # as matched when they reference an award of this release with
+        # award_link_status = 'matched'.
+        outcome = self._classify_outcome(release_id, lit, tender, len(awards), item_structure)
+
         payload = {
             "process_id": process_id,
             "release_id": release_id,
@@ -714,6 +722,15 @@ class ProcessService:
             "award_vs_tender": self._award_vs_tender(
                 tender, awards, contracts
             ),
+            "outcome": {
+                "outcome": outcome,
+                "label": OUTCOME_LABELS.get(outcome, outcome),
+                "metadata": outcome_metadata(
+                    basis="preferred_release",
+                    confidence="derived",
+                    source_count=5,
+                ),
+            },
             "technical": {
                 "process_id": process_id,
                 "preferred_release_id": release_id,
@@ -1416,6 +1433,54 @@ class ProcessService:
         if value is None:
             return None
         return {"amount": str(value), "currency": currency}
+
+    def _classify_outcome(
+        self,
+        release_id: str,
+        lit: dict[str, str],
+        tender: dict[str, Any],
+        award_count: int,
+        item_structure: dict[str, Any],
+    ) -> str:
+        """Classify this process via the shared outcome rule (docs/13).
+
+        Gathers the five evidence counts the pure classifier needs: awards,
+        matched contracts (award_link_status), tender items, and award-item
+        links — all scoped to the preferred release.
+        """
+        award_count_total = 0
+        matched_contracts = 0
+        linked_items = 0
+        if award_count:
+            names, rows, _ = execute_bounded(
+                self.pool,
+                f"""
+                SELECT count(DISTINCT a.award_id) AS awards,
+                       count(DISTINCT c.contract_id) FILTER (
+                           WHERE c.award_link_status = 'matched'
+                       ) AS matched_contracts,
+                       count(DISTINCT ai.item_id) AS linked_items
+                FROM read_parquet({lit['awards']}) a
+                LEFT JOIN read_parquet({lit['contracts']}) c
+                  ON c.release_id = a.release_id AND c.award_id = a.award_id
+                LEFT JOIN read_parquet({lit['award_items']}) ai
+                  ON ai.release_id = a.release_id AND ai.award_id = a.award_id
+                WHERE a.release_id = ?
+                """,
+                [release_id],
+                self.settings.api.query_timeout_seconds,
+            )
+            row = rows[0] if rows else (0, 0, 0)
+            award_count_total, matched_contracts, linked_items = (
+                int(row[0] or 0), int(row[1] or 0), int(row[2] or 0)
+            )
+        return OutcomesService.classify(
+            tender_status=tender.get("source_status"),
+            award_count=award_count_total,
+            matched_contract_count=matched_contracts,
+            tender_item_count=item_structure.get("item_total", 0),
+            linked_item_count=linked_items,
+        )
 
     @staticmethod
     def _award_vs_tender(

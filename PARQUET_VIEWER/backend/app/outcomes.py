@@ -12,7 +12,13 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
-from .derivation import OUTCOME_RULE, OUTCOME_RULE_VERSION, describe
+from .derivation import (
+    FACTS_RULE,
+    FACTS_RULE_VERSION,
+    OUTCOME_RULE,
+    OUTCOME_RULE_VERSION,
+    describe,
+)
 from .search import INDEX_SOURCE_DATASETS, OUTCOME_VALUES, SearchIndex
 
 FUNNEL_ORDER = (
@@ -180,6 +186,112 @@ class OutcomesService:
                 basis="preferred_release",
                 confidence="derived",
                 source_count=5,
+            ),
+        }
+
+    # ----------------------------------------------------- process facts
+
+    def facts_summary(self) -> dict[str, Any]:
+        """Dimension breakdowns over the process_facts projection.
+
+        Phase 1 step 4 consumer: per-outcome totals plus method, category,
+        and area distributions — process-grain counts only, so incomplete
+        values never remove a process from a denominator (docs/11 §2).
+        Returns `available: False` when the index is absent or rebuilding;
+        callers serve honest unavailability, not zeros.
+        """
+        empty = {
+            "available": False,
+            "rule": FACTS_RULE,
+            "rule_version": FACTS_RULE_VERSION,
+            "total_processes": 0,
+        }
+        rows = self._query(
+            """
+            SELECT
+                outcome,
+                grouping(outcome) AS g_outcome,
+                procurement_method,
+                grouping(procurement_method) AS g_method,
+                main_procurement_category,
+                grouping(main_procurement_category) AS g_category,
+                area_of_delivery,
+                grouping(area_of_delivery) AS g_area,
+                count(*)::BIGINT AS n
+            FROM process_facts
+            GROUP BY GROUPING SETS (
+                (outcome),
+                (procurement_method),
+                (main_procurement_category),
+                (area_of_delivery)
+            )
+            """,
+            [],
+        )
+        if rows is None:
+            return empty
+        by_outcome: dict[str, int] = {}
+        by_method: list[tuple] = []
+        by_category: list[tuple] = []
+        by_area: list[tuple] = []
+        # Route each row by its grouping() flags, not by NULL-guessing: a
+        # dimension whose data value is genuinely NULL (7.07M tenders have
+        # no procurement_method) produces rows that NULL-checks misroute.
+        # grouping() = 1 means the column was aggregated away for this set.
+        for (outcome, g_outcome, method, g_method, category, g_category,
+             area, g_area, n) in rows:
+            if g_method and g_category and g_area:
+                by_outcome[outcome] = n
+            elif g_outcome and g_category and g_area:
+                by_method.append((method, n))
+            elif g_outcome and g_method and g_area:
+                by_category.append((category, n))
+            elif g_outcome and g_method and g_category:
+                by_area.append((area, n))
+        total = sum(by_outcome.values())
+        if total == 0:
+            return empty
+        def _bucket(pairs: list[tuple]) -> list[dict[str, Any]]:
+            return [
+                {"value": v if v is not None else "none", "count": n}
+                for v, n in sorted(pairs, key=lambda p: -p[1])
+            ]
+        return {
+            "available": True,
+            "rule": FACTS_RULE,
+            "rule_version": FACTS_RULE_VERSION,
+            "total_processes": total,
+            "outcomes": [
+                {
+                    "outcome": outcome,
+                    "label": OUTCOME_LABELS.get(outcome, outcome),
+                    "count": by_outcome[outcome],
+                }
+                for outcome in FUNNEL_ORDER
+                if outcome in by_outcome
+            ],
+            "methods": _bucket(by_method),
+            "categories": _bucket(by_category),
+            # High-cardinality: cap at 50 and say so, so consumers know the
+            # bucket sum intentionally falls short of total_processes.
+            "areas": _bucket(by_area[:50]),
+            "areas_total": len(by_area),
+            "areas_truncated": len(by_area) > 50,
+            "metadata": describe(
+                origin="derived",
+                rule=FACTS_RULE,
+                rule_version=FACTS_RULE_VERSION,
+                source_fields=[
+                    "tenders.procurement_method",
+                    "tenders.main_procurement_category",
+                    "tenders.area_of_delivery",
+                    "tenders.source_status", "awards.award_id",
+                    "contracts.award_link_status", "award_items.item_id",
+                    "tender_items.item_id",
+                ],
+                basis="preferred_release",
+                confidence="derived",
+                source_count=len(INDEX_SOURCE_DATASETS),
             ),
         }
 

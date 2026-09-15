@@ -29,6 +29,9 @@ CONFIDENCE = ("observed", "derived", "provisional")
 OUTCOME_RULE = "process-outcomes-v1"
 OUTCOME_RULE_VERSION = "1"
 
+FACTS_RULE = "process-facts-v1"
+FACTS_RULE_VERSION = "1"
+
 # --------------------------------------------------------------- §16 links
 #
 # One closed vocabulary for relationship confidence (docs/11 §16). The ETL

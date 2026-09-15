@@ -183,15 +183,19 @@ def build_project(root: Path, *, query_timeout_seconds: float = 60.0) -> None:
                 ('{FIXTURE_RELEASE_ID_1}', 'pgtn_fixture01', '11495158',
                  NULL::VARCHAR, 'Fixture tender title', 'open', 'complete', 'Closed',
                  TIMESTAMP '2024-02-01 00:00:00',
-                 CAST('5000.0000' AS DECIMAL(38,4)), 'PHP', DATE '2024-01-20'),
+                 CAST('5000.0000' AS DECIMAL(38,4)), 'PHP', DATE '2024-01-20',
+                 'goods', 'Region X', 180),
                 -- Alternate release: earlier announcement with a lower budget.
                 ('{FIXTURE_RELEASE_ID_2}', 'pgtn_fixture02', '11495158',
                  NULL::VARCHAR, 'Fixture tender title (draft)', 'open', 'active', 'Active',
                  TIMESTAMP '2024-01-10 00:00:00',
-                 CAST('4500.0000' AS DECIMAL(38,4)), 'PHP', DATE '2024-01-05')
+                 CAST('4500.0000' AS DECIMAL(38,4)), 'PHP', DATE '2024-01-05',
+                 'goods', 'Region X', 175)
             ) AS t(release_id, tender_id, source_bid_reference, solicitation_number,
                    title, procurement_method, status, source_status, closing_date,
-                   value_amount, value_currency, date_published)
+                   value_amount, value_currency, date_published,
+                   main_procurement_category, area_of_delivery,
+                   contract_duration_days)
         ) TO '{_lit(parquet_dir / "tenders.parquet")}' (FORMAT PARQUET)
         """
     )

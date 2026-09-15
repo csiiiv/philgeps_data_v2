@@ -44,7 +44,7 @@ except ImportError:  # pragma: no cover
 from .catalog import Catalog
 from .config import Settings
 from .database import DuckDBPool, execute_bounded, sql_literal_path
-from .derivation import OUTCOME_RULE, OUTCOME_RULE_VERSION
+from .derivation import FACTS_RULE, FACTS_RULE_VERSION, OUTCOME_RULE, OUTCOME_RULE_VERSION
 from .query import QueryError
 
 logger = logging.getLogger("philgeps.viewer.search")
@@ -136,7 +136,7 @@ INDEX_SOURCE_DATASETS = (
 # Bump when the index SCHEMA changes (tables/columns added). Source-file
 # fingerprints alone cannot detect code changes, so this version is stored
 # in the built database and mismatch forces a rebuild.
-INDEX_SCHEMA_VERSION = 6
+INDEX_SCHEMA_VERSION = 7
 
 
 class SearchIndex:
@@ -348,20 +348,22 @@ class SearchIndex:
                 GROUP BY 1, 2
                 """
             )
-            # Process outcomes (docs/13, rule process-outcomes-v1): one row
-            # per process classifying its lifecycle evidence, plus year x
-            # outcome facet counts. Evidence from the preferred release
-            # joins the already-materialized `procurements` table.
+            # Process facts (docs/11 Phase 1 step 4, rule process-facts-v1):
+            # one analytical row per process. The `outcomes` outcome column
+            # (docs/13, process-outcomes-v1) is computed here in the same
+            # pass — same CASE, same evidence — so `outcomes` below is a
+            # pure projection of this table and the two can never drift.
             connection.execute(
                 f"""
-                CREATE TABLE outcomes AS
+                CREATE TABLE process_facts AS
                 WITH award_evidence AS (
                     SELECT cp.process_id,
                            count(a.award_id) AS award_count,
                            count(c.contract_id) FILTER (
                                WHERE c.award_link_status = 'matched'
                            ) AS matched_contract_count,
-                           count(DISTINCT ai.item_id) AS linked_item_count
+                           count(DISTINCT ai.item_id) AS linked_item_count,
+                           sum(DISTINCT a.value_amount) AS award_value_amount
                     FROM read_parquet({lit['compiled_processes']}) cp
                     LEFT JOIN read_parquet({lit['awards']}) a
                       ON a.release_id = cp.preferred_release_id
@@ -380,50 +382,64 @@ class SearchIndex:
                     JOIN read_parquet({lit['tender_items']}) ti
                       ON ti.release_id = cp.preferred_release_id
                     GROUP BY cp.process_id
-                ),
-                classified AS (
-                    SELECT p.process_id,
-                           CASE
-                               WHEN coalesce(e.award_count, 0) > 0
-                                    AND p.source_status = 'Failed'
-                                    THEN 'conflicting_evidence'
-                               WHEN coalesce(e.award_count, 0) > 0
-                                    AND p.source_status = 'Cancelled'
-                                    THEN 'conflicting_evidence'
-                               WHEN coalesce(e.award_count, 0) > 0
-                                    AND coalesce(tic.tender_item_count, 0) > 0
-                                    AND coalesce(e.linked_item_count, 0) > 0
-                                    AND e.linked_item_count < tic.tender_item_count
-                                    THEN 'partially_awarded'
-                               WHEN coalesce(e.award_count, 0) > 0
-                                    AND coalesce(e.matched_contract_count, 0) > 0
-                                    THEN 'contracted'
-                               WHEN coalesce(e.award_count, 0) > 0
-                                    THEN 'awarded'
-                               WHEN p.source_status = 'Cancelled' THEN 'cancelled'
-                               WHEN p.source_status = 'Failed' THEN 'unsuccessful'
-                               WHEN p.source_status IN ('Active', 'Shortlisted',
-                                                        'Closed - Pending Opening')
-                                    THEN 'active'
-                               ELSE 'closed_unknown'
-                           END AS outcome
-                    FROM procurements p
-                    LEFT JOIN award_evidence e ON e.process_id = p.process_id
-                    LEFT JOIN tender_item_counts tic
-                      ON tic.process_id = p.process_id
                 )
-                SELECT process_id, outcome FROM classified
+                SELECT
+                    p.process_id,
+                    t.procurement_method,
+                    t.main_procurement_category,
+                    t.area_of_delivery,
+                    year(p.closing_date) AS closing_year,
+                    p.closing_date IS NOT NULL AS has_closing_date,
+                    p.value_amount AS tender_value_amount,
+                    coalesce(tic.tender_item_count, 0) AS tender_item_count,
+                    coalesce(e.award_count, 0) AS award_count,
+                    coalesce(e.matched_contract_count, 0) AS matched_contract_count,
+                    coalesce(e.linked_item_count, 0) AS linked_item_count,
+                    CASE
+                        WHEN coalesce(e.award_count, 0) > 0
+                             AND p.source_status IN ('Failed', 'Cancelled')
+                            THEN 'conflicting_evidence'
+                        WHEN coalesce(e.award_count, 0) > 0
+                             AND coalesce(tic.tender_item_count, 0) > 0
+                             AND coalesce(e.linked_item_count, 0) > 0
+                             AND e.linked_item_count < tic.tender_item_count
+                            THEN 'partially_awarded'
+                        WHEN coalesce(e.award_count, 0) > 0
+                             AND coalesce(e.matched_contract_count, 0) > 0
+                            THEN 'contracted'
+                        WHEN coalesce(e.award_count, 0) > 0
+                            THEN 'awarded'
+                        WHEN p.source_status = 'Cancelled' THEN 'cancelled'
+                        WHEN p.source_status = 'Failed' THEN 'unsuccessful'
+                        WHEN p.source_status IN ('Active', 'Shortlisted',
+                                                 'Closed - Pending Opening')
+                            THEN 'active'
+                        ELSE 'closed_unknown'
+                    END AS outcome
+                FROM procurements p
+                JOIN read_parquet({lit['compiled_processes']}) cp
+                  ON cp.process_id = p.process_id
+                JOIN read_parquet({lit['tenders']}) t
+                  ON t.release_id = cp.preferred_release_id
+                LEFT JOIN award_evidence e ON e.process_id = p.process_id
+                LEFT JOIN tender_item_counts tic
+                  ON tic.process_id = p.process_id
                 """
+            )
+            # `outcomes` is now a pure projection of process_facts (docs/13);
+            # funnel and facet queries keep working unchanged.
+            connection.execute(
+                "CREATE TABLE outcomes AS "
+                "SELECT process_id, outcome FROM process_facts"
             )
             connection.execute(
                 """
                 CREATE TABLE outcome_stats AS
-                SELECT o.outcome,
-                       year(p.closing_date) AS closing_year,
+                SELECT outcome,
+                       closing_year,
                        count(*)::BIGINT AS n
-                FROM outcomes o
-                JOIN procurements p ON p.process_id = o.process_id
-                WHERE p.closing_date IS NOT NULL
+                FROM process_facts
+                WHERE closing_year IS NOT NULL
                 GROUP BY 1, 2
                 """
             )
@@ -502,6 +518,10 @@ class SearchIndex:
                         "rule": "relationship-status-v1",
                         "rule_version": "1",
                     },
+                    "facts": {
+                        "rule": FACTS_RULE,
+                        "rule_version": FACTS_RULE_VERSION,
+                    },
                 },
                 "built_at": started.isoformat(),
                 "built_at_epoch_s": round(started.timestamp()),
@@ -514,7 +534,8 @@ class SearchIndex:
                     table: connection.execute(
                         f"SELECT count(*) FROM {table}"
                     ).fetchone()[0]
-                    for table in ("procurements", "outcomes", "filter_stats")
+                    for table in ("procurements", "process_facts", "outcomes",
+                                  "filter_stats")
                 },
             }
             connection.execute(

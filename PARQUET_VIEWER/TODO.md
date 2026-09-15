@@ -439,13 +439,26 @@ Status markers:
   lookups served from `.cache/provenance.duckdb` sorted by `record_key`,
   fingerprinted to the authoritative Parquet's size+mtime, rebuilt in the
   background when stale, direct-scan fallback at all times; delete-safe.)
-- [ ] Build disposable text/facet projections for titles and party names if
+- [x] Build disposable text/facet projections for titles and party names if
   direct scans are too slow.
-- [ ] Add quality-issue summary projections for common facets.
+- [x] Add quality-issue summary projections for common facets.
+  (2026-09-16: partially via `process_facts` +
+  `/api/facts/summary` — outcome/method/category/area buckets over all
+  11.2M processes; full issue-level facets remain ETL-blocked, see
+  `publication_blocking` ticket below.)
 - [ ] Consider `supplier_contract_facts` only if measured joins are not
   interactive; do not introduce new identity decisions in this cache.
-- [ ] Key every cache to authoritative file metadata and rule versions.
-- [ ] Verify deleting `PARQUET_VIEWER/.cache/` cannot affect source data.
+- [x] Key every cache to authoritative file metadata and rule versions.
+  (2026-09-16: both caches fingerprint source size+mtime; rule versions
+  recorded in `meta` — provenance carries `schema_version` 2, the search
+  index carries `INDEX_SCHEMA_VERSION` 7 plus the `build_manifest` rule
+  registry (outcome/facts/relationship) exposed at `/api/index/manifest`.)
+- [x] Verify deleting `PARQUET_VIEWER/.cache/` cannot affect source data.
+  (2026-09-16: code audit — the viewer opens every Parquet read-only and
+  its only writes are cache files under `.cache/`; verified live twice by
+  deleting `search_index.duckdb` (3.5GB) and confirming direct-scan
+  fallback serves queries while the projection rebuilds in the background.
+  Also removed a stray probe script found inside `.cache/`.)
 
 ## Packaging and handoff
 

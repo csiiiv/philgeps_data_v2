@@ -102,9 +102,9 @@ build manifest in its `meta` table (key `build_manifest`), exposed at
 - `projection` — which disposable projection produced it (`search_index`);
 - `schema_version` — the index schema version the build ran with;
 - `rules` — rule name + version for every derived artifact inside
-  (`process-outcomes-v1`, `relationship-status-v1`);
+  (`process-outcomes-v1`, `process-facts-v1`, `relationship-status-v1`);
 - `sources` — per-input path/size/mtime fingerprints used for the build;
-- `row_counts` — `procurements`, `outcomes`, `filter_stats`;
+- `row_counts` — `procurements`, `process_facts`, `outcomes`, `filter_stats`;
 - `built_at` / `built_at_epoch_s`;
 - `stale` / `index_state` — added by the endpoint (not stored): whether the
   on-disk index still matches current sources, and hit/building/miss state.

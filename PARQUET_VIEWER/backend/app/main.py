@@ -230,6 +230,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     def outcome_facets():
         return outcomes.outcome_facets()
 
+    @app.get("/api/facts/summary")
+    def facts_summary():
+        """Dimension breakdowns over the process_facts projection.
+
+        Process-grain counts per outcome, procurement method, category, and
+        area of delivery — the Phase 1 step 4 analytical surface. Honors the
+        docs/11 §2 guardrail: counts only, no monetary totals.
+        """
+        return outcomes.facts_summary()
+
     @app.get("/api/search/facets")
     def search_facets_endpoint():
         return search.facets()

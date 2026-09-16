@@ -16,6 +16,7 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from .catalog import Catalog
 from .config import Settings, load_settings
+from .coverage import SourceCoverageService
 from .database import DuckDBPool
 from .outcomes import OutcomesService
 from .provenance import ProvenanceCache
@@ -42,6 +43,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     saved_views = SavedViewsService(settings, catalog)
     search = SearchService(settings, pool, catalog)
     outcomes = OutcomesService(settings, pool, catalog, search.index)
+    coverage = SourceCoverageService(settings, pool, catalog, search.index)
     # Saved-view counts are expensive (full-filter scans); memoize per
     # dataset fingerprint, keeping only the latest snapshot's entry.
     _counts_cache: OrderedDict[str, dict] = OrderedDict()
@@ -229,6 +231,17 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     @app.get("/api/outcomes/facets")
     def outcome_facets():
         return outcomes.outcome_facets()
+
+    @app.get("/api/coverage/periods")
+    def coverage_periods():
+        """Per-source-period coverage: files, release links, issues.
+
+        Serves the disposable `source_periods` projection (rule
+        source-coverage-v1). Returns `available: false` while the index
+        builds — the direct-Parquet aggregate costs 20s+ and must not run
+        on the request path.
+        """
+        return coverage.periods()
 
     @app.get("/api/facts/summary")
     def facts_summary():

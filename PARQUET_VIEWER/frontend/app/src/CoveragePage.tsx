@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import {
   ApiError,
   type OutcomeFunnelResponse,
+  type SourceCoverageResponse,
   fetchOutcomeFunnel,
+  fetchSourceCoverage,
 } from './api';
 
 /**
@@ -195,6 +197,119 @@ export default function CoveragePage({
           {funnel.metadata.origin}, confidence {funnel.metadata.confidence}.
         </p>
       </details>
+
+      <SourcePeriods />
     </section>
+  );
+}
+
+/**
+ * Source-period coverage (rule source-coverage-v1): what each published
+ * quarterly file actually contains. All rows come from the disposable
+ * index projection; counts-only per the docs/11 §2 guardrail.
+ */
+function SourcePeriods() {
+  const [coverage, setCoverage] = useState<SourceCoverageResponse | null>(null);
+  const [showAll, setShowAll] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetchSourceCoverage()
+      .then((payload) => {
+        if (!cancelled) setCoverage(payload);
+      })
+      .catch(() => {
+        if (!cancelled) setCoverage(null);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  if (coverage === null || !coverage.available) {
+    return (
+      <details className="coverage-meta">
+        <summary>Source period coverage</summary>
+        <p>
+          The source-period projection is still building. The first index
+          build runs in the background after startup; try again shortly.
+        </p>
+      </details>
+    );
+  }
+
+  const INITIAL_ROWS = 12;
+  const visible = showAll ? coverage.periods : coverage.periods.slice(0, INITIAL_ROWS);
+
+  return (
+    <details className="coverage-meta">
+      <summary>
+        Source period coverage — {coverage.totals.source_files} files across{' '}
+        {coverage.period_count} periods
+      </summary>
+      <p>
+        What each published quarterly source file contains: releases linked
+        to it, observation rows it backs, and data-quality issues raised
+        against those releases. A release compiled from notices in several
+        periods counts in each; observation rows are split evenly across its
+        files. Counts only — source CSVs record notice text, not audited
+        money. Rule {coverage.rule} v{coverage.rule_version}.
+      </p>
+      <div className="table-wrap coverage-periods-wrap">
+        <table className="coverage-periods">
+          <thead>
+            <tr>
+              <th scope="col">Period</th>
+              <th scope="col" className="num">Files</th>
+              <th scope="col" className="num">Release links</th>
+              <th scope="col" className="num">Distinct releases</th>
+              <th scope="col" className="num">Observation rows</th>
+              <th scope="col" className="num">Issues</th>
+              <th scope="col" className="num">Issues / link</th>
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((p) => {
+              const ratio =
+                p.release_links > 0 ? p.issues / p.release_links : null;
+              return (
+                <tr key={p.period}>
+                  <th scope="row">{p.period}</th>
+                  <td className="num">{p.source_files}</td>
+                  <td className="num">{p.release_links.toLocaleString()}</td>
+                  <td className="num">{p.distinct_releases.toLocaleString()}</td>
+                  <td className="num">{Math.round(p.observations).toLocaleString()}</td>
+                  <td className="num">{p.issues.toLocaleString()}</td>
+                  <td className="num">
+                    {ratio === null ? '—' : ratio.toFixed(2)}
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      {coverage.periods_truncated && (
+        <p className="coverage-note">
+          Showing the {coverage.periods.length} most recent periods; older
+          periods exist in the projection.
+        </p>
+      )}
+      {coverage.periods.length > INITIAL_ROWS && (
+        <button
+          type="button"
+          className="button button-secondary"
+          onClick={() => setShowAll((v) => !v)}
+        >
+          {showAll
+            ? 'Show recent periods only'
+            : `Show all ${coverage.periods.length} periods`}
+        </button>
+      )}
+      <p className="coverage-meta-fields">
+        Derived from {coverage.metadata.source_fields.join(', ')} — origin{' '}
+        {coverage.metadata.origin}, confidence {coverage.metadata.confidence}.
+      </p>
+    </details>
   );
 }

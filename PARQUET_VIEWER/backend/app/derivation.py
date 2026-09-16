@@ -32,6 +32,12 @@ OUTCOME_RULE_VERSION = "1"
 FACTS_RULE = "process-facts-v1"
 FACTS_RULE_VERSION = "1"
 
+PARTIAL_RULE = "partial-award-v1"
+PARTIAL_RULE_VERSION = "1"
+
+COVERAGE_RULE = "source-coverage-v1"
+COVERAGE_RULE_VERSION = "1"
+
 # --------------------------------------------------------------- §16 links
 #
 # One closed vocabulary for relationship confidence (docs/11 §16). The ETL

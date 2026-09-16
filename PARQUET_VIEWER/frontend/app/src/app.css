@@ -896,6 +896,16 @@ th.cell-detail,
 .button-secondary { background: #08110f; color: var(--text); border: 1px solid var(--line); }
 .error-note { color: #ffb4a9; }
 
+/* Source-period coverage table (rule source-coverage-v1) */
+.coverage-periods-wrap { margin: 10px 0; max-height: 420px; overflow-y: auto; }
+.coverage-periods { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.coverage-periods th,
+.coverage-periods td { padding: 4px 8px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); text-align: left; }
+.coverage-periods td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.coverage-periods thead th.num { text-align: right; }
+.coverage-periods tbody th[scope='row'] { font-weight: 600; white-space: nowrap; }
+.coverage-periods thead th { position: sticky; top: 0; background: #0b1412; z-index: 1; }
+
 /* Outcome badge on the process page */
 .outcome-badge { font-weight: 600; }
 .outcome-contracted, .outcome-awarded { border-color: rgba(72,199,142,0.6); color: #7ee2b8; }

@@ -809,8 +809,14 @@ everything else.
    award_items evidence — with a filter to isolate the unawarded scope —
    and only when linkage evidence exists for the release; the timeline
    closing stop already sampled unawarded items.)*
-4. Add source-period coverage and data-quality summaries (severity grouping
-   is blocked on the ETL severity ticket; see Known review finding 1).
+4. Add source-period coverage and data-quality summaries. *(Done 2026-09-16:
+   the coverage half is live — per-period source-file, release-link,
+   observation-row, and issue counts derived from the manifest +
+   `releases` + `data_quality_issues` (rule `source-coverage-v1`), served
+   from the disposable `source_periods` projection at
+   `GET /api/coverage/periods` and rendered as an expandable table on the
+   Coverage tab; see docs/15. Severity grouping remains blocked on the ETL
+   severity ticket — Known review finding 1.)*
 
 This phase most clearly differentiates the current viewer from the former
 awards-only experience. Effort: L.

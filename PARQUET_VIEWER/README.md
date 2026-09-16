@@ -53,6 +53,7 @@ The active implementation checklist is maintained in [TODO.md](TODO.md).
 12. [Benchmark baseline](docs/12_benchmark_baseline.md)
 13. [Process outcomes spec](docs/13_process_outcomes_spec.md)
 14. [Relationship status spec](docs/14_relationship_status_spec.md)
+15. [Source coverage spec](docs/15_source_coverage_spec.md)
 
 ## Data sources
 

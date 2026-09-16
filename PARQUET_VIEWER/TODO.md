@@ -151,6 +151,21 @@ Status markers:
   in-browser on a partially-awarded process: 12 items → 4 awarded, 8 not
   awarded; filter isolates exactly those 8. Tests in
   `backend/tests/test_item_linkage.py`.)
+- [x] Source-period coverage and data-quality summaries (docs/11 Phase 2
+  step 4). (2026-09-16: coverage half live — per-period source-file,
+  release-link, distinct-release, observation-row, and issue counts (rule
+  `source-coverage-v1`, docs/15), built into the disposable
+  `source_periods` projection (index schema v8, now also fingerprinted to
+  `releases` + `data_quality_issues`) and served at
+  `GET /api/coverage/periods`; rendered as an expandable, capped table on
+  the Coverage tab with an issues-per-link column. Counting semantics are
+  documented (docs/15): multi-period releases count in each period,
+  observation rows split evenly across a release's files, unparsable file
+  names land in a visible `unknown` bucket. Two build-time OOMs fixed and
+  recorded: `count(DISTINCT)` at file grain (releases' PK makes `count(*)`
+  equivalent) and a 14.6M-row issue join (pre-aggregated to release grain
+  first). Severity grouping of issues remains open, blocked on the ETL
+  severity ticket.)
 - [x] Search-first landing for non-technical researchers.
   (`GET /api/search?q=…&page=…` returns plain-language story cards: procurement
   titles (one per process via preferred release) and party names (with

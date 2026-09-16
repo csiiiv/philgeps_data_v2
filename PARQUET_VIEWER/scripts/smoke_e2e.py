@@ -115,6 +115,16 @@ def main() -> int:
         status == 200 and "awarded" in (body.get("filters", {}).get("outcomes") or []),
     )
 
+    # 4c. Source-period coverage (rule source-coverage-v1)
+    status, body = get(base, "/api/coverage/periods")
+    check(
+        "source-period coverage answers",
+        status == 200 and body.get("available") is True
+        and len(body.get("periods", [])) > 0,
+        f"{body.get('period_count')} periods, "
+        f"{body.get('totals', {}).get('source_files')} files",
+    )
+
     # 5. Party page with stats and contracts-by-year
     party = parse.quote("Gencorp Supplies Inc.")
     status, body = get(base, f"/api/parties/name/{party}")

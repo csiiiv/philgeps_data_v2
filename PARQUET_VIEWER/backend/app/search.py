@@ -43,8 +43,16 @@ except ImportError:  # pragma: no cover
 
 from .catalog import Catalog
 from .config import Settings
+from .coverage import period_from_file_name
 from .database import DuckDBPool, execute_bounded, sql_literal_path
-from .derivation import FACTS_RULE, FACTS_RULE_VERSION, OUTCOME_RULE, OUTCOME_RULE_VERSION
+from .derivation import (
+    COVERAGE_RULE,
+    COVERAGE_RULE_VERSION,
+    FACTS_RULE,
+    FACTS_RULE_VERSION,
+    OUTCOME_RULE,
+    OUTCOME_RULE_VERSION,
+)
 from .query import QueryError
 
 logger = logging.getLogger("philgeps.viewer.search")
@@ -131,12 +139,13 @@ def _procurement_filter_clause(
 INDEX_SOURCE_DATASETS = (
     "tenders", "compiled_processes", "parties", "party_roles",
     "awards", "contracts", "award_items", "tender_items",
+    "releases", "data_quality_issues",
 )
 
 # Bump when the index SCHEMA changes (tables/columns added). Source-file
 # fingerprints alone cannot detect code changes, so this version is stored
 # in the built database and mismatch forces a rebuild.
-INDEX_SCHEMA_VERSION = 7
+INDEX_SCHEMA_VERSION = 8
 
 
 class SearchIndex:
@@ -286,6 +295,30 @@ class SearchIndex:
         if self._build_thread is not None and self._build_thread.is_alive():
             return "building"
         return "hit" if self._ready(paths) else "miss"
+
+    def _period_by_file(self) -> dict[str, str]:
+        """source_file_id → quarter label from the manifest.
+
+        The manifest is configuration-owned (its path comes from
+        settings.json) and small enough to read on the build thread. Any
+        read failure degrades to an empty map — files then land in the
+        visible `unknown` period instead of failing the whole build.
+        """
+        try:
+            import json as _json
+
+            raw = self.settings.manifest.read_text(encoding="utf-8")
+            manifest = _json.loads(raw)
+        except (OSError, ValueError):
+            return {}
+        mapping: dict[str, str] = {}
+        for entry in manifest.get("source_files", []):
+            file_id = entry.get("source_file_id")
+            if file_id:
+                mapping[file_id] = period_from_file_name(
+                    entry.get("normalized_file_name")
+                )
+        return mapping
 
     def _build(self, paths: dict[str, Path], fingerprint: dict[str, Any]) -> None:
         settings = self.settings
@@ -492,6 +525,115 @@ class SearchIndex:
                 ) = 1
                 """
             )
+            # Source-period coverage (docs/11 Phase 2 step 4, rule
+            # source-coverage-v1): per-source-file release linkage,
+            # observation rows, and quality-issue counts, then rolled up to
+            # quarter grain via the manifest's `normalized_file_name`. The
+            # manifest is read on the build thread (fast, JSON); a missing
+            # or unparsable manifest leaves every period as `unknown`
+            # rather than silently dropping the table.
+            period_by_file = self._period_by_file()
+            if period_by_file:
+                connection.execute(
+                    "CREATE TABLE file_periods(fid VARCHAR, period VARCHAR)"
+                )
+                connection.executemany(
+                    "INSERT INTO file_periods VALUES (?, ?)",
+                    list(period_by_file.items()),
+                )
+            else:
+                connection.execute(
+                    "CREATE TABLE file_periods AS "
+                    "SELECT CAST(NULL AS VARCHAR) AS fid, CAST(NULL AS VARCHAR) AS period "
+                    "WHERE FALSE"
+                )
+            connection.execute(
+                f"""
+                CREATE TABLE source_periods AS
+                WITH links AS (
+                    SELECT fid, release_id, obs
+                    FROM (
+                        SELECT unnest(source_file_ids) AS fid,
+                               release_id,
+                               supporting_observation_rows AS obs
+                        FROM read_parquet({lit['releases']})
+                    )
+                ),
+                rel_span AS (
+                    SELECT release_id, count(*) AS n_files,
+                           sum(coalesce(obs, 0)) AS obs_total
+                    FROM links GROUP BY release_id
+                ),
+                -- releases.parquet holds ONE row per release_id (registry
+                -- PK), so count(*) at file grain already equals distinct
+                -- releases: a DISTINCT aggregate here materialized
+                -- multi-GB VARCHAR sets and OOM'd the build.
+                per_file AS (
+                    SELECT l.fid,
+                           count(*) AS release_links,
+                           sum(coalesce(l.obs, 0) / rs.n_files::DOUBLE) AS obs_alloc
+                    FROM links l
+                    JOIN rel_span rs USING (release_id)
+                    GROUP BY l.fid
+                ),
+                -- Pre-aggregate to release grain first: joining 14.6M issue
+                -- rows into the releases hash table OOM'd; 9.3M (release,
+                -- count) pairs are the minimum the join needs.
+                issues_per_release AS (
+                    SELECT release_id, count(*) AS n
+                    FROM read_parquet({lit['data_quality_issues']})
+                    WHERE release_id IS NOT NULL
+                    GROUP BY 1
+                ),
+                issues_per_file AS (
+                    SELECT fid, sum(n)::BIGINT AS issues
+                    FROM (
+                        SELECT unnest(r.source_file_ids) AS fid, ir.n
+                        FROM issues_per_release ir
+                        JOIN read_parquet({lit['releases']}) r
+                          ON r.release_id = ir.release_id
+                    )
+                    GROUP BY 1
+                ),
+                -- Every file the viewer knows about: manifest files (even
+                -- with zero linked releases) plus any file that only shows
+                -- up in release/issue linkage. Unparsable or unlisted
+                -- files surface under the visible `unknown` period.
+                all_files AS (
+                    SELECT fid FROM per_file
+                    UNION
+                    SELECT fid FROM file_periods WHERE fid IS NOT NULL
+                    UNION
+                    SELECT fid FROM issues_per_file
+                )
+                SELECT
+                    coalesce(fp.period, 'unknown') AS period,
+                    1 AS source_files,
+                    coalesce(pf.release_links, 0) AS release_links,
+                    coalesce(pf.release_links, 0) AS distinct_releases,
+                    coalesce(pf.obs_alloc, 0) AS obs_alloc,
+                    coalesce(ipf.issues, 0) AS issues
+                FROM all_files f
+                LEFT JOIN per_file pf USING (fid)
+                LEFT JOIN issues_per_file ipf USING (fid)
+                LEFT JOIN file_periods fp USING (fid)
+                """
+            )
+            connection.execute(
+                """
+                CREATE TABLE source_periods_final AS
+                SELECT period,
+                       sum(source_files)::BIGINT AS source_files,
+                       sum(release_links)::BIGINT AS release_links,
+                       sum(distinct_releases)::BIGINT AS distinct_releases,
+                       sum(obs_alloc)::BIGINT AS observations,
+                       sum(issues)::BIGINT AS issues
+                FROM source_periods
+                GROUP BY 1
+                """
+            )
+            connection.execute("DROP TABLE source_periods")
+            connection.execute("ALTER TABLE source_periods_final RENAME TO source_periods")
             connection.execute("CREATE TABLE meta(key VARCHAR, value VARCHAR)")
             connection.execute(
                 "INSERT INTO meta VALUES ('fingerprint', ?)",
@@ -522,6 +664,10 @@ class SearchIndex:
                         "rule": FACTS_RULE,
                         "rule_version": FACTS_RULE_VERSION,
                     },
+                    "coverage": {
+                        "rule": COVERAGE_RULE,
+                        "rule_version": COVERAGE_RULE_VERSION,
+                    },
                 },
                 "built_at": started.isoformat(),
                 "built_at_epoch_s": round(started.timestamp()),
@@ -535,7 +681,7 @@ class SearchIndex:
                         f"SELECT count(*) FROM {table}"
                     ).fetchone()[0]
                     for table in ("procurements", "process_facts", "outcomes",
-                                  "filter_stats")
+                                  "filter_stats", "source_periods")
                 },
             }
             connection.execute(

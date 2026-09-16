@@ -34,6 +34,7 @@ FIXTURE_DATA_SQL = """
 FIXTURE_SOURCE_FILE_ID = "pgf_fixture01"
 FIXTURE_DOCUMENT_ID = "pgd_fixture01"
 FIXTURE_SOURCE_URL = "https://example.com/philgeps/2024-04--2024-06.csv"
+FIXTURE_SOURCE_FILE_ID_2 = "pgf_fixture02"
 
 FIXTURE_PROCESS_ID = "pgcp_fixture01"
 FIXTURE_RELEASE_ID_1 = "pgrl_fixture01"  # preferred (latest)
@@ -319,6 +320,34 @@ def build_project(root: Path, *, query_timeout_seconds: float = 60.0) -> None:
         ) TO '{_lit(parquet_dir / "contracts.parquet")}' (FORMAT PARQUET)
         """
     )
+    # Data-quality issues (source-coverage + quality summaries): severity
+    # and publication_blocking mirror the real ETL vocabulary.
+    connection.execute(
+        f"""
+        COPY (
+            SELECT * FROM (VALUES
+                ('pgdq_i1', '{FIXTURE_RELEASE_ID_1}', 'tender',
+                 '{FIXTURE_RELEASE_ID_1}', 'procurement_method_unmapped',
+                 'normalization', 'warning', FALSE,
+                 'v-open', 'method not in vocabulary', 'method-vocab-v1', 1),
+                ('pgdq_i2', '{FIXTURE_RELEASE_ID_1}', 'tender',
+                 '{FIXTURE_RELEASE_ID_1}', 'tender_status_unmapped',
+                 'normalization', 'warning', FALSE,
+                 'Closed', 'status not in vocabulary', 'status-vocab-v1', 1),
+                ('pgdq_i3', NULL, 'source_file',
+                 '{FIXTURE_SOURCE_FILE_ID}', 'column_all_null',
+                 'completeness', 'warning', FALSE,
+                 NULL, 'joint_venture never recorded', 'completeness-v1', 1),
+                ('pgdq_i4', NULL, 'source_file',
+                 '{FIXTURE_SOURCE_FILE_ID_2}', 'column_all_null',
+                 'completeness', 'warning', FALSE,
+                 NULL, 'joint_venture never recorded', 'completeness-v1', 1)
+            ) AS t(issue_id, release_id, record_type, record_id, issue_code,
+                   issue_category, severity, publication_blocking,
+                   observed_value, detail, detection_rule, rule_version)
+        ) TO '{_lit(parquet_dir / "data_quality_issues.parquet")}' (FORMAT PARQUET)
+        """
+    )
     connection.close()
 
     manifest = {
@@ -340,7 +369,16 @@ def build_project(root: Path, *, query_timeout_seconds: float = 60.0) -> None:
                 "local_files": ["files/2024_Apr-Jun.csv"],
                 "document_ids": [FIXTURE_DOCUMENT_ID],
                 "normalized_file_name": "2024-04--2024-06.csv",
-            }
+            },
+            {
+                # Deliberately unparsable name: exercises the visible
+                # `unknown` period bucket in the coverage projection.
+                "source_file_id": FIXTURE_SOURCE_FILE_ID_2,
+                "sha256": "fixture-sha-2",
+                "local_files": ["files/supplement.csv"],
+                "document_ids": [FIXTURE_DOCUMENT_ID],
+                "normalized_file_name": "supplement.csv",
+            },
         ],
     }
     (root / "manifest.json").write_text(json.dumps(manifest), encoding="utf-8")
@@ -400,6 +438,12 @@ def build_project(root: Path, *, query_timeout_seconds: float = 60.0) -> None:
                 "file": "contracts.parquet",
                 "primary_key": ["release_id", "contract_id"],
                 "record_type": "contract",
+            },
+            {
+                "name": "data_quality_issues",
+                "file": "data_quality_issues.parquet",
+                "primary_key": ["issue_id"],
+                "record_type": "data_quality_issue",
             },
             {
                 "name": "parties",

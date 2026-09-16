@@ -24,14 +24,15 @@ class CatalogApiTests(unittest.TestCase):
         response = self.client.get("/api/health")
         self.assertEqual(response.status_code, 200)
         payload = response.json()
-        self.assertEqual(payload["dataset_count"], 13)
+        self.assertEqual(payload["dataset_count"], 14)
         self.assertEqual(payload["manifest"]["version"], 2)
-        self.assertEqual(payload["manifest"]["source_file_count"], 1)
+        self.assertEqual(payload["manifest"]["source_file_count"], 2)
+
     def test_catalog_lists_registered_dataset_with_columns(self):
         response = self.client.get("/api/catalog")
         self.assertEqual(response.status_code, 200)
         snapshot = response.json()
-        self.assertEqual(snapshot["dataset_count"], 13)
+        self.assertEqual(snapshot["dataset_count"], 14)
         dataset = next(d for d in snapshot["datasets"] if d["name"] == "items")
         self.assertEqual(dataset["name"], "items")
         self.assertEqual(dataset["primary_key"], ["release_id", "item_id"])

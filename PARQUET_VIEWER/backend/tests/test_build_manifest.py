@@ -50,6 +50,7 @@ class BuildManifestTests(unittest.TestCase):
             manifest["rules"]["relationship"]["rule"], "relationship-status-v1"
         )
         self.assertEqual(manifest["rules"]["facts"]["rule"], "process-facts-v1")
+        self.assertEqual(manifest["rules"]["coverage"]["rule"], "source-coverage-v1")
 
     def test_manifest_records_row_counts(self):
         manifest = self.client.get("/api/index/manifest").json()
@@ -58,6 +59,7 @@ class BuildManifestTests(unittest.TestCase):
         self.assertGreater(counts["process_facts"], 0)
         self.assertGreater(counts["outcomes"], 0)
         self.assertGreaterEqual(counts["filter_stats"], 0)
+        self.assertGreater(counts["source_periods"], 0)
 
     def test_manifest_fresh_after_build(self):
         manifest = self.client.get("/api/index/manifest").json()

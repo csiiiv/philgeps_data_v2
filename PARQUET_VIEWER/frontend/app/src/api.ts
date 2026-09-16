@@ -653,6 +653,35 @@ export function fetchOutcomeFunnel(
   return request<OutcomeFunnelResponse>(`/api/outcomes/funnel?${params.toString()}`);
 }
 
+export interface SourceCoveragePeriod {
+  period: string;
+  source_files: number;
+  release_links: number;
+  distinct_releases: number;
+  observations: number;
+  issues: number;
+}
+
+export interface SourceCoverageResponse {
+  available: boolean;
+  rule: string;
+  rule_version: string;
+  period_count: number;
+  periods_truncated: boolean;
+  periods: SourceCoveragePeriod[];
+  totals: {
+    source_files: number;
+    release_links: number;
+    observations: number;
+    issues: number;
+  };
+  metadata: DerivationMetadata;
+}
+
+export function fetchSourceCoverage(): Promise<SourceCoverageResponse> {
+  return request<SourceCoverageResponse>(`/api/coverage/periods`);
+}
+
 export interface CanonicalPartyInfo {
   canonical_party_id: string;
   preferred_name: string;

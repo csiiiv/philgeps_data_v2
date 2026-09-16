@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ApiError, type SourceFileRowsResponse, fetchSourceFileRows } from './api';
 import { formatValue } from './format';
 import { ModalHeader } from './ModalHost';
+import { SortableTh, rowAccessors, sortRows, useTableSort } from './sortableTable';
 
 /**
  * Raw PhilGEPS spreadsheet view: the normalized observations for one
@@ -31,6 +32,21 @@ export default function SourceRowsModal({
 }) {
   const [data, setData] = useState<SourceFileRowsResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const { sort, toggleSort } = useTableSort();
+  const columnNames = useMemo(() => data?.columns ?? [], [data]);
+  const accessors = useMemo(() => rowAccessors(['#', ...columnNames]), [columnNames]);
+  const sortedView = useMemo(() => {
+    if (!data) return [];
+    return sortRows(
+      data.rows.map((row, rowIndex) => ({
+        key: data.row_numbers[rowIndex],
+        rowNumber: data.row_numbers[rowIndex],
+        row,
+      })),
+      accessors,
+      sort,
+    );
+  }, [data, accessors, sort]);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,16 +107,23 @@ export default function SourceRowsModal({
               <table>
                 <thead>
                   <tr>
-                    <th>#</th>
+                    <SortableTh label="#" sortKey="#" sort={sort} onToggle={toggleSort} />
                     {data.columns.map((column) => (
-                      <th key={column} title={column}>{column}</th>
+                      <SortableTh
+                        key={column}
+                        label={column}
+                        sortKey={column}
+                        sort={sort}
+                        onToggle={toggleSort}
+                        className={undefined}
+                      />
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {data.rows.map((row, rowIndex) => (
-                    <tr key={data.row_numbers[rowIndex]}>
-                      <td className="row-number">{data.row_numbers[rowIndex]}</td>
+                  {sortedView.map(({ key, rowNumber, row }) => (
+                    <tr key={key}>
+                      <td className="row-number">{rowNumber}</td>
                       {row.map((value, colIndex) => (
                         <td key={colIndex} title={formatValue(value)}>
                           {value === null || value === '' ? (

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ApiError,
   type BreadcrumbResponse,
@@ -7,6 +7,7 @@ import {
   resolveBreadcrumb,
 } from './api';
 import { formatValue } from './format';
+import { SortableTh, rowAccessors, sortRows, useTableSort } from './sortableTable';
 
 /** Compact breadcrumb input: `<source_file_id>:<source_row_number>`. */
 const BREADCRUMB_PATTERN = /^([A-Za-z0-9_-]+):(\d+)$/;
@@ -107,6 +108,34 @@ function BreadcrumbView({ crumb }: { crumb: BreadcrumbResponse }) {
   const normalized = crumb.normalized_observation ?? {};
   const cleaned = crumb.cleaned_observation ?? {};
   const columnNames = Array.from(new Set([...Object.keys(normalized), ...Object.keys(cleaned)]));
+  const { sort: colSort, toggleSort: toggleColSort } = useTableSort();
+  const sortedColumns = useMemo(
+    () =>
+      sortRows(
+        columnNames.map((name) => ({
+          name,
+          normalized: Object.prototype.hasOwnProperty.call(normalized, name)
+            ? normalized[name]
+            : undefined,
+          cleaned: Object.prototype.hasOwnProperty.call(cleaned, name)
+            ? cleaned[name]
+            : undefined,
+        })),
+        rowAccessors(['name', 'normalized', 'cleaned']),
+        colSort,
+      ),
+    [columnNames, normalized, cleaned, colSort],
+  );
+  const { sort: recSort, toggleSort: toggleRecSort } = useTableSort();
+  const sortedRecords = useMemo(
+    () =>
+      sortRows(
+        crumb.derived_records.map((record, index) => ({ ...record, _i: index })),
+        rowAccessors(['record_type', 'record_id', 'release_id']),
+        recSort,
+      ),
+    [crumb.derived_records, recSort],
+  );
   return (
     <>
       <section className="trace-section">
@@ -152,28 +181,32 @@ function BreadcrumbView({ crumb }: { crumb: BreadcrumbResponse }) {
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Column</th><th>Normalized (raw)</th><th>Cleaned (typed)</th></tr>
+              <tr>
+                <SortableTh label="Column" sortKey="name" sort={colSort} onToggle={toggleColSort} />
+                <SortableTh label="Normalized (raw)" sortKey="normalized" sort={colSort} onToggle={toggleColSort} />
+                <SortableTh label="Cleaned (typed)" sortKey="cleaned" sort={colSort} onToggle={toggleColSort} />
+              </tr>
             </thead>
             <tbody>
-              {columnNames.map((name) => (
+              {sortedColumns.map(({ name, normalized: normVal, cleaned: cleanVal }) => (
                 <tr key={name}>
                   <td><code>{name}</code></td>
-                  <td title={formatValue(normalized[name])}>
-                    {normalized[name] === undefined ? (
+                  <td title={formatValue(normVal)}>
+                    {normVal === undefined ? (
                       <span className="null">absent</span>
-                    ) : normalized[name] === null ? (
+                    ) : normVal === null ? (
                       <span className="null">null</span>
                     ) : (
-                      formatValue(normalized[name])
+                      formatValue(normVal)
                     )}
                   </td>
-                  <td title={formatValue(cleaned[name])}>
-                    {cleaned[name] === undefined ? (
+                  <td title={formatValue(cleanVal)}>
+                    {cleanVal === undefined ? (
                       <span className="null">absent</span>
-                    ) : cleaned[name] === null ? (
+                    ) : cleanVal === null ? (
                       <span className="null">null</span>
                     ) : (
-                      formatValue(cleaned[name])
+                      formatValue(cleanVal)
                     )}
                   </td>
                 </tr>
@@ -188,11 +221,15 @@ function BreadcrumbView({ crumb }: { crumb: BreadcrumbResponse }) {
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Record type</th><th>Record ID</th><th>Release</th></tr>
+              <tr>
+                <SortableTh label="Record type" sortKey="record_type" sort={recSort} onToggle={toggleRecSort} />
+                <SortableTh label="Record ID" sortKey="record_id" sort={recSort} onToggle={toggleRecSort} />
+                <SortableTh label="Release" sortKey="release_id" sort={recSort} onToggle={toggleRecSort} />
+              </tr>
             </thead>
             <tbody>
-              {crumb.derived_records.map((record, index) => (
-                <tr key={index}>
+              {sortedRecords.map((record) => (
+                <tr key={record._i}>
                   <td>{record.record_type}</td>
                   <td><code>{record.record_id}</code></td>
                   <td>
@@ -212,6 +249,16 @@ function BreadcrumbView({ crumb }: { crumb: BreadcrumbResponse }) {
 }
 
 function RecordSourcesView({ sources }: { sources: RecordSourcesResponse }) {
+  const { sort, toggleSort } = useTableSort();
+  const sortedSources = useMemo(
+    () =>
+      sortRows(
+        sources.sources.map((source, index) => ({ ...source, _i: index })),
+        rowAccessors(['release_id', 'source_file_id', 'source_sheet', 'source_row_number', 'normalized_file_name']),
+        sort,
+      ),
+    [sources.sources, sort],
+  );
   return (
     <>
       <section className="trace-section">
@@ -229,11 +276,17 @@ function RecordSourcesView({ sources }: { sources: RecordSourcesResponse }) {
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>Release</th><th>Source file</th><th>Sheet</th><th>Row</th><th>File name</th></tr>
+              <tr>
+                <SortableTh label="Release" sortKey="release_id" sort={sort} onToggle={toggleSort} />
+                <SortableTh label="Source file" sortKey="source_file_id" sort={sort} onToggle={toggleSort} />
+                <SortableTh label="Sheet" sortKey="source_sheet" sort={sort} onToggle={toggleSort} />
+                <SortableTh label="Row" sortKey="source_row_number" sort={sort} onToggle={toggleSort} />
+                <SortableTh label="File name" sortKey="normalized_file_name" sort={sort} onToggle={toggleSort} />
+              </tr>
             </thead>
             <tbody>
-              {sources.sources.map((source, index) => (
-                <tr key={index}>
+              {sortedSources.map((source) => (
+                <tr key={source._i}>
                   <td>
                     {source.release_id ? <code>{source.release_id.slice(0, 18)}…</code> : <span className="null">null</span>}
                   </td>

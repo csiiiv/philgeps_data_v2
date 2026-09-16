@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   ApiError,
   type AwardEntry,
@@ -16,6 +16,7 @@ import { ModalHeader } from './ModalHost';
 import { AwardItemsPanel } from './itemTable';
 import { ItemsPanel } from './ItemsPanel';
 import { renderMoney } from './money';
+import { SortableTh, sortRows, useTableSort } from './sortableTable';
 
 const moneyNotRecorded = <span className="null">not recorded</span>;
 
@@ -157,21 +158,37 @@ function AwardStructureTable({
   onOpenParty: (name: string) => void;
 }) {
   const distinctSuppliers = structure.awarded_supplier_names.length;
+  const { sort, toggleSort } = useTableSort();
+  const sortedAwards = useMemo(
+    () =>
+      sortRows(
+        structure.awards,
+        {
+          reference: (award) => award.award_reference,
+          title: (award) => award.title,
+          amount: (award) => (award.value ? Number(award.value.amount) : null),
+          date: (award) => award.date,
+          items: (award) => (award.item_count > 0 ? award.item_count : null),
+        },
+        sort,
+      ),
+    [structure.awards, sort],
+  );
   return (
     <div className="table-wrap award-structure-wrap">
       <table className="award-structure-table">
         <thead>
           <tr>
-            <th>Award ref</th>
-            <th>Award</th>
-            <th className="cell-amount">Amount</th>
-            <th>Date</th>
-            <th>Items</th>
+            <SortableTh label="Award ref" sortKey="reference" sort={sort} onToggle={toggleSort} />
+            <SortableTh label="Award" sortKey="title" sort={sort} onToggle={toggleSort} />
+            <SortableTh label="Amount" sortKey="amount" sort={sort} onToggle={toggleSort} className="cell-amount" />
+            <SortableTh label="Date" sortKey="date" sort={sort} onToggle={toggleSort} />
+            <SortableTh label="Items" sortKey="items" sort={sort} onToggle={toggleSort} />
             <th>Supplier(s)</th>
           </tr>
         </thead>
         <tbody>
-          {structure.awards.map((award) => (
+          {sortedAwards.map((award) => (
             <AwardStructureRows
               key={award.award_id}
               award={award}

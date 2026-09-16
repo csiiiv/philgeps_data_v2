@@ -1,5 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { ApiError, type CatalogSnapshot, fetchCatalog } from './api';
+import { SortableTh, sortRows, useTableSort } from './sortableTable';
 
 /**
  * About page: how this data is derived, how it is structured, how records
@@ -32,6 +33,20 @@ export default function AboutPage() {
   const totalBytes = snapshot
     ? snapshot.datasets.reduce((sum, d) => sum + (d.size_bytes ?? 0), 0)
     : null;
+  const { sort, toggleSort } = useTableSort();
+  const sortedDatasets = useMemo(() => {
+    if (!snapshot) return [];
+    return sortRows(
+      snapshot.datasets,
+      {
+        name: (d) => d.name,
+        rows: (d) => d.row_count,
+        size: (d) => d.size_bytes,
+        key: (d) => d.primary_key.join(' · '),
+      },
+      sort,
+    );
+  }, [snapshot, sort]);
 
   return (
     <section className="landing" aria-label="About this data">
@@ -254,14 +269,14 @@ export default function AboutPage() {
             <table>
               <thead>
                 <tr>
-                  <th>Dataset</th>
-                  <th>Rows</th>
-                  <th>Size</th>
-                  <th>Primary key</th>
+                  <SortableTh label="Dataset" sortKey="name" sort={sort} onToggle={toggleSort} />
+                  <SortableTh label="Rows" sortKey="rows" sort={sort} onToggle={toggleSort} />
+                  <SortableTh label="Size" sortKey="size" sort={sort} onToggle={toggleSort} />
+                  <SortableTh label="Primary key" sortKey="key" sort={sort} onToggle={toggleSort} />
                 </tr>
               </thead>
               <tbody>
-                {snapshot.datasets.map((d) => (
+                {sortedDatasets.map((d) => (
                   <tr key={d.name}>
                     <td>
                       <code>{d.name}</code>

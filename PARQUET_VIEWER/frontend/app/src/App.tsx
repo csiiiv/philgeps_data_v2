@@ -17,6 +17,7 @@ import {
 } from './api';
 import { formatBytes, formatNumber, formatValue } from './format';
 import TraceDrawer, { parseBreadcrumb, type TraceTarget } from './TraceDrawer';
+import { SortableTh, rowAccessors, sortRows, useTableSort } from './sortableTable';
 import ProcessDrawer from './ProcessDrawer';
 import SearchLanding from './SearchLanding';
 import AboutPage from './AboutPage';
@@ -627,50 +628,11 @@ export default function App() {
         </div>
       </section>
 
-      <section className="catalog-section">
-        <div className="section-heading">
-          <div>
-            <p className="eyebrow">Foundation milestone</p>
-            <h2>Dataset catalog</h2>
-          </div>
-          <button type="button" onClick={() => void loadCatalog(true)} disabled={refreshing}>
-            {refreshing ? 'Refreshing…' : 'Refresh metadata'}
-          </button>
-        </div>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Dataset</th>
-                <th>Status</th>
-                <th>Rows</th>
-                <th>Size</th>
-                <th>Primary key</th>
-              </tr>
-            </thead>
-            <tbody>
-              {catalogState.kind === 'loading' && (
-                <tr><td colSpan={5}>Loading catalog…</td></tr>
-              )}
-              {catalogState.kind === 'error' && (
-                <tr><td colSpan={5} role="alert">Catalog failed: {catalogState.message}</td></tr>
-              )}
-              {catalogState.kind === 'ready' &&
-                catalogState.snapshot.datasets.map((d) => (
-                  <tr key={d.name}>
-                    <td><code>{d.name}</code></td>
-                    <td>
-                      <span className={`pill ${d.status === 'healthy' ? '' : 'error'}`}>{d.status}</span>
-                    </td>
-                    <td>{formatNumber(d.row_count)}</td>
-            <td>{formatBytes(d.size_bytes)}</td>
-                    <td><code>{d.primary_key.join(' · ')}</code></td>
-                  </tr>
-                ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+      <CatalogTable
+        catalogState={catalogState}
+        onRefresh={() => void loadCatalog(true)}
+        refreshing={refreshing}
+      />
         </>
       )}
 
@@ -789,6 +751,75 @@ export default function App() {
         }}
       />
     </main>
+  );
+}
+
+function CatalogTable({
+  catalogState,
+  onRefresh,
+  refreshing,
+}: {
+  catalogState: CatalogState;
+  onRefresh: () => void;
+  refreshing: boolean;
+}) {
+  const { sort, toggleSort } = useTableSort();
+  const accessors: Record<string, (d: DatasetEntry) => unknown> = {
+    name: (d) => d.name,
+    status: (d) => d.status,
+    rows: (d) => d.row_count,
+    size: (d) => d.size_bytes,
+    key: (d) => d.primary_key.join(' · '),
+  };
+  const datasets =
+    catalogState.kind === 'ready'
+      ? sortRows(catalogState.snapshot.datasets, accessors, sort)
+      : [];
+  return (
+    <section className="catalog-section">
+      <div className="section-heading">
+        <div>
+          <p className="eyebrow">Foundation milestone</p>
+          <h2>Dataset catalog</h2>
+        </div>
+        <button type="button" onClick={onRefresh} disabled={refreshing}>
+          {refreshing ? 'Refreshing…' : 'Refresh metadata'}
+        </button>
+      </div>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <SortableTh label="Dataset" sortKey="name" sort={sort} onToggle={toggleSort} />
+              <SortableTh label="Status" sortKey="status" sort={sort} onToggle={toggleSort} />
+              <SortableTh label="Rows" sortKey="rows" sort={sort} onToggle={toggleSort} />
+              <SortableTh label="Size" sortKey="size" sort={sort} onToggle={toggleSort} />
+              <SortableTh label="Primary key" sortKey="key" sort={sort} onToggle={toggleSort} />
+            </tr>
+          </thead>
+          <tbody>
+            {catalogState.kind === 'loading' && (
+              <tr><td colSpan={5}>Loading catalog…</td></tr>
+            )}
+            {catalogState.kind === 'error' && (
+              <tr><td colSpan={5} role="alert">Catalog failed: {catalogState.message}</td></tr>
+            )}
+            {catalogState.kind === 'ready' &&
+              datasets.map((d) => (
+                <tr key={d.name}>
+                  <td><code>{d.name}</code></td>
+                  <td>
+                    <span className={`pill ${d.status === 'healthy' ? '' : 'error'}`}>{d.status}</span>
+                  </td>
+                  <td>{formatNumber(d.row_count)}</td>
+                  <td>{formatBytes(d.size_bytes)}</td>
+                  <td><code>{d.primary_key.join(' · ')}</code></td>
+                </tr>
+              ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -1056,6 +1087,19 @@ function RowInspector({
   onClose: () => void;
 }) {
   const row = result.rows[rowIndex];
+  const { sort, toggleSort } = useTableSort();
+  const rowsView = useMemo(() => {
+    if (!row) return [];
+    return sortRows(
+      result.columns.map((c) => ({
+        name: c.name,
+        type: c.type,
+        value: row[c.name],
+      })),
+      rowAccessors(['name', 'type', 'value']),
+      sort,
+    );
+  }, [result.columns, row, sort]);
   if (!row) return null;
   return (
     <div className="inspector-backdrop" onClick={onClose}>
@@ -1071,15 +1115,19 @@ function RowInspector({
         </div>
         <table>
           <thead>
-            <tr><th>Column</th><th>Type</th><th>Value</th></tr>
+            <tr>
+              <SortableTh label="Column" sortKey="name" sort={sort} onToggle={toggleSort} />
+              <SortableTh label="Type" sortKey="type" sort={sort} onToggle={toggleSort} />
+              <SortableTh label="Value" sortKey="value" sort={sort} onToggle={toggleSort} />
+            </tr>
           </thead>
           <tbody>
-            {result.columns.map((c) => (
-              <tr key={c.name}>
-                <td><code>{c.name}</code></td>
-                <td>{c.type}</td>
+            {rowsView.map(({ name, type, value }) => (
+              <tr key={name}>
+                <td><code>{name}</code></td>
+                <td>{type}</td>
                 <td className="inspector-value">
-                  {row[c.name] === null ? <span className="null">null</span> : formatValue(row[c.name])}
+                  {value === null ? <span className="null">null</span> : formatValue(value)}
                 </td>
               </tr>
             ))}

@@ -65,8 +65,10 @@ select, input { width: 100%; margin-top: 6px; border: 1px solid var(--line); bor
 .toolbar-buttons { display: flex; gap: 8px; }
 .query-controls { display: grid; grid-template-columns: minmax(180px, 1.2fr) 90px minmax(140px, 1fr) auto; gap: 12px; align-items: end; margin-bottom: 14px; }
 
-th .sort-btn { background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 0; font-weight: inherit; }
+th .sort-btn { background: transparent; color: inherit; font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 0; font-weight: inherit; cursor: pointer; text-align: inherit; }
 th .sort-btn:hover { color: var(--accent); }
+.sort-marker { opacity: 0.35; font-size: 0.85em; }
+.sort-marker-active { opacity: 1; color: var(--accent); font-size: 0.85em; }
 .row-action { width: 1%; }
 .row-action button { padding: 4px 10px; font-size: 12px; }
 

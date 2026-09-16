@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ApiError,
   type FilterSpec,
@@ -12,6 +12,7 @@ import { recordKeyFromRow } from './recordTrace';
 import { formatValue } from './format';
 import { renderMoneyParts } from './money';
 import { ModalHeader } from './ModalHost';
+import { SortableTh, rowAccessors, sortRows, useTableSort } from './sortableTable';
 import {
   AwardItemsPanel,
   ITEM_TABLE_COLUMNS,
@@ -282,6 +283,17 @@ function RecordsTable({
   awardeesByAward?: Record<string, string[]>;
   onOpenSources: (sourceFileId: string, startRow: number, endRow: number, fileName?: string) => void;
 }) {
+  const columnKeys = useMemo(() => {
+    const spec = TABLE_COLUMNS[dataset];
+    if (spec) return spec.map((column) => column.key);
+    return result.columns.map((column) => column.name);
+  }, [dataset, result.columns]);
+  const { sort, toggleSort } = useTableSort();
+  const accessors = useMemo(() => rowAccessors(columnKeys), [columnKeys]);
+  const sortedRows = useMemo(
+    () => sortRows(result.rows, accessors, sort),
+    [result.rows, accessors, sort],
+  );
   if (dataset === 'tender_items') {
     const items = result.rows.map((row) => itemRowFromQuery(row));
     return (
@@ -324,15 +336,28 @@ function RecordsTable({
         <thead>
           <tr>
             {TABLE_COLUMNS[dataset]?.map((column) => (
-              <th key={column.key} className={column.klass ?? ''}>{column.label}</th>
+              <SortableTh
+                key={column.key}
+                label={column.label}
+                sortKey={column.key}
+                sort={sort}
+                onToggle={toggleSort}
+                className={column.klass ?? undefined}
+              />
             )) ?? result.columns.map((column) => (
-              <th key={column.name}>{column.name}</th>
+              <SortableTh
+                key={column.name}
+                label={column.name}
+                sortKey={column.name}
+                sort={sort}
+                onToggle={toggleSort}
+              />
             ))}
             <th className="row-action">Source</th>
           </tr>
         </thead>
         <tbody>
-          {result.rows.map((row, index) => (
+          {sortedRows.map((row, index) => (
             <RecordRow
               key={index}
               dataset={dataset}

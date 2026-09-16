@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react';
 import {
   ApiError,
   type OutcomeFunnelResponse,
+  type SourceCoveragePeriod,
   type SourceCoverageResponse,
   fetchOutcomeFunnel,
   fetchSourceCoverage,
 } from './api';
+import { SortableTh, sortRows, useTableSort } from './sortableTable';
 
 /**
  * Coverage page (docs/11 §2): the complete procurement population as a
@@ -211,6 +213,16 @@ export default function CoveragePage({
 function SourcePeriods() {
   const [coverage, setCoverage] = useState<SourceCoverageResponse | null>(null);
   const [showAll, setShowAll] = useState(false);
+  const { sort, toggleSort } = useTableSort(null);
+  const periodAccessors: Record<string, (p: SourceCoveragePeriod) => unknown> = {
+    period: (p) => p.period,
+    files: (p) => p.source_files,
+    links: (p) => p.release_links,
+    distinct: (p) => p.distinct_releases,
+    obs: (p) => p.observations,
+    issues: (p) => p.issues,
+    ratio: (p) => (p.release_links > 0 ? p.issues / p.release_links : null),
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -239,7 +251,10 @@ function SourcePeriods() {
   }
 
   const INITIAL_ROWS = 12;
-  const visible = showAll ? coverage.periods : coverage.periods.slice(0, INITIAL_ROWS);
+  const sortedPeriods = sortRows(coverage.periods, periodAccessors, sort);
+  // Default order (no sort clicked) is newest-first from the API; any
+  // active sort re-orders the full list before the cap applies.
+  const visible = showAll ? sortedPeriods : sortedPeriods.slice(0, INITIAL_ROWS);
 
   return (
     <details className="coverage-meta">
@@ -259,13 +274,13 @@ function SourcePeriods() {
         <table className="coverage-periods">
           <thead>
             <tr>
-              <th scope="col">Period</th>
-              <th scope="col" className="num">Files</th>
-              <th scope="col" className="num">Release links</th>
-              <th scope="col" className="num">Distinct releases</th>
-              <th scope="col" className="num">Observation rows</th>
-              <th scope="col" className="num">Issues</th>
-              <th scope="col" className="num">Issues / link</th>
+              <SortableTh label="Period" sortKey="period" sort={sort} onToggle={toggleSort} />
+              <SortableTh label="Files" sortKey="files" sort={sort} onToggle={toggleSort} className="num" />
+              <SortableTh label="Release links" sortKey="links" sort={sort} onToggle={toggleSort} className="num" />
+              <SortableTh label="Distinct releases" sortKey="distinct" sort={sort} onToggle={toggleSort} className="num" />
+              <SortableTh label="Observation rows" sortKey="obs" sort={sort} onToggle={toggleSort} className="num" />
+              <SortableTh label="Issues" sortKey="issues" sort={sort} onToggle={toggleSort} className="num" />
+              <SortableTh label="Issues / link" sortKey="ratio" sort={sort} onToggle={toggleSort} className="num" />
             </tr>
           </thead>
           <tbody>

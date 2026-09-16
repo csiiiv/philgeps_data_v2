@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   ApiError,
   type ChildCountsResponse,
@@ -13,6 +13,7 @@ import {
   fetchProcessTimeline,
   fetchReleaseCompare,
 } from './api';
+import { SortableTh, rowAccessors, sortRows, useTableSort } from './sortableTable';
 
 /** Grid dataset names for drill-through from a release. */
 const CHILD_DRILLTHROUGH: Record<string, string> = {
@@ -360,18 +361,28 @@ function CollectionDiffBlock({ title, diff }: { title: string; diff: CollectionD
 }
 
 function FieldDiffTable({ fields }: { fields: FieldDiff[] }) {
+  const { sort, toggleSort } = useTableSort();
+  const sortedFields = useMemo(
+    () =>
+      sortRows(
+        fields,
+        rowAccessors(['field', 'left', 'right', 'change']),
+        sort,
+      ),
+    [fields, sort],
+  );
   return (
     <table className="compare-table">
       <thead>
         <tr>
-          <th>Field</th>
-          <th>Baseline</th>
-          <th>Active</th>
-          <th></th>
+          <SortableTh label="Field" sortKey="field" sort={sort} onToggle={toggleSort} />
+          <SortableTh label="Baseline" sortKey="left" sort={sort} onToggle={toggleSort} />
+          <SortableTh label="Active" sortKey="right" sort={sort} onToggle={toggleSort} />
+          <SortableTh label="" sortKey="change" sort={sort} onToggle={toggleSort} />
         </tr>
       </thead>
       <tbody>
-        {fields.map((f) => (
+        {sortedFields.map((f) => (
           <tr key={f.field} className={`change-row-${f.change}`}>
             <td>{f.field}</td>
             <td className="cell-detail">{fmt(f.left)}</td>

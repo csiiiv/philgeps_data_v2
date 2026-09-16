@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ApiError,
   type CatalogSnapshot,
@@ -10,6 +10,7 @@ import {
   searchAll,
 } from './api';
 import { renderMoneyParts } from './money';
+import { SortableTh, sortRows, useTableSort } from './sortableTable';
 
 /**
  * Search-first entry point for researchers: one box, plain vocabulary.
@@ -198,6 +199,19 @@ export default function SearchLanding({
   const shownParties = result?.parties.length ?? 0;
   const partyTotal = result?.party_total ?? 0;
   const hasMoreParties = result != null && shownParties < partyTotal;
+  const { sort: partySort, toggleSort: togglePartySort } = useTableSort();
+  const sortedParties = useMemo(() => {
+    const parties = result?.parties ?? [];
+    return sortRows(
+      parties,
+      {
+        name: (card) => card.name,
+        role: (card) => roleLabel(card.roles),
+        records: (card) => card.release_count,
+      },
+      partySort,
+    );
+  }, [result?.parties, partySort]);
   const yearOptions = facets?.years?.map((y) => y.year) ?? [];
 
   return (
@@ -382,13 +396,13 @@ export default function SearchLanding({
             <table className="party-table">
               <thead>
                 <tr>
-                  <th>Name</th>
-                  <th>Role</th>
-                  <th>Records</th>
+                  <SortableTh label="Name" sortKey="name" sort={partySort} onToggle={togglePartySort} />
+                  <SortableTh label="Role" sortKey="role" sort={partySort} onToggle={togglePartySort} />
+                  <SortableTh label="Records" sortKey="records" sort={partySort} onToggle={togglePartySort} />
                 </tr>
               </thead>
               <tbody>
-                {result.parties.map((card) => (
+                {sortedParties.map((card) => (
                   <tr key={card.name} className="party-row">
                     <td>
                       <button
@@ -498,19 +512,27 @@ export function ProcurementTable({
   cards: ProcurementCard[];
   onOpenProcess: (processId: string) => void;
 }) {
+  const { sort, toggleSort } = useTableSort();
+  const accessors: Record<string, (card: ProcurementCard) => unknown> = {
+    title: (card) => card.title,
+    status: (card) => card.status,
+    amount: (card) => (card.value_amount == null ? null : Number(card.value_amount)),
+    closing: (card) => card.closing_date,
+  };
+  const sorted = useMemo(() => sortRows(cards, accessors, sort), [cards, sort]);
   return (
     <div className="table-wrap">
       <table className="procurement-table">
         <thead>
           <tr>
-            <th>Project</th>
-            <th>Status</th>
-            <th className="cell-amount">Amount</th>
-            <th>Closing</th>
+            <SortableTh label="Project" sortKey="title" sort={sort} onToggle={toggleSort} />
+            <SortableTh label="Status" sortKey="status" sort={sort} onToggle={toggleSort} />
+            <SortableTh label="Amount" sortKey="amount" sort={sort} onToggle={toggleSort} className="cell-amount" />
+            <SortableTh label="Closing" sortKey="closing" sort={sort} onToggle={toggleSort} />
           </tr>
         </thead>
         <tbody>
-          {cards.map((card, i) => {
+          {sorted.map((card, i) => {
             const disabled = !card.process_id;
             const open = () => card.process_id && onOpenProcess(card.process_id);
             return (

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import type { ItemEntry, MoneyValue } from './api';
 import { formatValue } from './format';
 import { renderMoney } from './money';
+import { SortableTh, sortRows, useTableSort } from './sortableTable';
 
 type ItemColumn = { key: string; label: string; klass?: string };
 
@@ -15,6 +16,18 @@ export const ITEM_TABLE_COLUMNS: ItemColumn[] = [
   { key: 'budget', label: 'Item budget', klass: 'cell-amount' },
   { key: 'unit_price', label: 'Per unit', klass: 'cell-amount' },
 ];
+
+/** How to pull a sortable value for each item column. */
+const ITEM_ACCESSORS: Record<string, (item: ItemEntry) => unknown> = {
+  line_item_number: (item) => item.line_item_number,
+  title: (item) => item.title,
+  description: (item) => item.description,
+  quantity: (item) => (item.quantity == null ? null : Number(item.quantity)),
+  unit_name: (item) => item.unit_name,
+  budget: (item) => (item.budget ? Number(item.budget.amount) : null),
+  unit_price: (item) => (item.unit_price ? Number(item.unit_price.amount) : null),
+  award_link: (item) => (item.award_link ? item.award_link.state : null),
+};
 
 export function formatQuantity(value: unknown) {
   if (value == null || value === '') return null;
@@ -133,6 +146,7 @@ export function ItemTable({
   emptyMessage?: string;
 }) {
   const [showDescriptions, setShowDescriptions] = useState(false);
+  const { sort, toggleSort } = useTableSort();
   const hasDescriptions = useMemo(
     () => items.some((item) => item.description && item.description.trim()),
     [items],
@@ -154,6 +168,11 @@ export function ItemTable({
       : base;
   }, [collapseDescriptions, showDescriptions, hasLinkage]);
 
+  const sortedItems = useMemo(
+    () => sortRows(items, ITEM_ACCESSORS, sort),
+    [items, sort],
+  );
+
   if (items.length === 0) {
     return <p className="null">{emptyMessage}</p>;
   }
@@ -174,12 +193,19 @@ export function ItemTable({
           <thead>
             <tr>
               {columns.map((column) => (
-                <th key={column.key} className={column.klass ?? ''}>{column.label}</th>
+                <SortableTh
+                  key={column.key}
+                  label={column.label}
+                  sortKey={column.key}
+                  sort={sort}
+                  onToggle={toggleSort}
+                  className={column.klass ?? ''}
+                />
               ))}
             </tr>
           </thead>
           <tbody>
-            {items.map((item) => (
+            {sortedItems.map((item) => (
               <tr key={item.item_id}>
                 {columns.map((column) => (
                   <td key={column.key} className={column.klass ?? ''}>

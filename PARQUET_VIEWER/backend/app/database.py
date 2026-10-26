@@ -37,7 +37,7 @@ class DuckDBPool:
         connection.execute(f"SET threads = {self.settings.duckdb.threads}")
         connection.execute("SET preserve_insertion_order = false")
         memory = self.settings.duckdb.memory_limit.replace("'", "''")
-        temp = str(self.temp_directory).replace("'", "''")
+        temp = self.temp_directory.as_posix().replace("'", "''")
         connection.execute(f"SET memory_limit = '{memory}'")
         connection.execute(f"SET temp_directory = '{temp}'")
         return connection

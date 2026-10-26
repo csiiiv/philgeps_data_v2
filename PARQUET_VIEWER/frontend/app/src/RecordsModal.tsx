@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   ApiError,
   type FilterSpec,
@@ -12,7 +12,6 @@ import { recordKeyFromRow } from './recordTrace';
 import { formatValue } from './format';
 import { renderMoneyParts } from './money';
 import { ModalHeader } from './ModalHost';
-import { SortableTh, rowAccessors, sortRows, useTableSort } from './sortableTable';
 import {
   AwardItemsPanel,
   ITEM_TABLE_COLUMNS,
@@ -58,10 +57,18 @@ export default function RecordsModal({
   const [awardeesByAward, setAwardeesByAward] = useState<Record<string, string[]>>({});
   const [sourceRefs, setSourceRefs] = useState<RecordSourceRef[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Server-side ordering over the FULL filtered record set (not just the
+  // loaded page). Column key + direction; null = payload default order.
+  const [recordSort, setRecordSort] = useState<{ column: string; direction: 'asc' | 'desc' } | null>(null);
   const seq = useRef(0);
 
   const focusColumn = recordId ? FOCUS_COLUMN[dataset] : null;
   const focused = Boolean(recordId && focusColumn);
+
+  // Reset ordering when the target dataset/release changes.
+  useEffect(() => {
+    setRecordSort(null);
+  }, [dataset, releaseId, recordId]);
 
   useEffect(() => {
     if (!isActive) return;
@@ -84,7 +91,7 @@ export default function RecordsModal({
     const main = queryTable(dataset, {
       filters,
       filter_logic: 'and',
-      sort: [],
+      sort: recordSort ? [{ column: recordSort.column, direction: recordSort.direction }] : [],
       page_size: focused ? 20 : 100,
     });
 
@@ -175,7 +182,7 @@ export default function RecordsModal({
           setError(err instanceof ApiError ? `${err.code ?? ''} ${err.message}` : String(err));
         }
       });
-  }, [dataset, releaseId, recordId, focusColumn, focused, isActive]);
+  }, [dataset, releaseId, recordId, focusColumn, focused, isActive, recordSort]);
 
   const title = focused
     ? (focusLabel ?? `${DATASET_LABELS[dataset] ?? dataset} · one record`)
@@ -245,6 +252,16 @@ export default function RecordsModal({
                 result={result}
                 awardeesByAward={awardeesByAward}
                 onOpenSources={onOpenSources}
+                sort={recordSort}
+                onToggleSort={(key) =>
+                  setRecordSort((current) => {
+                    if (!current || current.column !== key)
+                      return { column: key, direction: 'asc' };
+                    if (current.direction === 'asc')
+                      return { column: key, direction: 'desc' };
+                    return null;
+                  })
+                }
               />
             )}
             {focused && related && related.page.returned > 0 && (
@@ -263,7 +280,10 @@ export default function RecordsModal({
               <p className="hint">No supplier assertion linked to this award.</p>
             )}
             {!focused && result.page.has_more && (
-              <p className="hint">More than 100 records — showing the first 100.</p>
+              <p className="hint">
+                More than 100 records — showing the first 100. Column sorting
+                still orders every matching record before this window is taken.
+              </p>
             )}
           </>
         )}
@@ -277,25 +297,23 @@ function RecordsTable({
   result,
   awardeesByAward = {},
   onOpenSources,
+  sort = null,
+  onToggleSort,
 }: {
   dataset: string;
   result: QueryResult;
   awardeesByAward?: Record<string, string[]>;
   onOpenSources: (sourceFileId: string, startRow: number, endRow: number, fileName?: string) => void;
+  /** Active server-side sort (column + direction), null = payload default. */
+  sort?: { column: string; direction: 'asc' | 'desc' } | null;
+  /** Called with the column key when a header is clicked. */
+  onToggleSort?: (key: string) => void;
 }) {
-  const columnKeys = useMemo(() => {
-    const spec = TABLE_COLUMNS[dataset];
-    if (spec) return spec.map((column) => column.key);
-    return result.columns.map((column) => column.name);
-  }, [dataset, result.columns]);
-  const { sort, toggleSort } = useTableSort();
-  const accessors = useMemo(() => rowAccessors(columnKeys), [columnKeys]);
-  const sortedRows = useMemo(
-    () => sortRows(result.rows, accessors, sort),
-    [result.rows, accessors, sort],
-  );
+  // Rows arrive pre-ordered from the server (sort is server-side over the
+  // FULL filtered set); no client re-sorting here.
+  const rows = result.rows;
   if (dataset === 'tender_items') {
-    const items = result.rows.map((row) => itemRowFromQuery(row));
+    const items = rows.map((row) => itemRowFromQuery(row));
     return (
       <div className="table-wrap item-table-wrap">
         <table className="item-table">
@@ -318,7 +336,7 @@ function RecordsTable({
                 <td className="row-action">
                   <ItemSourceButton
                     itemId={item.item_id}
-                    releaseId={String(result.rows[index]?.release_id ?? '')}
+                    releaseId={String(rows[index]?.release_id ?? '')}
                     onOpenSources={onOpenSources}
                   />
                 </td>
@@ -330,34 +348,35 @@ function RecordsTable({
     );
   }
 
+  const spec = TABLE_COLUMNS[dataset];
+
   return (
     <div className="table-wrap">
       <table>
         <thead>
           <tr>
-            {TABLE_COLUMNS[dataset]?.map((column) => (
-              <SortableTh
-                key={column.key}
-                label={column.label}
-                sortKey={column.key}
-                sort={sort}
-                onToggle={toggleSort}
-                className={column.klass ?? undefined}
-              />
-            )) ?? result.columns.map((column) => (
-              <SortableTh
-                key={column.name}
-                label={column.name}
-                sortKey={column.name}
-                sort={sort}
-                onToggle={toggleSort}
-              />
-            ))}
+            {spec
+              ? spec.map((column) => (
+                <SortableServerTh
+                  key={column.key}
+                  column={column}
+                  sort={sort}
+                  onToggle={onToggleSort}
+                />
+              ))
+              : result.columns.map((column) => (
+                <SortableServerTh
+                  key={column.name}
+                  column={{ key: column.name, label: column.name }}
+                  sort={sort}
+                  onToggle={onToggleSort}
+                />
+              ))}
             <th className="row-action">Source</th>
           </tr>
         </thead>
         <tbody>
-          {sortedRows.map((row, index) => (
+          {rows.map((row, index) => (
             <RecordRow
               key={index}
               dataset={dataset}
@@ -374,6 +393,50 @@ function RecordsTable({
         </tbody>
       </table>
     </div>
+  );
+}
+
+/** Sortable header whose ordering runs server-side over the full result set.
+ * Virtual columns (values joined from another dataset, e.g. Awardee on
+ * awards) must pass `sortable: false` — the query API would reject them.
+ */
+function SortableServerTh({
+  column,
+  sort,
+  onToggle,
+}: {
+  column: { key: string; label: string; klass?: string; sortable?: boolean };
+  sort: { column: string; direction: 'asc' | 'desc' } | null;
+  onToggle?: (key: string) => void;
+}) {
+  if (column.sortable === false) {
+    return (
+      <th
+        className={column.klass ?? undefined}
+        title={`${column.label} comes from a separate dataset, so full-result sorting by it is not available`}
+      >
+        {column.label}
+      </th>
+    );
+  }
+  const active = sort?.column === column.key;
+  const marker = active ? (sort!.direction === 'asc' ? ' ▲' : ' ▼') : ' ↕';
+  return (
+    <th
+      className={column.klass ?? undefined}
+      aria-sort={active ? (sort!.direction === 'asc' ? 'ascending' : 'descending') : undefined}
+    >
+      <button
+        type="button"
+        className="sort-btn"
+        onClick={() => onToggle?.(column.key)}
+        disabled={!onToggle}
+        title={`Sort by ${column.label} (all matching records, not just the loaded page)`}
+      >
+        {column.label}
+        <span className={active ? 'sort-marker-active' : 'sort-marker'}>{marker}</span>
+      </button>
+    </th>
   );
 }
 
@@ -694,14 +757,14 @@ const DATASET_SINGULAR: Record<string, string> = {
   tender_items: 'item',
 };
 
-const TABLE_COLUMNS: Record<string, { key: string; label: string; klass?: string }[]> = {
+const TABLE_COLUMNS: Record<string, { key: string; label: string; klass?: string; sortable?: boolean }[]> = {
   tenders: [
     { key: 'source_bid_reference', label: 'Bid ref', klass: 'cell-ref' },
     { key: 'solicitation_number', label: 'Solicitation', klass: 'cell-ref' },
     { key: 'title', label: 'Title', klass: 'cell-title' },
     { key: 'procurement_method', label: 'Method' },
     { key: 'status', label: 'Status' },
-    { key: 'value_amount', label: 'Amount', klass: 'cell-amount' },
+    { key: 'value_amount', label: 'Bid Tender Amount', klass: 'cell-amount' },
     { key: 'closing_date', label: 'Closing' },
   ],
   tender_items: ITEM_TABLE_COLUMNS.map((column) => ({
@@ -713,9 +776,12 @@ const TABLE_COLUMNS: Record<string, { key: string; label: string; klass?: string
     { key: 'source_award_reference', label: 'Award ref', klass: 'cell-ref' },
     { key: 'title', label: 'Title', klass: 'cell-title' },
     { key: 'description', label: 'Description', klass: 'cell-detail' },
-    { key: 'awardee', label: 'Awardee', klass: 'cell-title' },
+    // Virtual: awardee names are joined from award_suppliers at render
+    // time — the awards table itself has no such column, so full-result
+    // sorting by it is not available.
+    { key: 'awardee', label: 'Awardee', klass: 'cell-title', sortable: false },
     { key: 'status', label: 'Status' },
-    { key: 'value_amount', label: 'Amount', klass: 'cell-amount' },
+    { key: 'value_amount', label: 'Bid Awarded Amount', klass: 'cell-amount' },
     { key: 'date', label: 'Date' },
   ],
   award_items: [
@@ -730,7 +796,7 @@ const TABLE_COLUMNS: Record<string, { key: string; label: string; klass?: string
   contracts: [
     { key: 'source_contract_number', label: 'Contract no.', klass: 'cell-title' },
     { key: 'source_award_reference', label: 'Award ref', klass: 'cell-ref' },
-    { key: 'value_amount', label: 'Amount', klass: 'cell-amount' },
+    { key: 'value_amount', label: 'Contract amount', klass: 'cell-amount' },
     { key: 'period_start', label: 'Start' },
     { key: 'period_end', label: 'End' },
   ],

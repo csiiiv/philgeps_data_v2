@@ -3,10 +3,12 @@ import {
   ApiError,
   type PartyIdentityFull,
   type PartyPageResponse,
+  type SortSpec,
   fetchPartyIdentity,
   fetchPartyPage,
 } from './api';
 import { ModalHeader } from './ModalHost';
+import { LoadingOverlay } from './LoadingOverlay';
 import { ProcurementTable } from './SearchLanding';
 import { renderMoney } from './money';
 
@@ -17,6 +19,12 @@ const ROLE_LABELS: Record<string, string> = {
   buyer: 'buyer',
   admin: 'admin',
 };
+
+type Busy =
+  | { kind: 'open' }
+  | { kind: 'refresh'; reason: 'sort' | 'scope' }
+  | { kind: 'more' }
+  | null;
 
 /** Mini bar for value-over-time: height scaled to the max year count. */
 function YearBars({ data }: { data: PartyPageResponse['stats'] extends undefined ? never : NonNullable<PartyPageResponse['stats']>['value_over_time'] }) {
@@ -67,19 +75,22 @@ export default function PartyPage({
   const [identity, setIdentity] = useState<PartyIdentityFull | null>(null);
   const [identityOpen, setIdentityOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [busy, setBusy] = useState<Busy>(null);
   const [page, setPage] = useState(0);
   const [scope, setScope] = useState<'name' | 'identity'>('name');
+  // Server-side ordering over the party's FULL procurement population.
+  const [procSort, setProcSort] = useState<SortSpec | null>(null);
 
   useEffect(() => {
     if (!name) return;
     let cancelled = false;
-    setLoading(true);
+    setBusy({ kind: 'open' });
     setError(null);
     setIdentity(null);
     setIdentityOpen(false);
-    // Scope resets to the exact name whenever the target changes.
+    // Scope and sort reset whenever the target party changes.
     setScope('name');
+    setProcSort(null);
     fetchPartyPage(name)
       .then((payload) => {
         if (!cancelled) {
@@ -93,7 +104,7 @@ export default function PartyPage({
         }
       })
       .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) setBusy(null);
       });
     return () => {
       cancelled = true;
@@ -103,28 +114,48 @@ export default function PartyPage({
   const switchScope = (next: 'name' | 'identity') => {
     if (!name || next === scope) return;
     setScope(next);
-    setLoading(true);
+    setBusy({ kind: 'refresh', reason: 'scope' });
     setError(null);
-    fetchPartyPage(name, 0, next)
+    fetchPartyPage(name, 0, next, procSort)
       .then((payload) => {
         setData(payload);
         setPage(0);
       })
       .catch((err: unknown) => setError(String(err)))
-      .finally(() => setLoading(false));
+      .finally(() => setBusy(null));
   };
 
   const loadMore = () => {
-    if (!data || !name) return;
+    if (!data || !name || busy) return;
     const next = page + 1;
-    setLoading(true);
-    fetchPartyPage(name, next, scope)
+    setBusy({ kind: 'more' });
+    fetchPartyPage(name, next, scope, procSort)
       .then((payload) => {
         setData({ ...payload, procurements: [...data.procurements, ...payload.procurements] });
         setPage(next);
       })
       .catch((err: unknown) => setError(String(err)))
-      .finally(() => setLoading(false));
+      .finally(() => setBusy(null));
+  };
+
+  /** Header click cycles asc → desc → default (server re-queries). */
+  const toggleProcSort = (key: string) => {
+    const next =
+      procSort?.column !== key
+        ? { column: key, direction: 'asc' as const }
+        : procSort.direction === 'asc'
+          ? { column: key, direction: 'desc' as const }
+          : null;
+    setProcSort(next);
+    if (!name) return;
+    setBusy({ kind: 'refresh', reason: 'sort' });
+    fetchPartyPage(name, 0, scope, next)
+      .then((payload) => {
+        setData(payload);
+        setPage(0);
+      })
+      .catch((err: unknown) => setError(String(err)))
+      .finally(() => setBusy(null));
   };
 
   const shown = data?.procurements.length ?? 0;
@@ -151,11 +182,27 @@ export default function PartyPage({
       className="inspector process-page wide-modal"
       role="dialog"
       aria-label={`Records for ${name}`}
+      aria-busy={busy != null || undefined}
       onClick={(e) => e.stopPropagation()}
     >
       <ModalHeader title={<span className="modal-heading">{name}</span>} depth={depth} total={total} onBack={onBack} onClose={onClose} onCloseAll={onCloseAll} />
-      <div className="trace-body">
-        {loading && !data && <p className="query-status">Loading…</p>}
+      <div className="trace-body party-body">
+        {(busy?.kind === 'open' || busy?.kind === 'refresh') && (
+          <LoadingOverlay
+            label={
+              busy.kind === 'open'
+                ? 'Loading party…'
+                : busy.reason === 'sort'
+                  ? 'Sorting procurements…'
+                  : 'Updating scope…'
+            }
+            detail={
+              busy.kind === 'open'
+                ? 'First open may take a few seconds while awards and contracts are gathered.'
+                : 'Reordering the full match set, not just this page.'
+            }
+          />
+        )}
         {error && <p className="warning" role="alert">Lookup failed: {error}</p>}
         {data && (
           <>
@@ -179,7 +226,12 @@ export default function PartyPage({
                 )}
                 {data.stats.value_comparable && data.stats.total_value != null && (
                   <div className="party-stat">
-                    <span className="count-label">Recorded value</span>
+                    <span
+                      className="count-label"
+                      title="Sum of tender values recorded on the notices (single currency)"
+                    >
+                      Tender value
+                    </span>
                     <span className="count-value">
                       {renderMoney({
                         amount: data.stats.total_value,
@@ -190,6 +242,22 @@ export default function PartyPage({
                           <YearBars data={data.stats.value_over_time} />
                         </span>
                       )}
+                    </span>
+                  </div>
+                )}
+                {data.stats.awarded_comparable && data.stats.awarded_total != null && (
+                  <div className="party-stat">
+                    <span
+                      className="count-label"
+                      title="Sum of distinct awards naming this party as supplier (single currency). Shared multi-supplier awards count in full once — not exclusive revenue (ADR-009)."
+                    >
+                      Awarded value
+                    </span>
+                    <span className="count-value">
+                      {renderMoney({
+                        amount: data.stats.awarded_total,
+                        currency: data.stats.awarded_currency ?? null,
+                      })}
                     </span>
                   </div>
                 )}
@@ -325,16 +393,24 @@ export default function PartyPage({
             {totalProcurements === 0 ? (
               <p className="null">No procurements recorded under this exact name.</p>
             ) : (
-              <ProcurementTable cards={data.procurements} onOpenProcess={onOpenProcess} />
+              <ProcurementTable
+                cards={data.procurements}
+                onOpenProcess={onOpenProcess}
+                sort={procSort}
+                onToggleSort={toggleProcSort}
+                partyView
+              />
             )}
             {shown < totalProcurements && (
               <button
                 type="button"
                 className="secondary more-button"
                 onClick={loadMore}
-                disabled={loading}
+                disabled={busy != null}
               >
-                {loading ? 'Loading…' : `Show ${Math.min(20, totalProcurements - shown)} more`}
+                {busy?.kind === 'more'
+                  ? 'Loading…'
+                  : `Show ${Math.min(20, totalProcurements - shown)} more`}
               </button>
             )}
             <p className="hint">

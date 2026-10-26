@@ -271,7 +271,7 @@ export function AwardItemsPanel({
               ? 'This award covers multiple tender line items — each row below is a distinct purchased item.'
               : 'Tender line item linked to this award (name, qty, and budget from the bid).'}
       </p>
-      <ItemTable items={items} collapseDescriptions compact={compact} />
+      <ItemTable items={items} compact={compact} />
     </div>
   );
 }

@@ -1,7 +1,11 @@
-param(
-    [int]$Port = 8765
-)
+# Local-only viewer (127.0.0.1). For LAN/VPS use run_viewer_network.ps1.
+param([int]$Port = 8765)
 
-$project = Split-Path -Parent $PSScriptRoot
-Set-Location -LiteralPath $project
-python -m uvicorn backend.app.main:app --host 127.0.0.1 --port $Port
+$ErrorActionPreference = "Stop"
+$Root = Split-Path -Parent $PSScriptRoot
+Set-Location $Root
+
+Write-Host "PhilGEPS Parquet Viewer (local)"
+Write-Host "  Open: http://127.0.0.1:$Port/"
+python -m uvicorn backend.app.main:app --host 0.0.0.0 --port $Port
+

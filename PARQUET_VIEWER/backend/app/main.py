@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import threading
 from collections import OrderedDict
 from pathlib import Path
@@ -17,12 +18,13 @@ from starlette.middleware.trustedhost import TrustedHostMiddleware
 from .catalog import Catalog
 from .config import Settings, load_settings
 from .coverage import SourceCoverageService
+
 from .database import DuckDBPool
 from .outcomes import OutcomesService
 from .provenance import ProvenanceCache
 from .process import ProcessService
 from .query import QueryError, TableQuery, TableQueryService, to_csv
-from .search import SearchService
+from .search import PARTY_SORT_COLUMNS, SearchService, parse_sort
 from .trace import TraceabilityService
 from .views import SavedViewsService
 
@@ -177,6 +179,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         year_to: int | None = Query(default=None, ge=1990, le=2100),
         outcome: list[str] = Query(default=[]),
         party_page: int = Query(default=0, ge=0),
+        sort: str | None = Query(
+            default=None,
+            max_length=40,
+            description=(
+                "Result ordering over the FULL match population, "
+                "`column[:asc|desc]`. Columns: closing_date, title, status, "
+                "value_amount (tender), award_value_amount."
+            ),
+        ),
     ):
         try:
             return search.search(
@@ -187,6 +198,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                 year_to=year_to,
                 outcomes=tuple(outcome),
                 party_page=party_page,
+                sort=parse_sort(sort),
             )
         except QueryError as error:
             raise HTTPException(
@@ -272,9 +284,24 @@ def create_app(settings: Settings | None = None) -> FastAPI:
         name: str,
         page: int = Query(default=0, ge=0),
         scope: str = Query(default="name", pattern="^(name|identity)$"),
+        sort: str | None = Query(
+            default=None,
+            max_length=48,
+            description=(
+                "Result ordering over the FULL match population, "
+                "`column[:asc|desc]`. Columns: closing_date, title, status, "
+                "value_amount (tender), award_value_amount, "
+                "supplier_award_value_amount."
+            ),
+        ),
     ):
         try:
-            return search.party(name, page, scope=scope)
+            return search.party(
+                name,
+                page,
+                scope=scope,
+                sort=parse_sort(sort, columns=PARTY_SORT_COLUMNS),
+            )
         except QueryError as error:
             raise HTTPException(
                 status_code=400, detail={"code": error.code, "message": str(error)}
@@ -417,13 +444,14 @@ def create_app(settings: Settings | None = None) -> FastAPI:
 
     @app.on_event("startup")
     def warm_background_builds() -> None:
-        # Kick both disposable projections in daemon threads: requests served
-        # before they finish fall back to direct scans transparently.
-        threading.Thread(
-            target=search.warm, name="search-index-build", daemon=True
-        ).start()
-
-        def _warm_provenance() -> None:
+        # Build the two disposable projections sequentially, not concurrently:
+        # each build claims its own DuckDB memory ceiling, and serializing
+        # keeps the startup peak near one ceiling instead of their sum (the
+        # small-VPS profile in docs/16 relies on this). Requests served before
+        # both finish fall back to direct scans transparently; serializing
+        # only delays warm-cache readiness, never correctness.
+        def _warm_all() -> None:
+            search.warm()
             snapshot = catalog.snapshot()
             path = None
             for item in snapshot["datasets"]:
@@ -432,9 +460,7 @@ def create_app(settings: Settings | None = None) -> FastAPI:
                     break
             provenance.warm(path)
 
-        threading.Thread(
-            target=_warm_provenance, name="provenance-build", daemon=True
-        ).start()
+        threading.Thread(target=_warm_all, name="warm-builds", daemon=True).start()
 
     @app.get("/", include_in_schema=False)
     def index():
@@ -443,5 +469,15 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     return app
 
 
-settings = load_settings()
+def _module_settings_path() -> Path | None:
+    """Settings path override for deployments: PHILGEPS_SETTINGS env var.
+
+    Lets a VPS run the small-RAM profile (`config/settings.vps-small.json`)
+    without editing the default `settings.json` used in development.
+    """
+    override = os.environ.get("PHILGEPS_SETTINGS")
+    return Path(override) if override else None
+
+
+settings = load_settings(_module_settings_path())
 app = create_app(settings)

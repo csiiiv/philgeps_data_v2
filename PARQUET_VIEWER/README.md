@@ -54,6 +54,7 @@ The active implementation checklist is maintained in [TODO.md](TODO.md).
 13. [Process outcomes spec](docs/13_process_outcomes_spec.md)
 14. [Relationship status spec](docs/14_relationship_status_spec.md)
 15. [Source coverage spec](docs/15_source_coverage_spec.md)
+16. [VPS deployment profile (4–6 GB RAM)](docs/16_vps_deployment_profile.md)
 
 ## Data sources
 
@@ -92,11 +93,27 @@ cd frontend\app; npm install; npm run build; cd ..\..
 .\scripts\run_viewer.ps1
 ```
 
-Then open `http://127.0.0.1:8765`. The server binds to `127.0.0.1` only —
-nothing is reachable from other machines. The first metadata load inspects all
-Parquet footers and may take a few seconds; it does not scan table contents.
-Startup performs a live check (`/api/health`); missing Python packages or
-datasets are reported by `scripts\check_environment.py` before launch.
+Then open `http://127.0.0.1:8765`. The default server binds to `127.0.0.1` only.
+The first metadata load inspects all Parquet footers and may take a few
+seconds; it does not scan table contents. Startup performs a live check
+(`/api/health`); missing Python packages or datasets are reported by
+`scripts\check_environment.py` before launch.
+
+### Network access (LAN / VPS)
+
+Opt-in — binds all interfaces and allows the machine’s LAN IP(s) and hostname
+via `PHILGEPS_EXTRA_ALLOWED_HOSTS` (no edit to `settings.json` required):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\run_viewer_network.ps1
+```
+
+Open `http://<this-machine-lan-ip>:8765` from another device on the same
+network. There is **no authentication**; anyone who can reach the port can
+query the data. For a public hostname, also add it to `api.allowed_hosts` in
+settings (or pass `-SettingsPath .\config\settings.vps-small.json` which
+already lists `philgeps-v2.simple-systems.dev`). See
+[docs/16_vps_deployment_profile.md](docs/16_vps_deployment_profile.md).
 
 Development run (hot-reloading React UI via Vite, API via uvicorn --reload):
 

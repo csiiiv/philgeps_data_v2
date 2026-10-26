@@ -1264,6 +1264,9 @@ class ProcessService:
             )
         listed_not_awarded = sorted(listed_names - awarded_names)
         # Bounded: a single release with pathological counts stays renderable.
+        # The cap is high (200) so the Awards table — whose column sorting
+        # happens in the browser over this payload — effectively covers the
+        # full award set for real processes.
         award_list = sorted(
             awards.values(),
             key=lambda a: (-(a["value"] and float(a["value"]["amount"]) or 0), a["award_id"]),
@@ -1275,12 +1278,12 @@ class ProcessService:
             award["items"] = linked[:5]
             award["items_truncated"] = len(linked) > 5
         return {
-            "awards": award_list[:50],
+            "awards": award_list[:200],
             "award_total": len(awards),
             "awarded_supplier_names": sorted(awarded_names),
             "listed_not_awarded": listed_not_awarded[:25],
             "listed_not_awarded_total": len(listed_not_awarded),
-            "truncated": len(award_list) > 50,
+            "truncated": len(award_list) > 200,
         }
 
     def _item_structure(

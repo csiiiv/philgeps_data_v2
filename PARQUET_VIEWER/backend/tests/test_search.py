@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from helpers import FIXTURE_PROCESS_ID, build_project, make_client
+from helpers import FIXTURE_PROCESS_ID, FIXTURE_RELEASE_ID_1, build_project, make_client
 
 
 class SearchEndpointTests(unittest.TestCase):
@@ -162,6 +162,144 @@ class SearchEndpointTests(unittest.TestCase):
         self.assertEqual(second["parties"], [])
 
 
+class SearchSortTests(unittest.TestCase):
+    """Server-side result ordering over the FULL match population."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.root = Path(tempfile.mkdtemp(prefix="pgview_sort_"))
+        build_project(cls.root)
+        cls.client = make_client(cls.root)
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.client.close()
+
+    def test_sort_echoed_in_payload(self):
+        payload = self.client.get(
+            "/api/search",
+            params={"q": "Fixture tender", "sort": "closing_date:asc"},
+        ).json()
+        self.assertEqual(
+            payload["sort"], {"column": "closing_date", "direction": "asc"}
+        )
+
+    def test_default_payload_sort_is_null(self):
+        payload = self.client.get(
+            "/api/search", params={"q": "Fixture tender"}
+        ).json()
+        self.assertIsNone(payload["sort"])
+
+    def test_sort_procuring_entity_and_region(self):
+        for column in ("procuring_entity", "region", "awardee"):
+            payload = self.client.get(
+                "/api/search",
+                params={"q": "Fixture tender", "sort": f"{column}:asc"},
+            ).json()
+            self.assertEqual(
+                payload["sort"], {"column": column, "direction": "asc"}
+            )
+            self.assertEqual(
+                payload["procurements"][0]["procuring_entity"],
+                "Department of Fixture Works",
+            )
+
+    def test_procurement_cards_include_buyer_and_region(self):
+        payload = self.client.get(
+            "/api/search", params={"q": "Fixture tender"}
+        ).json()
+        card = payload["procurements"][0]
+        self.assertEqual(card["procuring_entity"], "Department of Fixture Works")
+        # Fixture parties have no source_region column.
+        self.assertIsNone(card["region"])
+
+    def test_procurement_cards_include_top_awardee(self):
+        payload = self.client.get(
+            "/api/search", params={"q": "Fixture tender"}
+        ).json()
+        card = payload["procurements"][0]
+        # Gencorp won 4800, Splitter Trading won 1500: Gencorp is top.
+        self.assertEqual(card["awardee"], "Gencorp Supplies Inc.")
+
+    def test_sort_title_ascending_orders_results(self):
+        payload = self.client.get(
+            "/api/search", params={"q": "Fixture", "sort": "title"}
+        ).json()
+        titles = [card["title"] for card in payload["procurements"]]
+        self.assertEqual(titles, sorted(titles))
+
+    def test_sort_award_value_descending_orders_nulls_last(self):
+        payload = self.client.get(
+            "/api/search", params={"q": "Fixture", "sort": "award_value_amount:desc"}
+        ).json()
+        cards = payload["procurements"]
+        values = [
+            float(card["award_value_amount"])
+            for card in cards
+            if card["award_value_amount"] is not None
+        ]
+        self.assertEqual(values, sorted(values, reverse=True))
+        # Nulls (no awards / mixed currency) must sort after valued rows.
+        if any(card["award_value_amount"] is None for card in cards):
+            self.assertIsNone(cards[-1]["award_value_amount"])
+
+    def test_sort_rejects_unknown_column(self):
+        response = self.client.get(
+            "/api/search", params={"q": "Fixture tender", "sort": "banana"}
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(
+            response.json()["detail"]["code"], "invalid_search"
+        )
+
+    def test_sort_rejects_unknown_direction(self):
+        response = self.client.get(
+            "/api/search", params={"q": "Fixture tender", "sort": "title:sideways"}
+        )
+        self.assertEqual(response.status_code, 400)
+
+    def test_party_page_sort_orders_cards(self):
+        payload = self.client.get(
+            "/api/parties/name/Department of Fixture Works",
+            params={"sort": "title:asc"},
+        ).json()
+        self.assertEqual(
+            payload["sort"], {"column": "title", "direction": "asc"}
+        )
+        titles = [card["title"] for card in payload["procurements"]]
+        self.assertEqual(titles, sorted(titles))
+
+    def test_party_page_sort_by_supplier_award(self):
+        payload = self.client.get(
+            "/api/parties/name/Gencorp Supplies Inc.",
+            params={"sort": "supplier_award_value_amount:desc"},
+        ).json()
+        self.assertEqual(
+            payload["sort"],
+            {"column": "supplier_award_value_amount", "direction": "desc"},
+        )
+        card = payload["procurements"][0]
+        self.assertEqual(card["supplier_award_value_amount"], "4800.0000")
+        # Search endpoint must still reject the party-only column.
+        rejected = self.client.get(
+            "/api/search",
+            params={"q": "Fixture", "sort": "supplier_award_value_amount:desc"},
+        )
+        self.assertEqual(rejected.status_code, 400)
+
+    def test_sort_is_cached_separately(self):
+        plain = self.client.get("/api/search", params={"q": "Fixture tender"})
+        sorted_req = self.client.get(
+            "/api/search", params={"q": "Fixture tender", "sort": "title:asc"}
+        )
+        # Same query, different sort: fresh result, not the plain cache hit.
+        self.assertNotIn("cached", sorted_req.json())
+        repeat = self.client.get(
+            "/api/search", params={"q": "Fixture tender", "sort": "title:asc"}
+        )
+        self.assertTrue(repeat.json()["cached"])
+
+
 class ProcessEnhancementTests(unittest.TestCase):
     """Quality flag help + award-vs-tender ratio on the process summary."""
 
@@ -226,6 +364,135 @@ class ProcessEnhancementTests(unittest.TestCase):
             identity["stats"]["status_counts"][0]["count"],
             exact["stats"]["status_counts"][0]["count"],
         )
+
+    def test_search_cards_carry_awarded_amount(self):
+        # Preferred release awards: 4800 + 1500 PHP -> awarded total 6300.
+        payload = self.client.get(
+            "/api/search", params={"q": "Fixture tender"}
+        ).json()
+        card = payload["procurements"][0]
+        self.assertEqual(float(card["award_value_amount"]), 6300.0)
+        self.assertEqual(card["award_value_currency"], "PHP")
+
+    def test_party_page_stats_split_tender_and_awarded_value(self):
+        # Gencorp: tenders seen via its processes (5000) vs distinct awards
+        # naming it (4800 — pgaw_fixture01 only; pgaw_fixture02 names
+        # Splitter Trading). Award grain, supplier-assertion attribution.
+        payload = self.client.get(
+            "/api/parties/name/Gencorp Supplies Inc."
+        ).json()
+        stats = payload["stats"]
+        self.assertEqual(stats["awarded_total"], "4800.0000")
+        self.assertEqual(stats["awarded_currency"], "PHP")
+        self.assertTrue(stats["awarded_comparable"])
+        # Tender total unchanged (one process, 5000 PHP notice value).
+        self.assertEqual(stats["total_value"], "5000.0000")
+
+    def test_party_page_cards_carry_awarded_amount(self):
+        payload = self.client.get(
+            "/api/parties/name/Department of Fixture Works"
+        ).json()
+        card = payload["procurements"][0]
+        self.assertEqual(float(card["award_value_amount"]), 6300.0)
+        # Buyer is not an award supplier — supplier-scoped amount is null.
+        self.assertIsNone(card["supplier_award_value_amount"])
+        self.assertFalse(card["supplier_award_shared"])
+
+    def test_party_page_supplier_award_is_party_scoped(self):
+        # Process total 6300; Gencorp only won pgaw_fixture01 (4800).
+        payload = self.client.get(
+            "/api/parties/name/Gencorp Supplies Inc."
+        ).json()
+        self.assertGreaterEqual(len(payload["procurements"]), 1)
+        card = payload["procurements"][0]
+        self.assertEqual(float(card["award_value_amount"]), 6300.0)
+        self.assertEqual(card["supplier_award_value_amount"], "4800.0000")
+        self.assertEqual(card["supplier_award_value_currency"], "PHP")
+        self.assertFalse(card["supplier_award_shared"])
+
+    def test_party_page_shared_supplier_award_is_flagged(self):
+        # Add a co-supplier on Gencorp's exclusive lot so the award is shared.
+        import duckdb as _duckdb
+
+        root = Path(tempfile.mkdtemp(prefix="pgview_shared_award_"))
+        build_project(root)
+        parquet = root / "parquets" / "award_suppliers.parquet"
+        con = _duckdb.connect()
+        con.execute(
+            f"""
+            COPY (
+                SELECT * FROM (VALUES
+                    ('pgsa_fixture01', '{FIXTURE_RELEASE_ID_1}', 'pgaw_fixture01',
+                     'pgpt_supplier', 'Gencorp Supplies Inc.', NULL,
+                     'matched', 'matched', NULL),
+                    ('pgsa_fixture01c', '{FIXTURE_RELEASE_ID_1}', 'pgaw_fixture01',
+                     'pgpt_partner', 'Partner Co.', NULL,
+                     'matched', 'matched', NULL),
+                    ('pgsa_fixture02', '{FIXTURE_RELEASE_ID_1}', 'pgaw_fixture02',
+                     'pgpt_supplier2', 'Splitter Trading', 'JV with Partner Co.',
+                     'matched', 'matched', NULL)
+                ) AS t(award_supplier_assertion_id, release_id, award_id,
+                       party_id, source_supplier_label, source_joint_venture,
+                       award_link_status, party_link_status, supplier_quality_flags)
+            ) TO '{str(parquet).replace(chr(39), chr(39) * 2)}' (FORMAT PARQUET)
+            """
+        )
+        con.close()
+        client = make_client(root)
+        try:
+            payload = client.get(
+                "/api/parties/name/Gencorp Supplies Inc."
+            ).json()
+            card = payload["procurements"][0]
+            self.assertEqual(float(card["award_value_amount"]), 6300.0)
+            # Still only Gencorp's lot (4800), but shared with Partner Co.
+            self.assertEqual(card["supplier_award_value_amount"], "4800.0000")
+            self.assertTrue(card["supplier_award_shared"])
+            self.assertEqual(card["supplier_award_co_suppliers"], 2)
+        finally:
+            client.close()
+
+    def test_mixed_currency_awards_report_null_awarded_total(self):
+        # Build a one-off fixture project with a mixed-currency award pair
+        # to prove the honest-currency rule: NULL, never a cross-sum.
+        import duckdb as _duckdb
+
+        root = Path(tempfile.mkdtemp(prefix="pgview_mixed_"))
+        build_project(root)
+        awards_path = root / "parquets" / "awards.parquet"
+        con = _duckdb.connect()
+        con.execute(
+            f"""
+            COPY (
+                SELECT * FROM (VALUES
+                    ('{FIXTURE_RELEASE_ID_1}', 'pgaw_fixture01', '5708843',
+                     'Fixture award',
+                     CAST('4800.0000' AS DECIMAL(38,4)), 'PHP',
+                     TIMESTAMP '2024-02-05 00:00:00', DATE '2024-02-06'),
+                    ('{FIXTURE_RELEASE_ID_1}', 'pgaw_fixture02', '5708844',
+                     'Split lot B',
+                     CAST('100.0000' AS DECIMAL(38,4)), 'USD',
+                     TIMESTAMP '2024-02-06 00:00:00', DATE '2024-02-06')
+                ) AS t(release_id, award_id, source_award_reference, title,
+                       value_amount, value_currency, date, date_published)
+            ) TO '{str(awards_path).replace(chr(39), chr(39) * 2)}' (FORMAT PARQUET)
+            """
+        )
+        con.close()
+        # Stale the index so the next search rebuilds from the new awards.
+        index_path = root / ".cache" / "search_index.duckdb"
+        if index_path.exists():
+            index_path.unlink()
+        client = make_client(root)
+        try:
+            payload = client.get(
+                "/api/search", params={"q": "Fixture tender"}
+            ).json()
+            card = payload["procurements"][0]
+            self.assertIsNone(card["award_value_amount"])
+            self.assertIsNone(card["award_value_currency"])
+        finally:
+            client.close()
 
     def test_party_identity_full_shape(self):
         payload = self.client.get(

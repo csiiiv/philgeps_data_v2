@@ -5,6 +5,7 @@ import {
   type ProcurementCard,
   type SearchFacetsResponse,
   type SearchResponse,
+  type SortSpec,
   fetchCatalog,
   fetchSearchFacets,
   searchAll,
@@ -22,14 +23,17 @@ export default function SearchLanding({
   onOpenProcess,
   onOpenParty,
   initialOutcomeFilter,
+  initialSearchTerm,
 }: {
   onOpenProcess: (processId: string) => void;
   /** Opens the party page for one observed name (researcher view). */
   onOpenParty: (name: string) => void;
   /** Pre-applied outcome filter (coverage funnel drill-through). */
   initialOutcomeFilter?: string | null;
+  /** Pre-filled search box (shared "copy link" URL, ?search=…). */
+  initialSearchTerm?: string;
 }) {
-  const [term, setTerm] = useState('');
+  const [term, setTerm] = useState(initialSearchTerm ?? '');
   const [result, setResult] = useState<SearchResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -42,6 +46,9 @@ export default function SearchLanding({
   const [outcomeFilter, setOutcomeFilter] = useState<string[]>(
     initialOutcomeFilter ? [initialOutcomeFilter] : [],
   );
+  // Server-side ordering over the FULL match population (not just the
+  // loaded page). Null = the API's default (closing date, newest first).
+  const [procSort, setProcSort] = useState<SortSpec | null>(null);
   // Parties page independently from procurements (12/page vs 20/page).
   const [partyPage, setPartyPage] = useState(0);
   const seq = useRef(0);
@@ -86,7 +93,7 @@ export default function SearchLanding({
         year_from: yearFrom,
         year_to: yearTo,
         outcomes: outcomeFilter,
-      })
+      }, 0, procSort)
         .then((payload) => {
           if (current === seq.current) {
             setResult(payload);
@@ -105,8 +112,8 @@ export default function SearchLanding({
         });
     }, 400);
     return () => clearTimeout(timer);
-    // Filters re-run the search (first page) like a new query.
-  }, [term, statusFilter, yearFrom, yearTo, outcomeFilter]);
+    // Filters and sort re-run the search (first page) like a new query.
+  }, [term, statusFilter, yearFrom, yearTo, outcomeFilter, procSort]);
 
   const loadMore = () => {
     if (!result) return;
@@ -117,7 +124,7 @@ export default function SearchLanding({
       year_from: yearFrom,
       year_to: yearTo,
       outcomes: outcomeFilter,
-    })
+    }, 0, procSort)
       .then((payload) => {
         if (current === seq.current) {
           setResult({ ...payload, procurements: [...result.procurements, ...payload.procurements] });
@@ -146,6 +153,7 @@ export default function SearchLanding({
         outcomes: outcomeFilter,
       },
       next,
+      procSort,
     )
       .then((payload) => {
         if (current === seq.current) {
@@ -186,6 +194,22 @@ export default function SearchLanding({
   const hasActiveFilters =
     statusFilter.length > 0 || yearFrom != null || yearTo != null || outcomeFilter.length > 0;
 
+  const [linkCopied, setLinkCopied] = useState(false);
+  const copySearchLink = () => {
+    const url = new URL(window.location.href);
+    url.hash = '';
+    url.search = '';
+    url.searchParams.set('search', term.trim());
+    const link = url.toString();
+    const done = () => {
+      setLinkCopied(true);
+      window.setTimeout(() => setLinkCopied(false), 2000);
+    };
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard.writeText(link).then(done).catch(() => {});
+    }
+  };
+
   const clearFilters = () => {
     setStatusFilter([]);
     setYearFrom(null);
@@ -212,6 +236,15 @@ export default function SearchLanding({
       partySort,
     );
   }, [result?.parties, partySort]);
+
+  /** Header click cycles asc → desc → default (server re-queries). */
+  const toggleProcSort = (key: string) => {
+    setProcSort((current) => {
+      if (!current || current.column !== key) return { column: key, direction: 'asc' };
+      if (current.direction === 'asc') return { column: key, direction: 'desc' };
+      return null;
+    });
+  };
   const yearOptions = facets?.years?.map((y) => y.year) ?? [];
 
   return (
@@ -373,8 +406,22 @@ export default function SearchLanding({
               showing {shown}
               {total > 0 ? ` of ${total.toLocaleString()}` : ''}
             </span>
+            <button
+              type="button"
+              className="secondary copy-link-button"
+              onClick={copySearchLink}
+              disabled={!term.trim()}
+              title="Copy a link that reopens this search"
+            >
+              {linkCopied ? 'Link copied' : 'Copy link'}
+            </button>
           </h3>
-          <ProcurementTable cards={result.procurements} onOpenProcess={onOpenProcess} />
+          <ProcurementTable
+            cards={result.procurements}
+            onOpenProcess={onOpenProcess}
+            sort={procSort}
+            onToggleSort={toggleProcSort}
+          />
           {hasMore && (
             <button type="button" className="secondary more-button" onClick={loadMore} disabled={loading}>
               {loading ? 'Loading…' : `Show ${Math.min(PROCUREMENT_LIMIT, total - shown)} more`}
@@ -504,35 +551,84 @@ function formatMillions(count: number): string {
   return count.toLocaleString();
 }
 
-/** Researcher-facing procurement table: rows open the procurement page. */
+/** Researcher-facing procurement table: rows open the procurement page.
+ *
+ * Ordering is SERVER-SIDE over the full match population when a sort
+ * handler is provided (search results, party page); consumers without a
+ * handler (none today) keep the payload order. Header cycles
+ * asc → desc → default.
+ */
 export function ProcurementTable({
   cards,
   onOpenProcess,
+  sort = null,
+  onToggleSort,
+  partyView = false,
 }: {
   cards: ProcurementCard[];
   onOpenProcess: (processId: string) => void;
+  /** Active server-side sort (column + direction), null = API default. */
+  sort?: SortSpec | null;
+  /** Called with the column key when a header is clicked. */
+  onToggleSort?: (key: string) => void;
+  /**
+   * Party page: show this party's awarded amount beside the process total,
+   * with a shared-award badge when ADR-009 applies.
+   */
+  partyView?: boolean;
 }) {
-  const { sort, toggleSort } = useTableSort();
-  const accessors: Record<string, (card: ProcurementCard) => unknown> = {
-    title: (card) => card.title,
-    status: (card) => card.status,
-    amount: (card) => (card.value_amount == null ? null : Number(card.value_amount)),
-    closing: (card) => card.closing_date,
+  const toggle = (key: string) => onToggleSort?.(key);
+  const activeMarker = (key: string) => {
+    if (sort?.column !== key) return ' ↕';
+    return sort.direction === 'asc' ? ' ▲' : ' ▼';
   };
-  const sorted = useMemo(() => sortRows(cards, accessors, sort), [cards, sort]);
+  const ariaSort = (key: string): 'ascending' | 'descending' | undefined => {
+    if (sort?.column !== key) return undefined;
+    return sort.direction === 'asc' ? 'ascending' : 'descending';
+  };
+  const header = (label: string, key: string, className?: string) => (
+    <th className={className} aria-sort={ariaSort(key)}>
+      <button
+        type="button"
+        className="sort-btn"
+        onClick={() => toggle(key)}
+        disabled={!onToggleSort}
+        title={
+          onToggleSort
+            ? `Sort by ${label} (all results, not just the loaded page)`
+            : label
+        }
+      >
+        {label}
+        <span className={sort?.column === key ? 'sort-marker-active' : 'sort-marker'}>
+          {activeMarker(key)}
+        </span>
+      </button>
+    </th>
+  );
   return (
     <div className="table-wrap">
       <table className="procurement-table">
         <thead>
           <tr>
-            <SortableTh label="Project" sortKey="title" sort={sort} onToggle={toggleSort} />
-            <SortableTh label="Status" sortKey="status" sort={sort} onToggle={toggleSort} />
-            <SortableTh label="Amount" sortKey="amount" sort={sort} onToggle={toggleSort} className="cell-amount" />
-            <SortableTh label="Closing" sortKey="closing" sort={sort} onToggle={toggleSort} />
+            {header('Project', 'title')}
+            {header('Procuring entity', 'procuring_entity')}
+            {header('Region', 'region')}
+            {header('Awardee', 'awardee')}
+            {header('Status', 'status')}
+            {header('Bid Tender Amount', 'value_amount', 'cell-amount')}
+            {header('Bid Awarded Amount', 'award_value_amount', 'cell-amount')}
+            {partyView &&
+              header(
+                "Supplier's Bid Awarded Amount",
+                'supplier_award_value_amount',
+                'cell-amount',
+              )}
+            {header('Closing', 'closing_date')}
           </tr>
         </thead>
         <tbody>
-          {sorted.map((card, i) => {
+          {cards.map((card, i) => {
             const disabled = !card.process_id;
             const open = () => card.process_id && onOpenProcess(card.process_id);
             return (
@@ -554,12 +650,70 @@ export function ProcurementTable({
                 <td className="proc-title">
                   {card.title ?? 'Untitled'}
                 </td>
+                <td className="proc-entity">
+                  {card.procuring_entity ?? <span className="null">—</span>}
+                </td>
+                <td className="proc-region">
+                  {card.region ?? <span className="null">—</span>}
+                </td>
+                <td className="proc-entity">
+                  {card.awardee ?? <span className="null">—</span>}
+                </td>
                 <td>{card.status ?? <span className="null">—</span>}</td>
-                <td className="cell-amount">
+                <td className="cell-amount" title="Value recorded on the tender notice">
                   {renderMoneyParts(card.value_amount, card.value_currency, {
                     empty: <span className="null">no amount recorded</span>,
                   })}
                 </td>
+                <td
+                  className="cell-amount"
+                  title={
+                    'award_value_amount' in card
+                      ? card.award_value_amount == null
+                        ? 'No awards recorded, or this process\u2019s awards mix currencies'
+                        : 'Sum of award values on the preferred release (single currency)'
+                      : 'Award totals are still being computed (search index building)'
+                  }
+                >
+                  {'award_value_amount' in card ? (
+                    renderMoneyParts(card.award_value_amount, card.award_value_currency, {
+                      empty: <span className="null">not awarded / mixed currency</span>,
+                    })
+                  ) : (
+                    <span className="null">building…</span>
+                  )}
+                </td>
+                {partyView && (
+                  <td
+                    className="cell-amount"
+                    title={
+                      card.supplier_award_shared
+                        ? `Includes shared award(s) with ${card.supplier_award_co_suppliers ?? 'multiple'} suppliers — full award value, not an exclusive split (ADR-009)`
+                        : card.supplier_award_value_amount == null
+                          ? 'No preferred-release award names this party as supplier'
+                          : 'Sum of awards on this process that name this party'
+                    }
+                  >
+                    {renderMoneyParts(
+                      card.supplier_award_value_amount ?? null,
+                      card.supplier_award_value_currency ?? null,
+                      {
+                        empty: <span className="null">not a named supplier</span>,
+                      },
+                    )}
+                    {card.supplier_award_shared && (
+                      <span
+                        className="badge badge-shared-award"
+                        title={`Shared with ${card.supplier_award_co_suppliers ?? 'other'} suppliers — value is the full award, not a split`}
+                      >
+                        shared
+                        {card.supplier_award_co_suppliers != null
+                          ? ` ×${card.supplier_award_co_suppliers}`
+                          : ''}
+                      </span>
+                    )}
+                  </td>
+                )}
                 <td>{card.closing_date ? card.closing_date.slice(0, 10) : <span className="null">—</span>}</td>
               </tr>
             );

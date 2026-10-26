@@ -221,7 +221,7 @@ class ProvenanceCache:
             memory = settings.duckdb.memory_limit.replace("'", "''")
             connection.execute(f"SET memory_limit = '{memory}'")
             connection.execute(
-                f"SET temp_directory = '{str(spill).replace(chr(39), chr(39) * 2)}'"
+                f"SET temp_directory = '{spill.as_posix().replace(chr(39), chr(39) * 2)}'"
             )
 
             # Decide cold vs incremental: attach prior only when schema matches.

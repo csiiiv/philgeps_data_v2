@@ -452,6 +452,9 @@ export default function App() {
           onOpenProcess={(pid) => modals.openProcess(pid)}
           onOpenParty={(name) => modals.push({ kind: 'party', name })}
           initialOutcomeFilter={pendingOutcome}
+          initialSearchTerm={
+            new URLSearchParams(window.location.search).get('search') ?? ''
+          }
         />
       ) : mode === 'coverage' ? (
         <CoveragePage onFilterOutcome={(outcome) => { setMode('search'); setPendingOutcome(outcome); }} />

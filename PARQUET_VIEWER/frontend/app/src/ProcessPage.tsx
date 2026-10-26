@@ -13,6 +13,7 @@ import {
   fetchReleaseSources,
 } from './api';
 import { ModalHeader } from './ModalHost';
+import { LoadingOverlay } from './LoadingOverlay';
 import { AwardItemsPanel } from './itemTable';
 import { ItemsPanel } from './ItemsPanel';
 import { renderMoney } from './money';
@@ -130,7 +131,12 @@ export default function ProcessPage({
     >
       <ModalHeader title="Procurement" depth={depth} total={total} onBack={onBack} onClose={onClose} onCloseAll={onCloseAll} />
       <div className="trace-body">
-        {loading && <p className="query-status">Loading procurement…</p>}
+        {loading && (
+          <LoadingOverlay
+            label="Loading procurement…"
+            detail="Gathering awards, contracts, and timeline for this process."
+          />
+        )}
         {error && (
           <p className="warning" role="alert">
             Lookup failed: {error}
@@ -181,7 +187,7 @@ function AwardStructureTable({
           <tr>
             <SortableTh label="Award ref" sortKey="reference" sort={sort} onToggle={toggleSort} />
             <SortableTh label="Award" sortKey="title" sort={sort} onToggle={toggleSort} />
-            <SortableTh label="Amount" sortKey="amount" sort={sort} onToggle={toggleSort} className="cell-amount" />
+            <SortableTh label="Bid Awarded Amount" sortKey="amount" sort={sort} onToggle={toggleSort} className="cell-amount" />
             <SortableTh label="Date" sortKey="date" sort={sort} onToggle={toggleSort} />
             <SortableTh label="Items" sortKey="items" sort={sort} onToggle={toggleSort} />
             <th>Supplier(s)</th>
@@ -919,7 +925,7 @@ function SummaryBody({
             </p>
           )}
           {summary.award_structure.truncated && (
-            <p className="hint">Showing the top 50 awards by value; more exist.</p>
+            <p className="hint">Showing the top 200 awards by value; more exist.</p>
           )}
         </section>
       )}

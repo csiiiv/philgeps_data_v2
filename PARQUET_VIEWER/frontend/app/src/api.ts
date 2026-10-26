@@ -570,6 +570,29 @@ export interface ProcurementCard {
   value_amount: string | null;
   value_currency: string | null;
   closing_date: string | null;
+  /** Preferred-release procuring entity (one name when several are recorded). */
+  procuring_entity?: string | null;
+  /** That entity's recorded region (parties.source_region). */
+  region?: string | null;
+  /**
+   * Top awardee by total award value on the preferred release; the
+   * observed supplier label with the largest single-currency total.
+   */
+  awardee?: string | null;
+  /** Per-process awarded total; null when awards are absent or mix currencies. */
+  award_value_amount?: string | null;
+  award_value_currency?: string | null;
+  /**
+   * Party page only: sum of awards on this process that name the viewed
+   * party. Shared multi-supplier awards contribute their full value
+   * (not an exclusive split) — see `supplier_award_shared`.
+   */
+  supplier_award_value_amount?: string | null;
+  supplier_award_value_currency?: string | null;
+  /** True when at least one attributed award has multiple supplier labels. */
+  supplier_award_shared?: boolean;
+  /** Distinct suppliers on the widest attributed award (when shared). */
+  supplier_award_co_suppliers?: number | null;
   total_matches?: number;
 }
 
@@ -587,11 +610,18 @@ export interface SearchFilters {
   outcomes?: string[];
 }
 
+/** Server-side result ordering (applies to the FULL match population). */
+export interface SortSpec {
+  column: string;
+  direction: 'asc' | 'desc';
+}
+
 export interface SearchResponse {
   query: string;
   page: number;
   party_page?: number;
   filters?: SearchFilters;
+  sort?: SortSpec | null;
   procurements: ProcurementCard[];
   procurement_total: number;
   parties: PartyCard[];
@@ -724,6 +754,7 @@ export interface PartyPageResponse {
   name: string;
   page: number;
   scope?: 'name' | 'identity';
+  sort?: SortSpec | null;
   variants?: string[];
   stats?: PartyStats;
   contracts_by_year?: ContractsByYear;
@@ -740,6 +771,10 @@ export interface PartyStats {
   total_value: string | null;
   value_currency: string | null;
   value_comparable: boolean;
+  /** Awarded-value totals; null / false when currencies mix. */
+  awarded_total?: string | null;
+  awarded_currency?: string | null;
+  awarded_comparable?: boolean;
 }
 
 export interface ViewCount {
@@ -773,12 +808,14 @@ export function searchAll(
     outcomes?: string[];
   },
   partyPage = 0,
+  sort?: SortSpec | null,
 ): Promise<SearchResponse> {
   const params = new URLSearchParams({ q, page: String(page), party_page: String(partyPage) });
   for (const status of filters?.statuses ?? []) params.append('status', status);
   for (const outcome of filters?.outcomes ?? []) params.append('outcome', outcome);
   if (filters?.year_from != null) params.set('year_from', String(filters.year_from));
   if (filters?.year_to != null) params.set('year_to', String(filters.year_to));
+  if (sort) params.set('sort', `${sort.column}:${sort.direction}`);
   return request<SearchResponse>(`/api/search?${params.toString()}`);
 }
 
@@ -790,9 +827,12 @@ export function fetchPartyPage(
   name: string,
   page = 0,
   scope: 'name' | 'identity' = 'name',
+  sort?: SortSpec | null,
 ): Promise<PartyPageResponse> {
+  const params = new URLSearchParams({ page: String(page), scope });
+  if (sort) params.set('sort', `${sort.column}:${sort.direction}`);
   return request<PartyPageResponse>(
-    `/api/parties/name/${encodeURIComponent(name).replaceAll('%2F', '/')}?page=${page}&scope=${scope}`,
+    `/api/parties/name/${encodeURIComponent(name).replaceAll('%2F', '/')}?${params.toString()}`,
   );
 }
 

@@ -5,7 +5,8 @@
   "manifest": "../RAW_DATA_DOWNLOADER/dataset/manifest.json",
   "cache_directory": ".cache",
   "duckdb": {
-    "memory_limit": "4GB",
+    "memory_limit": "8GB",
+    "build_memory_limit": "8GB",
     "threads": 4,
     "max_concurrent_queries": 2
   },

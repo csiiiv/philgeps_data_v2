@@ -110,6 +110,134 @@ export default function AboutPage() {
       </div>
 
       <div className="about-section">
+        <h3>How the source files evolved</h3>
+        <p>
+          PhilGEPS bulk files changed layout repeatedly between 2000 and 2025. A{' '}
+          <a
+            href="https://github.com/csiiiv/philgeps-awards-dashboard"
+            target="_blank"
+            rel="noreferrer"
+          >
+            schema-evolution analysis
+          </a>{' '}
+          of the source documents describes five logical schemas over that
+          period. Ingestion here does not take that story on faith: every file
+          is inspected and each row carries the detected{' '}
+          <code>_source_schema_id</code> of the layout it actually came from.
+        </p>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Era</th>
+                <th>Logical schema</th>
+                <th>Verified layout</th>
+                <th>Files</th>
+                <th>Cols</th>
+                <th>What changed</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>2000–2015</td>
+                <td>Schema 1 — original</td>
+                <td>
+                  <code>legacy_40_uom</code>
+                </td>
+                <td>11</td>
+                <td>40</td>
+                <td>
+                  Original layout (XLSX, header on visible row 4); unit field
+                  abbreviated <code>UOM</code>
+                </td>
+              </tr>
+              <tr>
+                <td>2016–2020</td>
+                <td>Schema 2 — rename pass</td>
+                <td>
+                  <code>legacy_40_unit_of_measurement</code>
+                </td>
+                <td>1</td>
+                <td>40</td>
+                <td>
+                  One rename: <code>UOM</code> →{' '}
+                  <code>Unit of Measurement</code> (seen here only in the
+                  Oct–Dec 2017 file)
+                </td>
+              </tr>
+              <tr>
+                <td>2021–2024</td>
+                <td>Schema 3 — modern</td>
+                <td>
+                  <code>modern_43</code>
+                </td>
+                <td>40</td>
+                <td>43</td>
+                <td>
+                  Adds <code>Client Agency</code>, <code>Created By</code>,{' '}
+                  <code>Awardee Contact Person</code>; renames entity,
+                  reference, and date fields
+                </td>
+              </tr>
+              <tr>
+                <td>2021–2022 re-export · 2025</td>
+                <td>Schemas 4/5 — location-enriched</td>
+                <td>
+                  <code>location_46</code>
+                </td>
+                <td>18</td>
+                <td>46</td>
+                <td>
+                  +12 location fields (6 procuring-entity, 6 awardee); −9
+                  legacy/privacy fields; <code>Efectivity</code> typo finally
+                  fixed. Some 2021–2022 files were re-exported in this layout
+                  — four of them without any header row.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <ul className="about-list">
+          <li>
+            <strong>Location data is new</strong> — region, province, and
+            city/municipality for both the procuring entity and the awardee
+            (plus awardee country, size, and joint-venture flag) exist only in
+            the 46-column layout; earlier eras have none, and the re-exported
+            2021–2022 files gained it retroactively.
+          </li>
+          <li>
+            <strong>Privacy-era fields came and went</strong> —{' '}
+            <code>Created By</code> and <code>Awardee Contact Person</code>{' '}
+            appeared in the modern 43-column layout and were dropped again in
+            the 46-column one; the published <code>List of Bidder&rsquo;s</code>{' '}
+            field never appears in the files in this corpus.
+          </li>
+          <li>
+            <strong>Renames are constant</strong> —{' '}
+            <code>Organization Name</code> → <code>Procuring Entity</code> →{' '}
+            <code>Procuring Entity (PE)</code>; <code>Reference ID</code> →{' '}
+            <code>Bid Reference No.</code>; <code>Awardee Corporate Title</code>{' '}
+            → <code>Awardee Organization Name</code>;{' '}
+            <code>Notice/Award Status</code> →{' '}
+            <code>Bid/Award Notice Status</code>.
+          </li>
+          <li>
+            <strong>Column order is unreliable</strong> — positions shift
+            between layouts, so mapping is always by column name, never
+            position. That is why schema detection happens per file rather
+            than being assumed from year or filename.
+          </li>
+        </ul>
+        <p className="hint">
+          The five-schema story is a semantic map, not a description of these
+          physical files: here the 2000–2010 headers sit on visible row 4, and
+          the 43-column files are XLSX including <code>Client Agency</code>.
+          The per-file inventory (<code>source_inventory.md</code>) is
+          authoritative.
+        </p>
+      </div>
+
+      <div className="about-section">
         <h3>How the data is structured</h3>
         <p>
           Records follow the{' '}

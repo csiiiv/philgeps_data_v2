@@ -21,6 +21,7 @@ import { SortableTh, rowAccessors, sortRows, useTableSort } from './sortableTabl
 import ProcessDrawer from './ProcessDrawer';
 import SearchLanding from './SearchLanding';
 import AboutPage from './AboutPage';
+import SchemaPage from './SchemaPage';
 import HealthPage from './HealthPage';
 import CoveragePage from './CoveragePage';
 import ModalHost, { useModalStack } from './ModalHost';
@@ -114,17 +115,15 @@ export default function App() {
   const [traceError, setTraceError] = useState<string | null>(null);
   const [processExplorerId, setProcessExplorerId] = useState<string | null>(null);
   const [viewsState, setViewsState] = useState<{ views: SavedView[]; problems: string[] } | null>(null);
-  const [mode, setMode] = useState<'search' | 'coverage' | 'health' | 'explorer' | 'about'>(() =>
-    new URLSearchParams(window.location.search).get('view') === 'explorer'
-      ? 'explorer'
-      : new URLSearchParams(window.location.search).get('view') === 'health'
-        ? 'health'
-        : new URLSearchParams(window.location.search).get('view') === 'coverage'
-          ? 'coverage'
-          : new URLSearchParams(window.location.search).get('view') === 'about'
-            ? 'about'
-            : 'search',
-  );
+  const [mode, setMode] = useState<'search' | 'coverage' | 'health' | 'explorer' | 'about' | 'schema'>(() => {
+    const view = new URLSearchParams(window.location.search).get('view');
+    if (view === 'explorer') return 'explorer';
+    if (view === 'health') return 'health';
+    if (view === 'coverage') return 'coverage';
+    if (view === 'about') return 'about';
+    if (view === 'schema') return 'schema';
+    return 'search';
+  });
   // Outcome drill-through from the coverage funnel: remembered until
   // SearchLanding mounts, then consumed once.
   const [pendingOutcome, setPendingOutcome] = useState<string | null>(null);
@@ -148,6 +147,7 @@ export default function App() {
     if (mode === 'explorer') url.searchParams.set('view', 'explorer');
     else if (mode === 'health') url.searchParams.set('view', 'health');
     else if (mode === 'about') url.searchParams.set('view', 'about');
+    else if (mode === 'schema') url.searchParams.set('view', 'schema');
     else url.searchParams.delete('view');
     const processParam = topProcess && topProcess.kind === 'process' ? topProcess.processId : null;
     if (processParam) url.searchParams.set('process', processParam);
@@ -442,6 +442,15 @@ export default function App() {
             >
               About
             </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={mode === 'schema'}
+              className={mode === 'schema' ? 'active' : ''}
+              onClick={() => setMode('schema')}
+            >
+              Schema
+            </button>
           </div>
           <HealthStatus state={catalogState} />
         </div>
@@ -462,6 +471,8 @@ export default function App() {
         <HealthPage onOpenView={openSavedViewByName} />
       ) : mode === 'about' ? (
         <AboutPage />
+      ) : mode === 'schema' ? (
+        <SchemaPage />
       ) : (
         <>
           <form className="trace-form" onSubmit={handleTraceSubmit}>

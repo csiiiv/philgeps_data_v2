@@ -883,6 +883,17 @@ th.cell-detail,
 .about-dataset-table td code { overflow-wrap: anywhere; }
 .about-footer { margin-top: 28px; }
 
+/* Schema page */
+.schema-group-row td {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  font-size: 11px;
+  color: var(--muted, #71877d);
+  background: rgba(113, 135, 125, 0.08);
+}
+.schema-era { font-weight: 400; font-size: 11px; color: var(--muted, #71877d); }
+
 /* Search empty state */
 .search-empty { margin-top: 18px; display: flex; flex-direction: column; gap: 14px; }
 .search-empty-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

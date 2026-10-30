@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 /**
  * Schema page: how the PhilGEPS source layouts evolved 2000–2025, and how
@@ -216,8 +216,31 @@ const VIEW_LABELS: Record<string, string> = {
   location: 'Location 46-col (2021–2025)',
 };
 
+const SCHEMA_VIEWS = [
+  ['layouts', 'Layouts'],
+  ['crosswalk', 'Field crosswalk'],
+  ['columns', 'Column positions'],
+] as const;
+
+type SchemaView = (typeof SCHEMA_VIEWS)[number][0];
+
+function decodeSchemaView(raw: string | null): SchemaView {
+  return SCHEMA_VIEWS.some(([id]) => id === raw) ? (raw as SchemaView) : 'layouts';
+}
+
 export default function SchemaPage() {
-  const [view, setView] = useState<'layouts' | 'crosswalk' | 'columns'>('layouts');
+  const [view, setView] = useState<SchemaView>(() =>
+    decodeSchemaView(new URLSearchParams(window.location.search).get('schema')),
+  );
+
+  // Keep ?schema=… in the URL so each subsection is linkable and survives
+  // refresh/back. replaceState, matching how the app syncs its other params.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    url.searchParams.set('schema', view);
+    window.history.replaceState(null, '', url.toString());
+  }, [view]);
+
   return (
     <section className="landing" aria-label="Source schema evolution">
       <div className="about-hero">
@@ -241,13 +264,7 @@ export default function SchemaPage() {
       </div>
 
       <div className="mode-switch" role="tablist" aria-label="Schema view">
-        {(
-          [
-            ['layouts', 'Layouts'],
-            ['crosswalk', 'Field crosswalk'],
-            ['columns', 'Column positions'],
-          ] as const
-        ).map(([id, label]) => (
+        {SCHEMA_VIEWS.map(([id, label]) => (
           <button
             key={id}
             type="button"

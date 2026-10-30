@@ -149,6 +149,8 @@ export default function App() {
     else if (mode === 'about') url.searchParams.set('view', 'about');
     else if (mode === 'schema') url.searchParams.set('view', 'schema');
     else url.searchParams.delete('view');
+    // Sub-view of the schema tab persists only while that tab is active.
+    if (mode !== 'schema') url.searchParams.delete('schema');
     const processParam = topProcess && topProcess.kind === 'process' ? topProcess.processId : null;
     if (processParam) url.searchParams.set('process', processParam);
     else url.searchParams.delete('process');

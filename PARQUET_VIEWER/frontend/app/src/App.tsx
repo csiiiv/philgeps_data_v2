@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   ApiError,
   type CatalogSnapshot,
@@ -91,11 +92,26 @@ function decodeState(raw: string | null): ExplorerState | null {
   return null;
 }
 
+type Mode = 'search' | 'coverage' | 'health' | 'explorer' | 'about' | 'schema';
+
 export default function App() {
+  // Hash routing: ?view=… becomes #/view. The legacy query format is
+  // redirected once in main.tsx before the router mounts.
+  const location = useLocation();
+  const navigate = useNavigate();
+  const routeView = location.pathname.replace(/^\//, '') || 'search';
+  const mode: Mode =
+    routeView === 'coverage' || routeView === 'health' || routeView === 'explorer' ||
+    routeView === 'about' || routeView === 'schema'
+      ? routeView
+      : 'search';
+  const setMode = (next: Mode) => {
+    navigate(next === 'search' ? '/' : `/${next}${location.search}`);
+  };
   const [catalogState, setCatalogState] = useState<CatalogState>({ kind: 'loading' });
   const [refreshing, setRefreshing] = useState(false);
   const [state, setState] = useState<ExplorerState>(() => {
-    const fromUrl = new URLSearchParams(window.location.search).get('q');
+    const fromUrl = new URLSearchParams(location.search).get('q');
     return (
       decodeState(fromUrl) ?? {
         dataset: '',
@@ -115,15 +131,6 @@ export default function App() {
   const [traceError, setTraceError] = useState<string | null>(null);
   const [processExplorerId, setProcessExplorerId] = useState<string | null>(null);
   const [viewsState, setViewsState] = useState<{ views: SavedView[]; problems: string[] } | null>(null);
-  const [mode, setMode] = useState<'search' | 'coverage' | 'health' | 'explorer' | 'about' | 'schema'>(() => {
-    const view = new URLSearchParams(window.location.search).get('view');
-    if (view === 'explorer') return 'explorer';
-    if (view === 'health') return 'health';
-    if (view === 'coverage') return 'coverage';
-    if (view === 'about') return 'about';
-    if (view === 'schema') return 'schema';
-    return 'search';
-  });
   // Outcome drill-through from the coverage funnel: remembered until
   // SearchLanding mounts, then consumed once.
   const [pendingOutcome, setPendingOutcome] = useState<string | null>(null);
@@ -139,23 +146,19 @@ export default function App() {
   }, []);
   const querySeq = useRef(0);
 
-  // Keep the URL in sync so validation cases can be bookmarked/shared locally.
+  // Keep the hash-route query in sync so validation cases can be bookmarked
+  // and shared. process param follows the top modal layer.
   const topProcess = [...modals.layers].reverse().find((l) => l.kind === 'process');
   useEffect(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('q', encodeState(state));
-    if (mode === 'explorer') url.searchParams.set('view', 'explorer');
-    else if (mode === 'health') url.searchParams.set('view', 'health');
-    else if (mode === 'about') url.searchParams.set('view', 'about');
-    else if (mode === 'schema') url.searchParams.set('view', 'schema');
-    else url.searchParams.delete('view');
-    // Sub-view of the schema tab persists only while that tab is active.
-    if (mode !== 'schema') url.searchParams.delete('schema');
+    const params = new URLSearchParams(location.search);
+    params.set('q', encodeState(state));
     const processParam = topProcess && topProcess.kind === 'process' ? topProcess.processId : null;
-    if (processParam) url.searchParams.set('process', processParam);
-    else url.searchParams.delete('process');
-    window.history.replaceState(null, '', url.toString());
-  }, [state, topProcess, mode]);
+    if (processParam) params.set('process', processParam);
+    else params.delete('process');
+    params.delete('schema');
+    navigate(`/${mode === 'search' ? '' : mode}?${params.toString()}`, { replace: true });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state, topProcess]);
 
   const loadCatalog = useCallback(async (refresh: boolean) => {
     if (refresh) setRefreshing(true);
@@ -464,7 +467,7 @@ export default function App() {
           onOpenParty={(name) => modals.push({ kind: 'party', name })}
           initialOutcomeFilter={pendingOutcome}
           initialSearchTerm={
-            new URLSearchParams(window.location.search).get('search') ?? ''
+            new URLSearchParams(location.search).get('search') ?? ''
           }
         />
       ) : mode === 'coverage' ? (

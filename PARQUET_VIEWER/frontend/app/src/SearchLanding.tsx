@@ -196,11 +196,8 @@ export default function SearchLanding({
 
   const [linkCopied, setLinkCopied] = useState(false);
   const copySearchLink = () => {
-    const url = new URL(window.location.href);
-    url.hash = '';
-    url.search = '';
-    url.searchParams.set('search', term.trim());
-    const link = url.toString();
+    // Hash-routed share link: #/?search=… (no modal state).
+    const link = `${window.location.origin}${window.location.pathname}#/?search=${encodeURIComponent(term.trim())}`;
     const done = () => {
       setLinkCopied(true);
       window.setTimeout(() => setLinkCopied(false), 2000);

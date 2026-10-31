@@ -1,4 +1,5 @@
 import { useEffect, useMemo } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 /**
  * Schema page: PhilGEPS schema evolution analysis, 2000–2025.
@@ -341,10 +342,34 @@ function decodeSchemaView(raw: string | null): string {
   return raw && ids.includes(raw) ? raw : 'overview';
 }
 
+function SchemaIndexNav() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const go = (id: string) => {
+    const params = new URLSearchParams(location.search);
+    params.set('schema', id);
+    navigate(`/schema?${params.toString()}`);
+    // Wait a tick for any pending render, then scroll.
+    window.setTimeout(() => {
+      document.getElementById(`schema-${id}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }, 0);
+  };
+  return (
+    <nav className="schema-index" aria-label="Schema analysis sections">
+      {SCHEMA_SECTIONS.map(([id, label]) => (
+        <button key={id} type="button" onClick={() => go(id)}>
+          {label}
+        </button>
+      ))}
+    </nav>
+  );
+}
+
 export default function SchemaPage() {
   // Scroll to the ?schema= section on mount (deep links), defaulting to top.
   useEffect(() => {
-    const target = decodeSchemaView(new URLSearchParams(window.location.search).get('schema'));
+    const raw = new URLSearchParams(window.location.hash.replace(/^#/, '').split('?')[1] ?? '').get('schema');
+    const target = decodeSchemaView(raw);
     if (target !== 'overview') {
       document.getElementById(`schema-${target}`)?.scrollIntoView({ block: 'start' });
     }
@@ -370,13 +395,7 @@ export default function SchemaPage() {
           file&rsquo;s layout is detected at ingestion and every normalized row
           carries its <code>_source_schema_id</code>.
         </p>
-        <nav className="schema-index" aria-label="Schema analysis sections">
-          {SCHEMA_SECTIONS.map(([id, label]) => (
-            <a key={id} href={`?view=schema&schema=${id}#schema-${id}`}>
-              {label}
-            </a>
-          ))}
-        </nav>
+        <SchemaIndexNav />
       </div>
 
       <QuickReference />

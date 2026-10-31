@@ -122,7 +122,7 @@ export default function AboutPage() {
         <p>
           The full layout inventory, field crosswalk, and column-position
           comparison live in the{' '}
-          <a href="?view=schema">
+          <a href="#/schema">
             <strong>Schema tab</strong>
           </a>
           .

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+﻿import { useEffect, useMemo } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 /**
@@ -205,6 +205,7 @@ type CrosswalkRow = {
   s12: string | null;
   s3: string | null;
   s45: string | null;
+  normalized: string | null;
   note?: string;
 };
 type CrosswalkGroup = { group: string; rows: CrosswalkRow[] };
@@ -213,117 +214,117 @@ const CROSSWALK: CrosswalkGroup[] = [
   {
     group: 'Procuring entity',
     rows: [
-      { concept: 'Entity name', s12: 'Organization Name', s3: 'Procuring Entity', s45: 'Procuring Entity (PE)', note: 'Renamed 2021, clarified 2025' },
-      { concept: 'Client agency', s12: null, s3: 'Client Agency', s45: null, note: 'In this corpus’s Schema 3 files only' },
-      { concept: 'Region', s12: null, s3: null, s45: 'Region', note: 'New 2025/V2' },
-      { concept: 'Province', s12: null, s3: null, s45: 'Province', note: 'New 2025/V2' },
-      { concept: 'City/Municipality', s12: null, s3: null, s45: 'City/Municipality', note: 'New 2025/V2' },
-      { concept: 'Government branch', s12: null, s3: null, s45: 'Government Branch', note: 'New 2025/V2' },
-      { concept: 'Organization type', s12: null, s3: null, s45: 'PE Organization Type', note: 'New 2025/V2' },
-      { concept: 'Organization type (grouped)', s12: null, s3: null, s45: 'PE Organization Type (Grouped)', note: 'New 2025/V2' },
+      { concept: 'Entity name', s12: 'Organization Name', s3: 'Procuring Entity', s45: 'Procuring Entity (PE)', normalized: 'procuring_entity_name', note: 'Renamed 2021, clarified 2025' },
+      { concept: 'Client agency', s12: null, s3: 'Client Agency', s45: null, normalized: 'client_agency', note: 'In this corpus’s Schema 3 files only' },
+      { concept: 'Region', s12: null, s3: null, s45: 'Region', normalized: 'procuring_entity_region', note: 'New 2025/V2' },
+      { concept: 'Province', s12: null, s3: null, s45: 'Province', normalized: 'procuring_entity_province', note: 'New 2025/V2' },
+      { concept: 'City/Municipality', s12: null, s3: null, s45: 'City/Municipality', normalized: 'procuring_entity_city_municipality', note: 'New 2025/V2' },
+      { concept: 'Government branch', s12: null, s3: null, s45: 'Government Branch', normalized: 'government_branch', note: 'New 2025/V2' },
+      { concept: 'Organization type', s12: null, s3: null, s45: 'PE Organization Type', normalized: 'procuring_entity_organization_type', note: 'New 2025/V2' },
+      { concept: 'Organization type (grouped)', s12: null, s3: null, s45: 'PE Organization Type (Grouped)', normalized: 'procuring_entity_organization_type_grouped', note: 'New 2025/V2' },
     ],
   },
   {
     group: 'Bid identification',
     rows: [
-      { concept: 'Reference number', s12: 'Reference ID', s3: 'Bid Reference No.', s45: 'Bid Reference No.', note: 'Renamed 2021' },
-      { concept: 'Solicitation number', s12: 'Solicitation No.', s3: 'Solicitation No.', s45: null, note: 'Legacy, dropped 2025' },
-      { concept: 'Notice title', s12: 'Notice Title', s3: 'Notice Title', s45: 'Notice Title', note: 'Stable' },
-      { concept: 'Notice type', s12: 'Notice Type', s3: 'Notice Type', s45: null, note: 'Redundant with Classification, dropped 2025' },
-      { concept: 'Classification', s12: 'Classification', s3: 'Classification', s45: 'Classification', note: 'Stable' },
-      { concept: 'Business category', s12: 'Business Category', s3: 'Business Category', s45: 'Business Category', note: 'Stable' },
+      { concept: 'Reference number', s12: 'Reference ID', s3: 'Bid Reference No.', s45: 'Bid Reference No.', normalized: 'bid_reference_no', note: 'Renamed 2021' },
+      { concept: 'Solicitation number', s12: 'Solicitation No.', s3: 'Solicitation No.', s45: null, normalized: 'solicitation_no', note: 'Legacy, dropped 2025' },
+      { concept: 'Notice title', s12: 'Notice Title', s3: 'Notice Title', s45: 'Notice Title', normalized: 'notice_title', note: 'Stable' },
+      { concept: 'Notice type', s12: 'Notice Type', s3: 'Notice Type', s45: null, normalized: 'notice_type', note: 'Redundant with Classification, dropped 2025' },
+      { concept: 'Classification', s12: 'Classification', s3: 'Classification', s45: 'Classification', normalized: 'classification', note: 'Stable' },
+      { concept: 'Business category', s12: 'Business Category', s3: 'Business Category', s45: 'Business Category', normalized: 'business_category', note: 'Stable' },
     ],
   },
   {
     group: 'Budget & funding',
     rows: [
-      { concept: 'Funding source', s12: 'Funding Source', s3: 'Funding Source', s45: 'Funding Source', note: 'Stable' },
-      { concept: 'Funding instrument', s12: 'Funding Instrument', s3: 'Funding Instrument', s45: 'Funding Instrument', note: 'Stable' },
-      { concept: 'Approved budget', s12: 'Approved Budget of the Contract', s3: 'Approved Budget of the Contract', s45: 'Approved Budget of the Contract', note: 'Stable' },
-      { concept: 'Trade agreement', s12: 'Trade Agreement', s3: 'Trade Agreement', s45: 'Trade Agreement', note: 'Stable' },
+      { concept: 'Funding source', s12: 'Funding Source', s3: 'Funding Source', s45: 'Funding Source', normalized: 'funding_source', note: 'Stable' },
+      { concept: 'Funding instrument', s12: 'Funding Instrument', s3: 'Funding Instrument', s45: 'Funding Instrument', normalized: 'funding_instrument', note: 'Stable' },
+      { concept: 'Approved budget', s12: 'Approved Budget of the Contract', s3: 'Approved Budget of the Contract', s45: 'Approved Budget of the Contract', normalized: 'approved_budget', note: 'Stable' },
+      { concept: 'Trade agreement', s12: 'Trade Agreement', s3: 'Trade Agreement', s45: 'Trade Agreement', normalized: 'trade_agreement', note: 'Stable' },
     ],
   },
   {
     group: 'Bid timeline',
     rows: [
-      { concept: 'Published date', s12: 'Publish Date', s3: 'Published Date', s45: 'Published Date', note: 'Renamed 2021' },
-      { concept: 'Pre-bid date', s12: 'PreBid Date', s3: 'PreBid Date', s45: null, note: 'Dropped 2025' },
-      { concept: 'Closing date', s12: 'Closing Date', s3: 'Closing Date', s45: 'Closing Date', note: 'Stable' },
+      { concept: 'Published date', s12: 'Publish Date', s3: 'Published Date', s45: 'Published Date', normalized: 'bid_published_date', note: 'Renamed 2021' },
+      { concept: 'Pre-bid date', s12: 'PreBid Date', s3: 'PreBid Date', s45: null, normalized: 'prebid_date', note: 'Dropped 2025' },
+      { concept: 'Closing date', s12: 'Closing Date', s3: 'Closing Date', s45: 'Closing Date', normalized: 'closing_date', note: 'Stable' },
     ],
   },
   {
     group: 'Procurement',
     rows: [
-      { concept: 'Procurement mode', s12: 'Procurement Mode', s3: 'Procurement Mode', s45: 'Procurement Mode', note: 'Stable' },
-      { concept: 'Area of delivery', s12: 'Area of Delivery', s3: 'Area of Delivery', s45: 'Area of Delivery', note: 'Stable' },
-      { concept: 'Contract duration', s12: 'Contract Duration', s3: 'Contract Duration', s45: 'Contract Duration', note: 'Stable' },
-      { concept: 'Calendar type', s12: 'Calendar Type', s3: 'Calendar Type', s45: 'Calendar Type', note: 'Stable' },
+      { concept: 'Procurement mode', s12: 'Procurement Mode', s3: 'Procurement Mode', s45: 'Procurement Mode', normalized: 'procurement_mode', note: 'Stable' },
+      { concept: 'Area of delivery', s12: 'Area of Delivery', s3: 'Area of Delivery', s45: 'Area of Delivery', normalized: 'area_of_delivery', note: 'Stable' },
+      { concept: 'Contract duration', s12: 'Contract Duration', s3: 'Contract Duration', s45: 'Contract Duration', normalized: 'contract_duration', note: 'Stable' },
+      { concept: 'Calendar type', s12: 'Calendar Type', s3: 'Calendar Type', s45: 'Calendar Type', normalized: 'calendar_type', note: 'Stable' },
     ],
   },
   {
     group: 'Line items & UNSPSC',
     rows: [
-      { concept: 'Line item number', s12: 'Line Item No', s3: 'Line Item No', s45: 'Line Item No', note: 'Stable' },
-      { concept: 'Item name', s12: 'Item Name', s3: 'Item Name', s45: 'Item Name', note: 'Stable' },
-      { concept: 'Item description', s12: 'Item Desc', s3: 'Item Description', s45: 'Item Description', note: 'Full word 2021' },
-      { concept: 'Quantity', s12: 'Quantity', s3: 'Quantity', s45: 'Quantity', note: 'Stable' },
-      { concept: 'Unit of measure', s12: 'UOM', s3: 'UOM', s45: 'UOM', note: 'Schema 2 renamed it Unit of Measurement; reverted 2021' },
-      { concept: 'Item budget', s12: 'Item Budget', s3: 'Item Budget', s45: 'Item Budget', note: 'Stable' },
-      { concept: 'UNSPSC code', s12: 'UNSPSC Code', s3: 'UNSPSC Code', s45: 'UNSPSC Code', note: 'Stable' },
-      { concept: 'UNSPSC description', s12: 'UNSPSC Description', s3: 'UNSPSC Description', s45: 'UNSPSC Description', note: 'Stable' },
+      { concept: 'Line item number', s12: 'Line Item No', s3: 'Line Item No', s45: 'Line Item No', normalized: 'line_item_no', note: 'Stable' },
+      { concept: 'Item name', s12: 'Item Name', s3: 'Item Name', s45: 'Item Name', normalized: 'item_name', note: 'Stable' },
+      { concept: 'Item description', s12: 'Item Desc', s3: 'Item Description', s45: 'Item Description', normalized: 'item_description', note: 'Full word 2021' },
+      { concept: 'Quantity', s12: 'Quantity', s3: 'Quantity', s45: 'Quantity', normalized: 'quantity', note: 'Stable' },
+      { concept: 'Unit of measure', s12: 'UOM', s3: 'UOM', s45: 'UOM', normalized: 'unit_of_measurement', note: 'Schema 2 renamed it Unit of Measurement; reverted 2021' },
+      { concept: 'Item budget', s12: 'Item Budget', s3: 'Item Budget', s45: 'Item Budget', normalized: 'item_budget', note: 'Stable' },
+      { concept: 'UNSPSC code', s12: 'UNSPSC Code', s3: 'UNSPSC Code', s45: 'UNSPSC Code', normalized: 'unspsc_code', note: 'Stable' },
+      { concept: 'UNSPSC description', s12: 'UNSPSC Description', s3: 'UNSPSC Description', s45: 'UNSPSC Description', normalized: 'unspsc_description', note: 'Stable' },
     ],
   },
   {
     group: 'Bid status',
     rows: [
-      { concept: 'Notice status', s12: 'Notice Status', s3: 'Notice Status', s45: 'Bid Notice Status', note: 'More descriptive 2025' },
-      { concept: 'Created by user', s12: null, s3: 'Created By', s45: null, note: 'Added 2021, privacy removal 2025' },
+      { concept: 'Notice status', s12: 'Notice Status', s3: 'Notice Status', s45: 'Bid Notice Status', normalized: 'bid_notice_status', note: 'More descriptive 2025' },
+      { concept: 'Created by user', s12: null, s3: 'Created By', s45: null, normalized: 'created_by', note: 'Added 2021, privacy removal 2025' },
     ],
   },
   {
     group: 'Award',
     rows: [
-      { concept: 'Award reference', s12: 'Award No.', s3: 'Award No.', s45: 'Award Reference No.', note: 'More descriptive 2025' },
-      { concept: 'Award title', s12: 'Award Title', s3: 'Award Title', s45: 'Award Title', note: 'Stable' },
-      { concept: 'Award type', s12: 'Award Type', s3: 'Award Type', s45: null, note: 'Simplified away 2025' },
-      { concept: 'Reason for award', s12: 'Reason for Award', s3: 'Reason for Award', s45: null, note: 'Simplified away 2025' },
+      { concept: 'Award reference', s12: 'Award No.', s3: 'Award No.', s45: 'Award Reference No.', normalized: 'award_reference_no', note: 'More descriptive 2025' },
+      { concept: 'Award title', s12: 'Award Title', s3: 'Award Title', s45: 'Award Title', normalized: 'award_title', note: 'Stable' },
+      { concept: 'Award type', s12: 'Award Type', s3: 'Award Type', s45: null, normalized: 'award_type', note: 'Simplified away 2025' },
+      { concept: 'Reason for award', s12: 'Reason for Award', s3: 'Reason for Award', s45: null, normalized: 'reason_for_award', note: 'Simplified away 2025' },
     ],
   },
   {
     group: 'Award timeline & contract',
     rows: [
-      { concept: 'Award published date', s12: 'Publish Date(Award)', s3: 'Published Date(Award)', s45: 'Published Date(Award)', note: 'Renamed 2021' },
-      { concept: 'Award date', s12: 'Award Date', s3: 'Award Date', s45: 'Award Date', note: 'Stable' },
-      { concept: 'Notice to proceed', s12: 'Notice to Proceed Date', s3: 'Notice to Proceed Date', s45: 'Notice to Proceed Date', note: 'Stable' },
-      { concept: 'Contract effectivity', s12: 'Contract Efectivity Date', s3: 'Contract Efectivity Date', s45: 'Contract Effectivity Date', note: 'Typo corrected 2025' },
-      { concept: 'Contract end date', s12: 'Contract End Date', s3: 'Contract End Date', s45: 'Contract End Date', note: 'Stable' },
-      { concept: 'Contract amount', s12: 'Contract Amount', s3: 'Contract Amount', s45: 'Contract Amount', note: 'Stable' },
-      { concept: 'Contract number', s12: 'Contract No', s3: 'Contract No', s45: null, note: 'System-generated, dropped 2025' },
+      { concept: 'Award published date', s12: 'Publish Date(Award)', s3: 'Published Date(Award)', s45: 'Published Date(Award)', normalized: 'award_published_date', note: 'Renamed 2021' },
+      { concept: 'Award date', s12: 'Award Date', s3: 'Award Date', s45: 'Award Date', normalized: 'award_date', note: 'Stable' },
+      { concept: 'Notice to proceed', s12: 'Notice to Proceed Date', s3: 'Notice to Proceed Date', s45: 'Notice to Proceed Date', normalized: 'notice_to_proceed_date', note: 'Stable' },
+      { concept: 'Contract effectivity', s12: 'Contract Efectivity Date', s3: 'Contract Efectivity Date', s45: 'Contract Effectivity Date', normalized: 'contract_effectivity_date', note: 'Typo corrected 2025' },
+      { concept: 'Contract end date', s12: 'Contract End Date', s3: 'Contract End Date', s45: 'Contract End Date', normalized: 'contract_end_date', note: 'Stable' },
+      { concept: 'Contract amount', s12: 'Contract Amount', s3: 'Contract Amount', s45: 'Contract Amount', normalized: 'contract_amount', note: 'Stable' },
+      { concept: 'Contract number', s12: 'Contract No', s3: 'Contract No', s45: null, normalized: 'contract_no', note: 'System-generated, dropped 2025' },
     ],
   },
   {
     group: 'Award status',
     rows: [
-      { concept: 'Award status', s12: 'Award Status', s3: 'Award Status', s45: 'Award Notice Status', note: 'Consistent naming 2025' },
+      { concept: 'Award status', s12: 'Award Status', s3: 'Award Status', s45: 'Award Notice Status', normalized: 'award_notice_status', note: 'Consistent naming 2025' },
     ],
   },
   {
     group: 'Awardee',
     rows: [
-      { concept: 'Organization name', s12: 'Awardee Corporate Title', s3: 'Awardee Organization Name', s45: 'Awardee Organization Name', note: 'Renamed 2021' },
-      { concept: 'Contact person', s12: null, s3: 'Awardee Contact Person', s45: null, note: 'Added 2021, privacy removal 2025' },
-      { concept: 'Country', s12: null, s3: null, s45: 'Country of Awardee', note: 'New 2025/V2' },
-      { concept: 'Region', s12: null, s3: null, s45: 'Region of Awardee', note: 'New 2025/V2' },
-      { concept: 'Province', s12: null, s3: null, s45: 'Province of Awardee', note: 'New 2025/V2' },
-      { concept: 'City/Municipality', s12: null, s3: null, s45: 'City/Municipality of Awardee', note: 'New 2025/V2' },
-      { concept: 'Awardee size', s12: null, s3: null, s45: 'Awardee Size', note: 'New 2025/V2 (small/medium/large)' },
-      { concept: 'Joint venture', s12: null, s3: null, s45: 'Awardee Joint Venture', note: 'New 2025/V2 (JV partners)' },
+      { concept: 'Organization name', s12: 'Awardee Corporate Title', s3: 'Awardee Organization Name', s45: 'Awardee Organization Name', normalized: 'awardee_organization_name', note: 'Renamed 2021' },
+      { concept: 'Contact person', s12: null, s3: 'Awardee Contact Person', s45: null, normalized: 'awardee_contact_person', note: 'Added 2021, privacy removal 2025' },
+      { concept: 'Country', s12: null, s3: null, s45: 'Country of Awardee', normalized: 'awardee_country', note: 'New 2025/V2' },
+      { concept: 'Region', s12: null, s3: null, s45: 'Region of Awardee', normalized: 'awardee_region', note: 'New 2025/V2' },
+      { concept: 'Province', s12: null, s3: null, s45: 'Province of Awardee', normalized: 'awardee_province', note: 'New 2025/V2' },
+      { concept: 'City/Municipality', s12: null, s3: null, s45: 'City/Municipality of Awardee', normalized: 'awardee_city_municipality', note: 'New 2025/V2' },
+      { concept: 'Awardee size', s12: null, s3: null, s45: 'Awardee Size', normalized: 'awardee_size', note: 'New 2025/V2 (small/medium/large)' },
+      { concept: 'Joint venture', s12: null, s3: null, s45: 'Awardee Joint Venture', normalized: 'awardee_joint_venture', note: 'New 2025/V2 (JV partners)' },
     ],
   },
   {
     group: 'Competition',
     rows: [
-      { concept: 'List of bidders', s12: null, s3: 'List of Bidder’s', s45: null, note: 'Published story: added 2021, removed 2025. Verified here: never present in this corpus’s files (Client Agency occupies the slot instead)' },
+      { concept: 'List of bidders', s12: null, s3: 'List of Bidder’s', s45: null, normalized: null, note: 'Published story: added 2021, removed 2025. Verified here: never present in this corpus’s files (Client Agency occupies the slot instead)' },
     ],
   },
 ];
@@ -539,13 +540,14 @@ function CrosswalkSection() {
               <th>Schema 1–2<br />2000–2020</th>
               <th>Schema 3<br />2021–2024</th>
               <th>Schema 4–5<br />2025 / V2</th>
+              <th>Normalized field</th>
               <th>Evolution notes</th>
             </tr>
           </thead>
           {CROSSWALK.map((g) => (
             <tbody key={g.group}>
               <tr className="schema-group-row">
-                <td colSpan={5}>{g.group}</td>
+                <td colSpan={6}>{g.group}</td>
               </tr>
               {g.rows.map((r) => (
                 <tr key={r.concept}>
@@ -553,6 +555,7 @@ function CrosswalkSection() {
                   <td><Field name={r.s12} /></td>
                   <td><Field name={r.s3} /></td>
                   <td><Field name={r.s45} /></td>
+                  <td><Field name={r.normalized} /></td>
                   <td className="cell-detail">{r.note}</td>
                 </tr>
               ))}
@@ -563,6 +566,77 @@ function CrosswalkSection() {
     </Section>
   );
 }
+
+// Source column -> normalized field (from DATA_NORMALIZATION
+// config/schema_registry.json column_aliases). Every source variant across
+// all four layouts folds onto one canonical snake_case field.
+const NORMALIZED: Record<string, string> = {
+  'Organization Name': 'procuring_entity_name',
+  'Procuring Entity': 'procuring_entity_name',
+  'Procuring Entity (PE)': 'procuring_entity_name',
+  'Reference ID': 'bid_reference_no',
+  'Bid Reference No.': 'bid_reference_no',
+  'Solicitation No.': 'solicitation_no',
+  'Notice Title': 'notice_title',
+  'Publish Date': 'bid_published_date',
+  'Published Date': 'bid_published_date',
+  'Classification': 'classification',
+  'Notice Type': 'notice_type',
+  'Business Category': 'business_category',
+  'Funding Source': 'funding_source',
+  'Funding Instrument': 'funding_instrument',
+  'Procurement Mode': 'procurement_mode',
+  'Trade Agreement': 'trade_agreement',
+  'Approved Budget of the Contract': 'approved_budget',
+  'Area of Delivery': 'area_of_delivery',
+  'Contract Duration': 'contract_duration',
+  'Calendar Type': 'calendar_type',
+  'Line Item No': 'line_item_no',
+  'Item Name': 'item_name',
+  'Item Desc': 'item_description',
+  'Item Description': 'item_description',
+  'Quantity': 'quantity',
+  'UOM': 'unit_of_measurement',
+  'Unit of Measurement': 'unit_of_measurement',
+  'Item Budget': 'item_budget',
+  'Notice Status': 'bid_notice_status',
+  'Bid Notice Status': 'bid_notice_status',
+  'Created By': 'created_by',
+  'Client Agency': 'client_agency',
+  'Award No.': 'award_reference_no',
+  'Award Reference No.': 'award_reference_no',
+  'Award Title': 'award_title',
+  'Award Type': 'award_type',
+  'UNSPSC Code': 'unspsc_code',
+  'UNSPSC Description': 'unspsc_description',
+  'Publish Date(Award)': 'award_published_date',
+  'Published Date(Award)': 'award_published_date',
+  'Award Date': 'award_date',
+  'Notice to Proceed Date': 'notice_to_proceed_date',
+  'Contract No': 'contract_no',
+  'Contract Amount': 'contract_amount',
+  'Contract Efectivity Date': 'contract_effectivity_date',
+  'Contract Effectivity Date': 'contract_effectivity_date',
+  'Contract End Date': 'contract_end_date',
+  'Award Status': 'award_notice_status',
+  'Award Notice Status': 'award_notice_status',
+  'Reason for Award': 'reason_for_award',
+  'Awardee Corporate Title': 'awardee_organization_name',
+  'Awardee Organization Name': 'awardee_organization_name',
+  'Awardee Contact Person': 'awardee_contact_person',
+  'Region': 'procuring_entity_region',
+  'Province': 'procuring_entity_province',
+  'City/Municipality': 'procuring_entity_city_municipality',
+  'Government Branch': 'government_branch',
+  'PE Organization Type': 'procuring_entity_organization_type',
+  'PE Organization Type (Grouped)': 'procuring_entity_organization_type_grouped',
+  'Country of Awardee': 'awardee_country',
+  'Region of Awardee': 'awardee_region',
+  'Province of Awardee': 'awardee_province',
+  'City/Municipality of Awardee': 'awardee_city_municipality',
+  'Awardee Size': 'awardee_size',
+  'Awardee Joint Venture': 'awardee_joint_venture',
+};
 
 function ColumnsSection() {
   const columns = useMemo(
@@ -582,57 +656,113 @@ function ColumnsSection() {
     pos: i + 1,
     cells: columns.map((c) => c.cols[i] ?? null),
   }));
+  // Invert NORMALIZED: field -> all source variants that fold into it,
+  // multi-variant fields first (they are the interesting ones).
+  const foldRows = useMemo(() => {
+    const byField = new Map<string, string[]>();
+    for (const [source, field] of Object.entries(NORMALIZED)) {
+      const list = byField.get(field) ?? [];
+      list.push(source);
+      byField.set(field, list);
+    }
+    return [...byField.entries()]
+      .map(([field, variants]) => ({ field, variants }))
+      .sort((a, b) => b.variants.length - a.variants.length || a.field.localeCompare(b.field));
+  }, []);
   return (
-    <Section id="columns" title="Side-by-side column comparison">
-      <p>
-        Exact physical column order in each schema (verified from the source
-        files). <span className="pill">new</span> marks a column appearing for
-        the first time in that schema. Positions shift constantly — which is
-        why ingestion maps by column name, never position.
-      </p>
-      <div className="table-wrap">
-        <table>
-          <thead>
-            <tr>
-              <th>#</th>
-              {columns.map((c) => (
-                <th key={c.label}>
-                  {c.label}
-                  <br />
-                  <span className="schema-era">{c.sub}</span>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => (
-              <tr key={r.pos}>
-                <td>{r.pos}</td>
-                {r.cells.map((name, i) => (
-                  <td key={i}>
-                    {name ? (
-                      <>
-                        <code>{name}</code>
-                        {isNew(name, i) && (
-                          <span className="pill schema-new-pill">new</span>
-                        )}
-                      </>
-                    ) : (
-                      <span className="null">—</span>
-                    )}
-                  </td>
+    <>
+      <Section id="columns" title="Side-by-side column comparison">
+        <p>
+          Exact physical column order in each schema (verified from the source
+          files). <span className="pill">new</span> marks a column appearing for
+          the first time in that schema. Positions shift constantly — which is
+          why ingestion maps by column name, never position.
+        </p>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                {columns.map((c) => (
+                  <th key={c.label}>
+                    {c.label}
+                    <br />
+                    <span className="schema-era">{c.sub}</span>
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <p className="hint">
-        Schema 5 shares Schema 4&rsquo;s exact column set, so they are shown as
-        one column here; the only Schema 2 change is the single rename at
-        position 21.
-      </p>
-    </Section>
+            </thead>
+            <tbody>
+              {rows.map((r) => (
+                <tr key={r.pos}>
+                  <td>{r.pos}</td>
+                  {r.cells.map((name, i) => (
+                    <td key={i}>
+                      {name ? (
+                        <>
+                          <code>{name}</code>
+                          {isNew(name, i) && (
+                            <span className="pill schema-new-pill">new</span>
+                          )}
+                        </>
+                      ) : (
+                        <span className="null">—</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="hint">
+          Schema 5 shares Schema 4&rsquo;s exact column set, so they are shown as
+          one column here; the only Schema 2 change is the single rename at
+          position 21.
+        </p>
+      </Section>
+
+      <Section id="normalized" title="Source columns → normalized fields">
+        <p>
+          The payoff for surviving 25 years of renames: every source variant
+          folds onto one canonical snake_case field in the normalized layer
+          (<code>philgeps_normalized.parquet</code>, mapping from{' '}
+          <code>config/schema_registry.json</code>). 67 source column names
+          collapse to 55 stable fields — a renamed column never becomes a new
+          field.
+        </p>
+        <div className="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Normalized field</th>
+                <th>Source column variants</th>
+              </tr>
+            </thead>
+            <tbody>
+              {foldRows.map((r) => (
+                <tr key={r.field}>
+                  <td><code>{r.field}</code></td>
+                  <td className="cell-detail">
+                    {r.variants.map((v, i) => (
+                      <span key={v}>
+                        {i > 0 && ' · '}
+                        <code>{v}</code>
+                      </span>
+                    ))}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p className="hint">
+          Single-variant fields (e.g. <code>notice_title</code>) kept the same
+          name everywhere; multi-variant fields show every spelling they had —
+          each still lands in one normalized column.
+        </p>
+      </Section>
+    </>
   );
 }
 

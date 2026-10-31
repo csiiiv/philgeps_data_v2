@@ -128,3 +128,22 @@ confirmed; the template does not enumerate value mappings for them.
 - This document; README documentation index updated.
 - No changes to `config/field_mapping.json` targets (agreement confirmed;
   future-target candidates recorded above only).
+
+## Filled template copies
+
+`scripts/fill_ocds_mapping_templates.py` regenerates filled copies of both
+official templates from the authoritative JSON configs:
+
+- `artifacts/filled_templates/PhilGEPS_1.5_exports_OCDS_Field_Mapping_FILLED.xlsx`
+  — 94 OCDS paths filled with `<local target> <- <normalized field>` cells;
+  original mPhilGEPS fills preserved in the Notes column.
+- `artifacts/filled_templates/PhilGEPS_1.5_exports_OCDS_Codelist_Mapping_FILLED.xlsx`
+  — all 46 source values listed in `(Source) Codelists`; 15 code rows filled
+  across the four mapped closed codelists (tenderStatus, method,
+  procurementCategory, awardStatus), originals preserved in Notes.
+
+Re-run after any config change:
+
+```bash
+python OCDS_ETL/scripts/fill_ocds_mapping_templates.py
+```

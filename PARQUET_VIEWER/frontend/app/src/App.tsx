@@ -106,7 +106,8 @@ export default function App() {
       ? routeView
       : 'search';
   const setMode = (next: Mode) => {
-    navigate(next === 'search' ? '/' : `/${next}${location.search}`);
+    // Params are re-derived per-tab by the sync effect below.
+    navigate(next === 'search' ? '/' : `/${next}`);
   };
   const [catalogState, setCatalogState] = useState<CatalogState>({ kind: 'loading' });
   const [refreshing, setRefreshing] = useState(false);
@@ -147,18 +148,19 @@ export default function App() {
   const querySeq = useRef(0);
 
   // Keep the hash-route query in sync so validation cases can be bookmarked
-  // and shared. process param follows the top modal layer.
+  // and shared. The explorer's q blob and process deep links belong to the
+  // explorer route only; other tabs carry none of it.
   const topProcess = [...modals.layers].reverse().find((l) => l.kind === 'process');
   useEffect(() => {
+    if (mode !== 'explorer') return;
     const params = new URLSearchParams(location.search);
     params.set('q', encodeState(state));
     const processParam = topProcess && topProcess.kind === 'process' ? topProcess.processId : null;
     if (processParam) params.set('process', processParam);
     else params.delete('process');
-    params.delete('schema');
-    navigate(`/${mode === 'search' ? '' : mode}?${params.toString()}`, { replace: true });
+    navigate(`/explorer?${params.toString()}`, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state, topProcess]);
+  }, [state, topProcess, mode]);
 
   const loadCatalog = useCallback(async (refresh: boolean) => {
     if (refresh) setRefreshing(true);

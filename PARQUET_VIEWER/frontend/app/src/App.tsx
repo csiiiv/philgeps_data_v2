@@ -99,7 +99,8 @@ export default function App() {
   // redirected once in main.tsx before the router mounts.
   const location = useLocation();
   const navigate = useNavigate();
-  const routeView = location.pathname.replace(/^\//, '') || 'search';
+  // First path segment is the tab (/schema/crosswalk -> schema).
+  const routeView = location.pathname.replace(/^\//, '').split('/')[0] || 'search';
   const mode: Mode =
     routeView === 'coverage' || routeView === 'health' || routeView === 'explorer' ||
     routeView === 'about' || routeView === 'schema'

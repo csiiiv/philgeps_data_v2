@@ -328,51 +328,55 @@ const CROSSWALK: CrosswalkGroup[] = [
   },
 ];
 
-const SCHEMA_SECTIONS = [
-  ['quick-reference', 'Quick reference'],
-  ['timeline', 'Evolution timeline'],
-  ['observations', 'Key observations'],
-  ['crosswalk', 'Semantic grouping'],
+const SCHEMA_SUBTABS = [
+  ['overview', 'Overview'],
+  ['crosswalk', 'Field crosswalk'],
   ['columns', 'Column comparison'],
 ] as const;
 
-/** Valid ?schema= anchor ids (used for deep links into the single page). */
-function decodeSchemaView(raw: string | null): string {
-  const ids: readonly string[] = SCHEMA_SECTIONS.map(([id]) => id);
-  return raw && ids.includes(raw) ? raw : 'overview';
-}
+type SchemaSub = (typeof SCHEMA_SUBTABS)[number][0];
 
-function SchemaIndexNav() {
+function SchemaSubTabs({ active }: { active: SchemaSub }) {
   const navigate = useNavigate();
-  const location = useLocation();
-  const go = (id: string) => {
-    const params = new URLSearchParams(location.search);
-    params.set('schema', id);
-    navigate(`/schema?${params.toString()}`);
-    // Wait a tick for any pending render, then scroll.
-    window.setTimeout(() => {
-      document.getElementById(`schema-${id}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-    }, 0);
-  };
   return (
-    <nav className="schema-index" aria-label="Schema analysis sections">
-      {SCHEMA_SECTIONS.map(([id, label]) => (
-        <button key={id} type="button" onClick={() => go(id)}>
+    <div className="mode-switch" role="tablist" aria-label="Schema sections">
+      {SCHEMA_SUBTABS.map(([id, label]) => (
+        <button
+          key={id}
+          type="button"
+          role="tab"
+          aria-selected={active === id}
+          className={active === id ? 'active' : ''}
+          onClick={() => navigate(`/schema${id === 'overview' ? '' : `/${id}`}`)}
+        >
           {label}
         </button>
       ))}
-    </nav>
+    </div>
   );
 }
 
 export default function SchemaPage() {
-  // Scroll to the ?schema= section on mount (deep links), defaulting to top.
+  const location = useLocation();
+  const navigate = useNavigate();
+  const segment = location.pathname.replace(/^\/schema\/?/, '');
+  const sub = (segment || 'overview') as SchemaSub;
+  const active: SchemaSub = SCHEMA_SUBTABS.some(([id]) => id === sub) ? sub : 'overview';
+
+  // One-time compat: recently-shared links used ?schema=<section> anchors.
+  // Route them onto the matching subtab (overview sections scroll to anchor).
   useEffect(() => {
-    const raw = new URLSearchParams(window.location.hash.replace(/^#/, '').split('?')[1] ?? '').get('schema');
-    const target = decodeSchemaView(raw);
-    if (target !== 'overview') {
-      document.getElementById(`schema-${target}`)?.scrollIntoView({ block: 'start' });
+    const legacy = new URLSearchParams(location.search).get('schema');
+    if (!legacy) return;
+    const target: SchemaSub =
+      legacy === 'crosswalk' ? 'crosswalk' : legacy === 'columns' ? 'columns' : 'overview';
+    navigate(`/schema${target === 'overview' ? '' : `/${target}`}`, { replace: true });
+    if (target === 'overview') {
+      window.setTimeout(() => {
+        document.getElementById(`schema-${legacy}`)?.scrollIntoView({ block: 'start' });
+      }, 0);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -395,14 +399,19 @@ export default function SchemaPage() {
           file&rsquo;s layout is detected at ingestion and every normalized row
           carries its <code>_source_schema_id</code>.
         </p>
-        <SchemaIndexNav />
       </div>
 
-      <QuickReference />
-      <Timeline />
-      <Observations />
-      <CrosswalkSection />
-      <ColumnsSection />
+      <SchemaSubTabs active={active} />
+
+      {active === 'overview' && (
+        <>
+          <QuickReference />
+          <Timeline />
+          <Observations />
+        </>
+      )}
+      {active === 'crosswalk' && <CrosswalkSection />}
+      {active === 'columns' && <ColumnsSection />}
 
       <p className="hint about-footer">
         The five-schema story is the semantic map; the per-file inventory

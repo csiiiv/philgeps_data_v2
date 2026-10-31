@@ -61,6 +61,7 @@ breadcrumb to a complete Markdown table with
 10. [Architecture decision records](docs/10_architecture_decision_records.md)
 11. [Party-name normalization](docs/11_party_name_normalization.md)
 12. [Compiled process views](docs/12_compiled_process_views.md)
+13. [Official mPhilGEPS template review](docs/13_official_mphilgeps_template_review.md)
 
 Machine-readable design evidence includes
 [`artifacts/codelist_profile.json`](artifacts/codelist_profile.json) and

@@ -901,6 +901,33 @@ th.cell-detail,
   cursor: pointer;
 }
 .schema-index button:hover { border-color: var(--accent); }
+
+/* Schema page JSON downloads */
+.schema-downloads {
+  margin: 18px 0 6px;
+  padding: 14px 16px;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.schema-downloads .schema-download-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.schema-downloads button {
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--accent);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 4px 12px;
+  cursor: pointer;
+}
+.schema-downloads button:hover { border-color: var(--accent); }
 .schema-group-row td {
   font-weight: 600;
   letter-spacing: 0.02em;

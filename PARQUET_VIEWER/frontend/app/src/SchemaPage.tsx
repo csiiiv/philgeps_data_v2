@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo } from 'react';
+﻿import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 
 /**
@@ -404,6 +404,8 @@ export default function SchemaPage() {
       </div>
 
       <SchemaSubTabs active={active} />
+
+      <SchemaDownloads />
 
       {active === 'overview' && (
         <>
@@ -826,6 +828,129 @@ function OcdsMappingSection() {
         preserved, parsing deferred).
       </p>
     </Section>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Downloadable schema payloads — mirrors of the page constants, shaped after
+// the pipeline's own config files (schema_registry.json / field_mapping.json).
+
+function schemaDownloadJson() {
+  return {
+    description: 'PhilGEPS source schema layouts and aliases, verified per file in this corpus',
+    generated_by: 'PARQUET_VIEWER schema page',
+    pipeline_reference: 'DATA_NORMALIZATION/config/schema_registry.json',
+    pipeline_reference_note:
+      'registry is authoritative; this export mirrors the registry and the verified source inventory',
+    schemas: [
+      { schema_id: 'legacy_40_uom', label: 'Schema 1', columns: S1_COLUMNS, verified: '2000-2010 here (11 files)' },
+      { schema_id: 'legacy_40_unit_of_measurement', label: 'Schema 2', columns: S2_COLUMNS, verified: '2017 Q4 only (1 file)' },
+      { schema_id: 'modern_43', label: 'Schema 3', columns: S3_COLUMNS, verified: '2011-2022 Q1 here (40 files)' },
+      { schema_id: 'location_46', label: 'Schema 4-5', columns: S45_COLUMNS, verified: '2021+ V2 and 2025 (18 files)' },
+    ],
+    column_aliases: NORMALIZED,
+    crosswalk: CROSSWALK.map((g) => ({
+      group: g.group,
+      fields: g.rows.map((r) => ({
+        concept: r.concept,
+        schema_1_2: r.s12,
+        schema_3: r.s3,
+        schema_4_5: r.s45,
+        normalized: r.normalized,
+        note: r.note ?? null,
+      })),
+    })),
+  };
+}
+
+function normalizedDownloadJson() {
+  const byField = new Map<string, string[]>();
+  for (const [source, field] of Object.entries(NORMALIZED)) {
+    const list = byField.get(field) ?? [];
+    list.push(source);
+    byField.set(field, list);
+  }
+  const fields = [...byField.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([field, variants]) => ({ field, source_column_variants: variants }));
+  return {
+    description: 'PhilGEPS canonical normalized schema: stable snake_case fields',
+    generated_by: 'PARQUET_VIEWER schema page',
+    pipeline_reference: 'DATA_NORMALIZATION/config/schema_registry.json',
+    field_count: fields.length,
+    fields,
+  };
+}
+
+function ocdsDownloadJson() {
+  return {
+    description: 'Normalized/cleaned fields mapped to OCDS star-schema targets',
+    generated_by: 'PARQUET_VIEWER schema page',
+    pipeline_reference: 'OCDS_ETL/config/field_mapping.json',
+    ocds_version: '1.1.5',
+    input: 'philgeps_cleaned.parquet',
+    status_summary: {
+      total: OCDS_GROUPS.reduce((n, g) => n + g.rows.length, 0),
+      accepted: OCDS_GROUPS.reduce((n, g) => n + g.rows.filter((r) => r.status === 'accepted').length, 0),
+      unresolved: OCDS_GROUPS.reduce((n, g) => n + g.rows.filter((r) => r.status === 'unresolved').length, 0),
+    },
+    groups: OCDS_GROUPS.map((g) => ({
+      group: g.group,
+      entries: g.rows.map((r) => ({
+        field: r.field,
+        targets: r.targets,
+        treatment: r.treatment,
+        status: r.status,
+      })),
+    })),
+  };
+}
+
+const DOWNLOADS = [
+  { key: 'philgeps_schemas', label: 'Source schemas (4 layouts)', file: 'philgeps_schemas.json', build: schemaDownloadJson },
+  { key: 'philgeps_normalized', label: 'Normalized schema (55 fields)', file: 'philgeps_normalized.json', build: normalizedDownloadJson },
+  { key: 'philgeps_ocds_mapping', label: 'OCDS mapping (66 entries)', file: 'philgeps_ocds_mapping.json', build: ocdsDownloadJson },
+] as const;
+
+function downloadJson(filename: string, payload: unknown) {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function SchemaDownloads() {
+  const [last, setLast] = useState<string | null>(null);
+  return (
+    <div className="schema-downloads">
+      <p className="hint" style={{ margin: 0 }}>
+        Download this schema documentation as JSON — three exports mirroring the
+        pipeline&rsquo;s own config files.
+      </p>
+      <div className="schema-download-buttons">
+        {DOWNLOADS.map((d) => (
+          <button
+            key={d.key}
+            type="button"
+            className="btn-secondary"
+            onClick={() => {
+              downloadJson(d.file, d.build());
+              setLast(d.file);
+            }}
+          >
+            {d.label}
+          </button>
+        ))}
+      </div>
+      {last && (
+        <p className="hint" style={{ margin: 0 }}>
+          Downloaded <code>{last}</code>.
+        </p>
+      )}
+    </div>
   );
 }
 

@@ -763,26 +763,16 @@ function OcdsMappingSection() {
     0,
   );
   return (
-    <Section id="ocds" title="Normalized fields → OCDS mapping">
-      <p>
-        The final hop: each normalized/cleaned field&rsquo;s destination in the
-        OCDS star schema (<code>OCDS_ETL</code>, version 1.1.5, input{' '}
-        <code>philgeps_cleaned.parquet</code>). {total} mapping entries —{' '}
-        {total - unresolved} accepted, {unresolved} unresolved (kept in the
-        analytical parquet and blocked from publication until resolved).
-        Transcribed from <code>OCDS_ETL/config/field_mapping.json</code>.
-      </p>
-      <p className="hint">
-        Treatments: <code>direct</code>/<code>direct_local</code> = copied
-        as-is (local = analytical extension outside core OCDS) ·{' '}
-        <code>codelist_and_source</code> = mapped to an OCDS codelist with the
-        original retained in a <code>source_*</code> column ·{' '}
-        <code>identity_rule_and_copy</code> = participates in record identity ·{' '}
-        <code>conservative_key</code> = party dedup key ·{' '}
-        <code>source_party_mention</code> = becomes a party + role assignment ·{' '}
-        <code>quality_evidence</code> = feeds issue tracking · <code>*_pending_*</code>{' '}
-        = as-is until reference data (PSGC, address normalization) lands.
-      </p>
+    <>
+      <Section id="ocds" title="Normalized fields → OCDS mapping">
+        <p>
+          The final hop: each normalized/cleaned field&rsquo;s destination in the
+          OCDS star schema (<code>OCDS_ETL</code>, version 1.1.5, input{' '}
+          <code>philgeps_cleaned.parquet</code>). {total} mapping entries —{' '}
+          {total - unresolved} accepted, {unresolved} unresolved (kept in the
+          analytical parquet and blocked from publication until resolved).
+          Transcribed from <code>OCDS_ETL/config/field_mapping.json</code>.
+        </p>
       <div className="table-wrap">
         <table>
           <thead>
@@ -822,11 +812,297 @@ function OcdsMappingSection() {
         </table>
       </div>
       <p className="hint">
-        Unresolved entries: <code>client_agency</code> (buyer candidate role
-        vs. procuring entity overlap), <code>awardee_contact_person</code>{' '}
-        (privacy review pending), <code>awardee_joint_venture</code> (raw
-        preserved, parsing deferred).
+        Treatments: <code>direct</code>/<code>direct_local</code> = copied
+        as-is (local = analytical extension outside core OCDS) ·{' '}
+        <code>codelist_and_source</code> = mapped to an OCDS codelist with the
+        original retained in a <code>source_*</code> column ·{' '}
+        <code>identity_rule_and_copy</code> = participates in record identity ·{' '}
+        <code>conservative_key</code> = party dedup key ·{' '}
+        <code>source_party_mention</code> = becomes a party + role assignment ·{' '}
+        <code>quality_evidence</code> = feeds issue tracking · <code>*_pending_*</code>{' '}
+        = as-is until reference data (PSGC, address normalization) lands.
       </p>
+    </Section>
+
+      <OcdsCodelistSection />
+      <OcdsReviewSection />
+    </>
+  );
+}
+
+// Codelist mappings from OCDS_ETL/config/codelist_mapping.json:
+// source value -> OCDS closed/open codelist destination, with status and
+// rationale (only entries with a decision or note are shown per codelist).
+type CodelistValue = {
+  source: string;
+  destination: string | null;
+  status: 'accepted' | 'proposed' | 'unresolved';
+  rationale?: string;
+};
+
+const CODELISTS: { codelist: string; destination: string; closed: boolean; values: CodelistValue[] }[] = [
+  {
+    codelist: 'classification → mainProcurementCategory',
+    destination: 'tenders.main_procurement_category',
+    closed: true,
+    values: [
+      { source: 'Goods', destination: 'goods', status: 'accepted' },
+      { source: 'Civil Works', destination: 'works', status: 'accepted' },
+      { source: 'Consulting Services', destination: 'services', status: 'accepted' },
+      { source: 'Goods - General Support Services', destination: 'services', status: 'proposed', rationale: 'Label says goods, description says services; confirm policy before publication.' },
+      { source: 'Undefined', destination: null, status: 'unresolved' },
+    ],
+  },
+  {
+    codelist: 'procurement_mode → procurementMethod',
+    destination: 'tenders.procurement_method (+ details)',
+    closed: true,
+    values: [
+      { source: 'Public Bidding', destination: 'open', status: 'accepted' },
+      { source: 'National Competitive Bidding', destination: 'open', status: 'accepted' },
+      { source: 'International Competitive Bidding', destination: 'open', status: 'accepted' },
+      { source: 'Limited Source Bidding (Sec. 49)', destination: 'selective', status: 'accepted', rationale: 'OCDS selective = pre-selected suppliers invited (RA 9184 Sec. 49 shortlists). Official 2025 mPhilGEPS codelist template chose limited instead — divergence recorded, policy decision pending.' },
+      { source: 'Direct Contracting (Sec. 50)', destination: 'direct', status: 'accepted' },
+      { source: 'Direct Retail Purchase of POL and Airline Tickets (Sec. 53.14)', destination: 'direct', status: 'proposed' },
+      { source: 'Shopping', destination: 'limited', status: 'proposed' },
+      { source: 'Shopping - Ordinary/Regular Office Supplies & Equipment (Sec. 52.1.b)', destination: 'limited', status: 'proposed' },
+      { source: 'Shopping - Unforeseen Contingency (Sec. 52.1.a)', destination: 'limited', status: 'proposed' },
+      { source: 'Selection based on Consultants Qualification', destination: 'selective', status: 'proposed' },
+      { source: 'Negotiated Procurement - Two Failed Biddings (Sec. 53.1)', destination: 'direct', status: 'proposed', rationale: 'Official 2025 mPhilGEPS codelist template maps this source value to direct.' },
+      { source: 'Negotiated Procurement - Emergency Cases (Sec. 53.2)', destination: 'direct', status: 'proposed', rationale: 'Official 2025 mPhilGEPS codelist template maps this source value to direct.' },
+      { source: 'Negotiated Procurement - Agency to Agency (Sec. 53.5)', destination: 'direct', status: 'proposed', rationale: 'Official 2025 mPhilGEPS codelist template maps this source value to direct.' },
+      { source: 'Negotiated Procurement - United Nations Agencies (Sec. 53.13)', destination: 'direct', status: 'proposed' },
+      { source: 'Negotiated Procurement', destination: null, status: 'unresolved' },
+      { source: 'Negotiated Procurement - Small Value Procurement (Sec. 53.9)', destination: null, status: 'unresolved' },
+      { source: 'NP - Scientific, Scholarly/Artistic Work, Exclusive Tech. & Media Service (53.6)', destination: null, status: 'unresolved' },
+      { source: 'Negotiated Procurement - Procurement Agent (Sec. 53.6)', destination: null, status: 'unresolved' },
+      { source: 'Negotiated Procurement - Highly Technical Consultants (Sec. 53.7)', destination: null, status: 'unresolved' },
+      { source: 'Negotiated Procurement - Defense Cooperation Agreement (Sec. 53.8)', destination: null, status: 'unresolved' },
+      { source: 'Negotiated Procurement - Lease of Real Property (Sec. 53.10)', destination: null, status: 'unresolved' },
+      { source: 'Negotiated Procurement - NGO Participation (Sec. 53.11)', destination: null, status: 'unresolved' },
+      { source: 'Negotiated Procurement - Community Participation (Sec. 53.12)', destination: null, status: 'unresolved' },
+      { source: 'Local Purchase', destination: null, status: 'unresolved' },
+      { source: 'Renewal of Regular and Recurring Sevices per Appendix 37', destination: null, status: 'unresolved' },
+      { source: 'Undefined', destination: null, status: 'unresolved' },
+    ],
+  },
+  {
+    codelist: 'bid_notice_status → tender.status',
+    destination: 'tenders.status',
+    closed: true,
+    values: [
+      { source: 'Active', destination: 'active', status: 'accepted' },
+      { source: 'Awarded', destination: 'complete', status: 'accepted' },
+      { source: 'Failed', destination: 'unsuccessful', status: 'accepted' },
+      { source: 'Cancelled', destination: 'cancelled', status: 'accepted' },
+      { source: 'Closed', destination: 'complete', status: 'proposed' },
+      { source: 'Shortlisted', destination: 'active', status: 'proposed' },
+      { source: 'Closed - Pending Opening', destination: 'active', status: 'proposed' },
+      { source: 'Disapproved', destination: 'withdrawn', status: 'proposed' },
+    ],
+  },
+  {
+    codelist: 'award_notice_status → awards.status',
+    destination: 'awards.status',
+    closed: true,
+    values: [
+      { source: 'Posted', destination: 'active', status: 'accepted' },
+      { source: 'Updated', destination: 'active', status: 'accepted' },
+      { source: 'Cancelled', destination: 'cancelled', status: 'accepted' },
+      { source: 'For Approval', destination: 'pending', status: 'accepted' },
+    ],
+  },
+  {
+    codelist: 'calendar_type → duration unit',
+    destination: 'tenders.contract_duration_unit',
+    closed: false,
+    values: [
+      { source: 'Day/s', destination: 'day', status: 'accepted' },
+      { source: 'Month/s', destination: 'month', status: 'accepted' },
+      { source: 'Year/s', destination: 'year', status: 'accepted' },
+    ],
+  },
+];
+
+function OcdsCodelistSection() {
+  const total = CODELISTS.reduce((n, c) => n + c.values.length, 0);
+  const accepted = CODELISTS.reduce((n, c) => n + c.values.filter((v) => v.status === 'accepted').length, 0);
+  const proposed = CODELISTS.reduce((n, c) => n + c.values.filter((v) => v.status === 'proposed').length, 0);
+  const unresolved = CODELISTS.reduce((n, c) => n + c.values.filter((v) => v.status === 'unresolved').length, 0);
+  return (
+    <Section id="ocds-codelists" title="Codelist mappings">
+      <p>
+        Source value → OCDS codelist code for every mapped domain ({total}{' '}
+        values: {accepted} accepted, {proposed} proposed, {unresolved}{' '}
+        unresolved). Transcribed from{' '}
+        <code>OCDS_ETL/config/codelist_mapping.json</code>. Unmapped values
+        block publication of the record they appear on.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Source value</th>
+              <th>OCDS code</th>
+              <th>Status</th>
+              <th>Rationale / notes</th>
+            </tr>
+          </thead>
+          {CODELISTS.map((c) => (
+            <tbody key={c.codelist}>
+              <tr className="schema-group-row">
+                <td colSpan={4}>
+                  {c.codelist} {c.closed ? '(closed)' : '(open)'} → {c.destination}
+                </td>
+              </tr>
+              {c.values.map((v) => (
+                <tr key={v.source}>
+                  <td>{v.source}</td>
+                  <td><code>{v.destination ?? '—'}</code></td>
+                  <td>
+                    <span className={`pill${v.status !== 'accepted' ? ' error' : ''}`}>
+                      {v.status}
+                    </span>
+                  </td>
+                  <td className="cell-detail">{v.rationale ?? ''}</td>
+                </tr>
+              ))}
+            </tbody>
+          ))}
+        </table>
+      </div>
+      <p className="hint">
+        The closed-codelist conversions are the heart of OCDS conformance:{' '}
+        <code>goods/works/services</code>, <code>open/selective/limited/direct</code>,{' '}
+        <code>planning/active/complete/…</code>. Everything not in a codelist
+        stays in its <code>source_*</code> column — nothing is silently
+        discarded.
+      </p>
+    </Section>
+  );
+}
+
+// Findings from the official 2025 mPhilGEPS template review
+// (OCDS_ETL/docs/13_official_mphilgeps_template_review.md).
+const OCDS_REVIEW = {
+  confirmations: [
+    'All 14 field-level concepts shared with the official template map identically: titles, categories, procurement method (+details two-column pattern), budget → tender/value, item description/quantity/unit, award date, award value, suppliers, contract period start/end, tender and award statuses.',
+    'item_budget semantics resolved: the official template maps product price to tender/items/unit/value/amount — item budget is the per-unit price.',
+    'Buyer vs procuring entity: the template keeps buyer and tender/procuringEntity as distinct party references, supporting eventual resolution of client_agency toward the buyer role.',
+  ],
+  divergences: [
+    {
+      field: 'reason_for_award',
+      ours: 'awards.description',
+      theirs: 'tender/awardCriteria',
+      note: 'Our corpus values are free text and the awardCriteria codelist is closed, so awards.description stays correct for publication; tender/awardCriteriaDetails is a candidate future target.',
+    },
+    {
+      field: 'Limited Source Bidding (Sec. 49)',
+      ours: 'selective (accepted)',
+      theirs: 'limited',
+      note: 'Both defensible: selective matches OCDS pre-selected-supplier semantics and RA 9184 Sec. 49 shortlists; the official template chose limited. Policy decision pending.',
+    },
+  ],
+  candidates: [
+    { field: 'prebid_date', current: 'tenders.prebid_date (analytical)', candidate: 'tender/enquiryPeriod/startDate' },
+    { field: 'closing_date', current: 'tenders.closing_date (analytical)', candidate: 'tender/tenderPeriod/endDate' },
+    { field: 'contract_duration', current: 'tenders.contract_duration_days (analytical)', candidate: 'tender/contractPeriod/durationInDays' },
+    { field: 'item_budget', current: 'tender_items.item_budget_amount', candidate: 'tender/items/unit/value/amount' },
+    { field: 'unspsc classification', current: 'tender_items.classification_id', candidate: 'explicit UNSPSC scheme in classification' },
+  ],
+  openQuestions: [
+    { field: 'client_agency', question: 'Resolve toward buyer party role when it differs from the procuring entity?' },
+    { field: 'awardee_contact_person', question: 'Privacy review pending (DPA 2012) — publish, restrict, or drop?' },
+    { field: 'awardee_joint_venture', question: 'Raw preserved; when/how to parse JV members into separate parties?' },
+    { field: 'currency & timezone', question: 'PHP assumed; timezone policy unconfirmed — required before publication.' },
+    { field: 'Negotiated Procurement variants', question: '10 of 26 procurement_mode values still unresolved — map the remaining Sec. 53 cases or block publication?' },
+  ],
+};
+
+function OcdsReviewSection() {
+  return (
+    <Section id="ocds-review" title="Template review: findings, divergences & open questions">
+      <p>
+        Cross-checked against the official 2025 mPhilGEPS OCDS mapping
+        templates (field-level v0.91 + codelist v0.2, in{' '}
+        <code>mapping_references/</code>). They describe the live mPhilGEPS
+        database, so agreement is semantic; full detail in{' '}
+        <code>OCDS_ETL/docs/13_official_mphilgeps_template_review.md</code>.
+      </p>
+
+      <h4>Confirmed by the official template</h4>
+      <ul>
+        {OCDS_REVIEW.confirmations.map((c) => (
+          <li key={c}>{c}</li>
+        ))}
+      </ul>
+
+      <h4>Divergences</h4>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Field / value</th>
+              <th>Ours</th>
+              <th>Official template</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {OCDS_REVIEW.divergences.map((d) => (
+              <tr key={d.field}>
+                <td><code>{d.field}</code></td>
+                <td><code>{d.ours}</code></td>
+                <td><code>{d.theirs}</code></td>
+                <td className="cell-detail">{d.note}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Candidate OCDS-native targets (future refinements)</h4>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Field</th>
+              <th>Current target</th>
+              <th>Candidate OCDS path</th>
+            </tr>
+          </thead>
+          <tbody>
+            {OCDS_REVIEW.candidates.map((c) => (
+              <tr key={c.field}>
+                <td><code>{c.field}</code></td>
+                <td><code>{c.current}</code></td>
+                <td><code>{c.candidate}</code></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <h4>Open questions / to review</h4>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Topic</th>
+              <th>Question</th>
+            </tr>
+          </thead>
+          <tbody>
+            {OCDS_REVIEW.openQuestions.map((q) => (
+              <tr key={q.field}>
+                <td><code>{q.field}</code></td>
+                <td className="cell-detail">{q.question}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </Section>
   );
 }
@@ -903,6 +1179,24 @@ function ocdsDownloadJson() {
         status: r.status,
       })),
     })),
+    codelists: CODELISTS.map((c) => ({
+      codelist: c.codelist,
+      destination: c.destination,
+      closed: c.closed,
+      values: c.values.map((v) => ({
+        source: v.source,
+        destination_value: v.destination,
+        status: v.status,
+        rationale: v.rationale ?? null,
+      })),
+    })),
+    template_review: {
+      reference: 'official 2025 mPhilGEPS OCDS mapping templates (mapping_references/)',
+      doc: 'OCDS_ETL/docs/13_official_mphilgeps_template_review.md',
+      divergences: OCDS_REVIEW.divergences,
+      candidate_targets: OCDS_REVIEW.candidates,
+      open_questions: OCDS_REVIEW.openQuestions,
+    },
   };
 }
 

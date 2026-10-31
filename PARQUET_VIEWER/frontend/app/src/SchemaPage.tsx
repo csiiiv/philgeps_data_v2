@@ -333,6 +333,7 @@ const SCHEMA_SUBTABS = [
   ['overview', 'Overview'],
   ['crosswalk', 'Field crosswalk'],
   ['columns', 'Column comparison'],
+  ['ocds', 'OCDS mapping'],
 ] as const;
 
 type SchemaSub = (typeof SCHEMA_SUBTABS)[number][0];
@@ -370,7 +371,7 @@ export default function SchemaPage() {
     const legacy = new URLSearchParams(location.search).get('schema');
     if (!legacy) return;
     const target: SchemaSub =
-      legacy === 'crosswalk' ? 'crosswalk' : legacy === 'columns' ? 'columns' : 'overview';
+      legacy === 'crosswalk' ? 'crosswalk' : legacy === 'columns' ? 'columns' : legacy === 'ocds' ? 'ocds' : 'overview';
     navigate(`/schema${target === 'overview' ? '' : `/${target}`}`, { replace: true });
     if (target === 'overview') {
       window.setTimeout(() => {
@@ -413,6 +414,7 @@ export default function SchemaPage() {
       )}
       {active === 'crosswalk' && <CrosswalkSection />}
       {active === 'columns' && <ColumnsSection />}
+      {active === 'ocds' && <OcdsMappingSection />}
 
       <p className="hint about-footer">
         The five-schema story is the semantic map; the per-file inventory
@@ -637,6 +639,195 @@ const NORMALIZED: Record<string, string> = {
   'Awardee Size': 'awardee_size',
   'Awardee Joint Venture': 'awardee_joint_venture',
 };
+
+// Normalized/cleaned field -> OCDS star schema targets, transcribed from
+// OCDS_ETL/config/field_mapping.json (field_mapping_version 1, OCDS 1.1.5,
+// input: philgeps_cleaned.parquet). Grouped by primary target table.
+type OcdsRow = {
+  field: string;
+  targets: string[];
+  treatment: string;
+  status: 'accepted' | 'unresolved';
+};
+
+const OCDS_GROUPS: { group: string; rows: OcdsRow[] }[] = [
+  {
+    group: 'Provenance & releases',
+    rows: [
+      { field: '_source_file_id', targets: ['record_sources.source_file_id'], treatment: 'direct', status: 'accepted' },
+      { field: '_source_sheet', targets: ['record_sources.source_sheet'], treatment: 'direct', status: 'accepted' },
+      { field: '_source_row_number', targets: ['record_sources.source_row_number'], treatment: 'direct', status: 'accepted' },
+      { field: '_source_schema_id', targets: ['record_sources.source_schema_id'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'created_by', targets: ['releases.source_created_by'], treatment: 'analytical_only', status: 'accepted' },
+    ],
+  },
+  {
+    group: 'Contracting processes & tenders',
+    rows: [
+      { field: 'bid_reference_no', targets: ['contracting_processes.source_process_identifier', 'tenders.source_bid_reference'], treatment: 'identity_rule_and_copy', status: 'accepted' },
+      { field: 'solicitation_no', targets: ['tenders.solicitation_number'], treatment: 'direct', status: 'accepted' },
+      { field: 'notice_title', targets: ['tenders.title'], treatment: 'direct', status: 'accepted' },
+      { field: 'bid_published_date', targets: ['tenders.date_published', 'releases.release_date_evidence'], treatment: 'direct_naive_timestamp', status: 'accepted' },
+      { field: 'classification', targets: ['tenders.main_procurement_category', 'tenders.source_classification'], treatment: 'codelist_and_source', status: 'accepted' },
+      { field: 'notice_type', targets: ['tenders.source_notice_type'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'business_category', targets: ['tenders.business_category'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'funding_source', targets: ['tenders.funding_source'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'funding_instrument', targets: ['tenders.funding_instrument'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'procurement_mode', targets: ['tenders.procurement_method', 'tenders.procurement_method_details'], treatment: 'codelist_and_source', status: 'accepted' },
+      { field: 'trade_agreement', targets: ['tenders.trade_agreement'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'approved_budget', targets: ['tenders.value_amount'], treatment: 'direct_decimal', status: 'accepted' },
+      { field: 'area_of_delivery', targets: ['tenders.area_of_delivery'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'contract_duration', targets: ['tenders.source_contract_duration', 'tenders.contract_duration_days'], treatment: 'copy_and_safe_day_conversion', status: 'accepted' },
+      { field: 'calendar_type', targets: ['tenders.source_calendar_type', 'tenders.contract_duration_unit'], treatment: 'codelist_and_source', status: 'accepted' },
+      { field: 'prebid_date', targets: ['tenders.prebid_date'], treatment: 'direct_naive_timestamp', status: 'accepted' },
+      { field: 'closing_date', targets: ['tenders.closing_date'], treatment: 'direct_naive_timestamp', status: 'accepted' },
+      { field: 'bid_notice_status', targets: ['tenders.status', 'tenders.source_status'], treatment: 'codelist_and_source', status: 'accepted' },
+    ],
+  },
+  {
+    group: 'Tender items',
+    rows: [
+      { field: 'line_item_no', targets: ['tender_items.source_line_item_number'], treatment: 'identity_rule_and_copy', status: 'accepted' },
+      { field: 'item_name', targets: ['tender_items.title'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'item_description', targets: ['tender_items.description'], treatment: 'direct', status: 'accepted' },
+      { field: 'quantity', targets: ['tender_items.quantity'], treatment: 'direct_decimal', status: 'accepted' },
+      { field: 'unit_of_measurement', targets: ['tender_items.unit_name'], treatment: 'direct', status: 'accepted' },
+      { field: 'item_budget', targets: ['tender_items.item_budget_amount'], treatment: 'direct_local_pending_semantics', status: 'accepted' },
+      { field: 'unspsc_code', targets: ['tender_items.classification_id'], treatment: 'direct_string', status: 'accepted' },
+      { field: 'unspsc_description', targets: ['tender_items.classification_description'], treatment: 'direct', status: 'accepted' },
+    ],
+  },
+  {
+    group: 'Awards',
+    rows: [
+      { field: 'award_reference_no', targets: ['awards.source_award_reference'], treatment: 'identity_rule_and_copy', status: 'accepted' },
+      { field: 'award_title', targets: ['awards.title'], treatment: 'direct', status: 'accepted' },
+      { field: 'award_type', targets: ['awards.source_award_type'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'award_date', targets: ['awards.date'], treatment: 'direct_naive_timestamp', status: 'accepted' },
+      { field: 'award_published_date', targets: ['awards.date_published', 'releases.release_date_evidence'], treatment: 'direct_naive_timestamp', status: 'accepted' },
+      { field: 'contract_amount', targets: ['awards.value_amount', 'contracts.value_amount'], treatment: 'copy_with_semantics_flag', status: 'accepted' },
+      { field: 'award_notice_status', targets: ['awards.status', 'awards.source_status'], treatment: 'codelist_and_source', status: 'accepted' },
+      { field: 'reason_for_award', targets: ['awards.description'], treatment: 'direct', status: 'accepted' },
+    ],
+  },
+  {
+    group: 'Contracts',
+    rows: [
+      { field: 'contract_no', targets: ['contracts.source_contract_number'], treatment: 'identity_rule_and_copy', status: 'accepted' },
+      { field: 'notice_to_proceed_date', targets: ['contracts.notice_to_proceed_date'], treatment: 'direct_local_naive_timestamp', status: 'accepted' },
+      { field: 'contract_effectivity_date', targets: ['contracts.period_start'], treatment: 'direct_naive_timestamp', status: 'accepted' },
+      { field: 'contract_end_date', targets: ['contracts.period_end'], treatment: 'direct_naive_timestamp', status: 'accepted' },
+    ],
+  },
+  {
+    group: 'Parties & roles',
+    rows: [
+      { field: 'procuring_entity_name', targets: ['parties.name', 'party_roles.procuringEntity'], treatment: 'source_party_mention', status: 'accepted' },
+      { field: 'procuring_entity_name_key', targets: ['parties.name_key'], treatment: 'conservative_key', status: 'accepted' },
+      { field: 'client_agency', targets: ['parties.name', 'party_roles.buyer_candidate'], treatment: 'source_party_mention', status: 'unresolved' },
+      { field: 'client_agency_key', targets: ['parties.name_key'], treatment: 'conservative_key', status: 'accepted' },
+      { field: 'awardee_organization_name', targets: ['parties.name', 'party_roles.supplier', 'award_suppliers.source_supplier_label'], treatment: 'source_party_mention', status: 'accepted' },
+      { field: 'awardee_organization_name_key', targets: ['parties.name_key'], treatment: 'conservative_key', status: 'accepted' },
+      { field: 'awardee_contact_person', targets: ['parties.contact_name'], treatment: 'analytical_only_pending_privacy', status: 'unresolved' },
+      { field: 'awardee_joint_venture', targets: ['parties.source_joint_venture', 'award_suppliers.source_joint_venture'], treatment: 'preserve_unparsed', status: 'unresolved' },
+      { field: 'procuring_entity_region', targets: ['parties.source_region'], treatment: 'direct_pending_psgc', status: 'accepted' },
+      { field: 'procuring_entity_province', targets: ['parties.source_province'], treatment: 'direct_pending_psgc', status: 'accepted' },
+      { field: 'procuring_entity_city_municipality', targets: ['parties.source_city_municipality'], treatment: 'direct_pending_psgc', status: 'accepted' },
+      { field: 'government_branch', targets: ['parties.government_branch'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'procuring_entity_organization_type', targets: ['parties.source_organization_type'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'procuring_entity_organization_type_grouped', targets: ['parties.organization_type_grouped'], treatment: 'direct_local', status: 'accepted' },
+      { field: 'awardee_country', targets: ['parties.source_country'], treatment: 'direct_pending_address_normalization', status: 'accepted' },
+      { field: 'awardee_region', targets: ['parties.source_region'], treatment: 'direct_pending_psgc', status: 'accepted' },
+      { field: 'awardee_province', targets: ['parties.source_province'], treatment: 'direct_pending_psgc', status: 'accepted' },
+      { field: 'awardee_city_municipality', targets: ['parties.source_city_municipality'], treatment: 'direct_pending_psgc', status: 'accepted' },
+      { field: 'awardee_size', targets: ['parties.organization_size'], treatment: 'direct_local', status: 'accepted' },
+    ],
+  },
+  {
+    group: 'Data quality',
+    rows: [
+      { field: '_extra_values', targets: ['data_quality_issues.observed_value'], treatment: 'quality_evidence', status: 'accepted' },
+      { field: '_replacement_character_columns', targets: ['data_quality_issues.observed_value'], treatment: 'quality_evidence', status: 'accepted' },
+      { field: '_cleaning_issues', targets: ['data_quality_issues.issue_code'], treatment: 'quality_evidence', status: 'accepted' },
+      { field: '_cleaning_issue_count', targets: ['data_quality_issues.source_issue_count'], treatment: 'quality_evidence', status: 'accepted' },
+    ],
+  },
+];
+
+function OcdsMappingSection() {
+  const total = OCDS_GROUPS.reduce((n, g) => n + g.rows.length, 0);
+  const unresolved = OCDS_GROUPS.reduce(
+    (n, g) => n + g.rows.filter((r) => r.status === 'unresolved').length,
+    0,
+  );
+  return (
+    <Section id="ocds" title="Normalized fields → OCDS mapping">
+      <p>
+        The final hop: each normalized/cleaned field&rsquo;s destination in the
+        OCDS star schema (<code>OCDS_ETL</code>, version 1.1.5, input{' '}
+        <code>philgeps_cleaned.parquet</code>). {total} mapping entries —{' '}
+        {total - unresolved} accepted, {unresolved} unresolved (kept in the
+        analytical parquet and blocked from publication until resolved).
+        Transcribed from <code>OCDS_ETL/config/field_mapping.json</code>.
+      </p>
+      <p className="hint">
+        Treatments: <code>direct</code>/<code>direct_local</code> = copied
+        as-is (local = analytical extension outside core OCDS) ·{' '}
+        <code>codelist_and_source</code> = mapped to an OCDS codelist with the
+        original retained in a <code>source_*</code> column ·{' '}
+        <code>identity_rule_and_copy</code> = participates in record identity ·{' '}
+        <code>conservative_key</code> = party dedup key ·{' '}
+        <code>source_party_mention</code> = becomes a party + role assignment ·{' '}
+        <code>quality_evidence</code> = feeds issue tracking · <code>*_pending_*</code>{' '}
+        = as-is until reference data (PSGC, address normalization) lands.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Normalized field</th>
+              <th>OCDS target(s)</th>
+              <th>Treatment</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          {OCDS_GROUPS.map((g) => (
+            <tbody key={g.group}>
+              <tr className="schema-group-row">
+                <td colSpan={4}>{g.group}</td>
+              </tr>
+              {g.rows.map((r) => (
+                <tr key={r.field}>
+                  <td><code>{r.field}</code></td>
+                  <td className="cell-detail">
+                    {r.targets.map((t, i) => (
+                      <span key={t}>
+                        {i > 0 && ' · '}
+                        <code>{t}</code>
+                      </span>
+                    ))}
+                  </td>
+                  <td><code>{r.treatment}</code></td>
+                  <td>
+                    <span className={`pill${r.status === 'unresolved' ? ' error' : ''}`}>
+                      {r.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          ))}
+        </table>
+      </div>
+      <p className="hint">
+        Unresolved entries: <code>client_agency</code> (buyer candidate role
+        vs. procuring entity overlap), <code>awardee_contact_person</code>{' '}
+        (privacy review pending), <code>awardee_joint_venture</code> (raw
+        preserved, parsing deferred).
+      </p>
+    </Section>
+  );
+}
 
 function ColumnsSection() {
   const columns = useMemo(

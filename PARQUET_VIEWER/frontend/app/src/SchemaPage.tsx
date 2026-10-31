@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo } from 'react';
 
 /**
  * Schema page: PhilGEPS schema evolution analysis, 2000–2025.
@@ -327,30 +327,28 @@ const CROSSWALK: CrosswalkGroup[] = [
   },
 ];
 
-const SCHEMA_VIEWS = [
-  ['overview', 'Overview'],
-  ['crosswalk', 'Field crosswalk'],
-  ['columns', 'Column positions'],
+const SCHEMA_SECTIONS = [
+  ['quick-reference', 'Quick reference'],
+  ['timeline', 'Evolution timeline'],
+  ['observations', 'Key observations'],
+  ['crosswalk', 'Semantic grouping'],
+  ['columns', 'Column comparison'],
 ] as const;
 
-type SchemaView = (typeof SCHEMA_VIEWS)[number][0];
-
-function decodeSchemaView(raw: string | null): SchemaView {
-  return SCHEMA_VIEWS.some(([id]) => id === raw) ? (raw as SchemaView) : 'overview';
+/** Valid ?schema= anchor ids (used for deep links into the single page). */
+function decodeSchemaView(raw: string | null): string {
+  const ids: readonly string[] = SCHEMA_SECTIONS.map(([id]) => id);
+  return raw && ids.includes(raw) ? raw : 'overview';
 }
 
 export default function SchemaPage() {
-  const [view, setView] = useState<SchemaView>(() =>
-    decodeSchemaView(new URLSearchParams(window.location.search).get('schema')),
-  );
-
-  // Keep ?schema=… in the URL so each subsection is linkable and survives
-  // refresh/back. replaceState, matching how the app syncs its other params.
+  // Scroll to the ?schema= section on mount (deep links), defaulting to top.
   useEffect(() => {
-    const url = new URL(window.location.href);
-    url.searchParams.set('schema', view);
-    window.history.replaceState(null, '', url.toString());
-  }, [view]);
+    const target = decodeSchemaView(new URLSearchParams(window.location.search).get('schema'));
+    if (target !== 'overview') {
+      document.getElementById(`schema-${target}`)?.scrollIntoView({ block: 'start' });
+    }
+  }, []);
 
   return (
     <section className="landing" aria-label="Source schema evolution">
@@ -372,26 +370,20 @@ export default function SchemaPage() {
           file&rsquo;s layout is detected at ingestion and every normalized row
           carries its <code>_source_schema_id</code>.
         </p>
+        <nav className="schema-index" aria-label="Schema analysis sections">
+          {SCHEMA_SECTIONS.map(([id, label]) => (
+            <a key={id} href={`?view=schema&schema=${id}#schema-${id}`}>
+              {label}
+            </a>
+          ))}
+        </nav>
       </div>
 
-      <div className="mode-switch" role="tablist" aria-label="Schema view">
-        {SCHEMA_VIEWS.map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            role="tab"
-            aria-selected={view === id}
-            className={view === id ? 'active' : ''}
-            onClick={() => setView(id)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-
-      {view === 'overview' && <OverviewView />}
-      {view === 'crosswalk' && <CrosswalkView />}
-      {view === 'columns' && <ColumnsView />}
+      <QuickReference />
+      <Timeline />
+      <Observations />
+      <CrosswalkSection />
+      <ColumnsSection />
 
       <p className="hint about-footer">
         The five-schema story is the semantic map; the per-file inventory
@@ -404,90 +396,109 @@ export default function SchemaPage() {
 
 // ---------------------------------------------------------------------------
 
-function OverviewView() {
+function Section({
+  id,
+  title,
+  children,
+}: {
+  id: string;
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <>
-      <div className="about-section">
-        <h3>Quick reference</h3>
-        <p>
-          Five schemas over 25 years. The <em>verified here</em> column shows
-          how each maps onto the physical layouts detected in this corpus.
-        </p>
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Schema</th>
-                <th>Period</th>
-                <th>Format</th>
-                <th>Cols</th>
-                <th>Key change</th>
-                <th>Verified here</th>
-              </tr>
-            </thead>
-            <tbody>
-              {QUICK_REFERENCE.map((r) => (
-                <tr key={r.n}>
-                  <td><strong>{r.n}</strong></td>
-                  <td>{r.period}</td>
-                  <td>{r.format}</td>
-                  <td>{r.cols}</td>
-                  <td>{r.change}</td>
-                  <td className="cell-detail">{r.verified}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div className="about-section">
-        <h3>Schema evolution timeline</h3>
-        <div className="schema-cards">
-          {TIMELINE.map((t) => (
-            <article key={t.title} className={`schema-card schema-card-${t.tone}`}>
-              <h4>{t.title}</h4>
-              <ul className="schema-card-facts">
-                {t.facts.map((f) => (
-                  <li key={f}>{f}</li>
-                ))}
-              </ul>
-              <ul>
-                {t.points.map((p) => (
-                  <li key={p}>{p}</li>
-                ))}
-              </ul>
-            </article>
-          ))}
-        </div>
-      </div>
-
-      <div className="about-section">
-        <h3>Key observations</h3>
-        <div className="schema-cards">
-          {OBSERVATIONS.map((o) => (
-            <article key={o.title} className="schema-card">
-              <h4>{o.title}</h4>
-              {o.items && (
-                <ul>
-                  {o.items.map((i) => (
-                    <li key={i}>{i}</li>
-                  ))}
-                </ul>
-              )}
-              {o.body && <p>{o.body}</p>}
-            </article>
-          ))}
-        </div>
-      </div>
-    </>
+    <div className="about-section" id={`schema-${id}`}>
+      <h3>{title}</h3>
+      {children}
+    </div>
   );
 }
 
-function CrosswalkView() {
+function QuickReference() {
   return (
-    <div className="about-section">
-      <h3>Complete semantic grouping</h3>
+    <Section id="quick-reference" title="Quick reference">
+      <p>
+        Five schemas over 25 years. The <em>verified here</em> column shows
+        how each maps onto the physical layouts detected in this corpus.
+      </p>
+      <div className="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Schema</th>
+              <th>Period</th>
+              <th>Format</th>
+              <th>Cols</th>
+              <th>Key change</th>
+              <th>Verified here</th>
+            </tr>
+          </thead>
+          <tbody>
+            {QUICK_REFERENCE.map((r) => (
+              <tr key={r.n}>
+                <td><strong>{r.n}</strong></td>
+                <td>{r.period}</td>
+                <td>{r.format}</td>
+                <td>{r.cols}</td>
+                <td>{r.change}</td>
+                <td className="cell-detail">{r.verified}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </Section>
+  );
+}
+
+function Timeline() {
+  return (
+    <Section id="timeline" title="Schema evolution timeline">
+      <div className="schema-cards">
+        {TIMELINE.map((t) => (
+          <article key={t.title} className={`schema-card schema-card-${t.tone}`}>
+            <h4>{t.title}</h4>
+            <ul className="schema-card-facts">
+              {t.facts.map((f) => (
+                <li key={f}>{f}</li>
+              ))}
+            </ul>
+            <ul>
+              {t.points.map((p) => (
+                <li key={p}>{p}</li>
+              ))}
+            </ul>
+          </article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function Observations() {
+  return (
+    <Section id="observations" title="Key observations">
+      <div className="schema-cards">
+        {OBSERVATIONS.map((o) => (
+          <article key={o.title} className="schema-card">
+            <h4>{o.title}</h4>
+            {o.items && (
+              <ul>
+                {o.items.map((i) => (
+                  <li key={i}>{i}</li>
+                ))}
+              </ul>
+            )}
+            {o.body && <p>{o.body}</p>}
+          </article>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
+function CrosswalkSection() {
+  return (
+    <Section id="crosswalk" title="Complete semantic grouping">
       <p>
         Every field concept resolved to its column name in each schema family.
         <strong> absent</strong> means the field does not exist in that schema.
@@ -521,11 +532,11 @@ function CrosswalkView() {
           ))}
         </table>
       </div>
-    </div>
+    </Section>
   );
 }
 
-function ColumnsView() {
+function ColumnsSection() {
   const columns = useMemo(
     () => [
       { label: 'Schema 1', sub: '2000–2010 here', cols: S1_COLUMNS },
@@ -544,8 +555,7 @@ function ColumnsView() {
     cells: columns.map((c) => c.cols[i] ?? null),
   }));
   return (
-    <div className="about-section">
-      <h3>Side-by-side column comparison</h3>
+    <Section id="columns" title="Side-by-side column comparison">
       <p>
         Exact physical column order in each schema (verified from the source
         files). <span className="pill">new</span> marks a column appearing for
@@ -594,7 +604,7 @@ function ColumnsView() {
         one column here; the only Schema 2 change is the single rename at
         position 21.
       </p>
-    </div>
+    </Section>
   );
 }
 

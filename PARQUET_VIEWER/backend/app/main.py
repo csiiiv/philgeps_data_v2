@@ -442,6 +442,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     if assets.is_dir():
         app.mount("/assets", StaticFiles(directory=assets), name="assets")
 
+    # Filled OCDS mapping template workbooks served as static downloads
+    # (copied into dist/downloads by the frontend prebuild script).
+    downloads = frontend / "dist" / "downloads"
+    if downloads.is_dir():
+        app.mount(
+            "/downloads",
+            StaticFiles(directory=downloads),
+            name="downloads",
+        )
+
     @app.on_event("startup")
     def warm_background_builds() -> None:
         # Build the two disposable projections sequentially, not concurrently:

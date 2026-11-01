@@ -794,7 +794,7 @@ function OcdsMappingSection() {
                   <td className="cell-detail">
                     {r.targets.map((t, i) => (
                       <span key={t}>
-                        {i > 0 && ' · '}
+                        {i > 0 && ' | '}
                         <code>{t}</code>
                       </span>
                     ))}
@@ -1221,8 +1221,9 @@ function SchemaDownloads() {
   return (
     <div className="schema-downloads">
       <p className="hint" style={{ margin: 0 }}>
-        Download this schema documentation as JSON — three exports mirroring the
-        pipeline&rsquo;s own config files.
+        Download this schema documentation as JSON, plus the filled official
+        OCDS mapping templates (xlsx) — all mirroring the pipeline&rsquo;s own
+        config files.
       </p>
       <div className="schema-download-buttons">
         {DOWNLOADS.map((d) => (
@@ -1238,6 +1239,20 @@ function SchemaDownloads() {
             {d.label}
           </button>
         ))}
+        <a
+          className="schema-download-link"
+          href="downloads/PhilGEPS_1.5_exports_OCDS_Field_Mapping_FILLED.xlsx"
+          download
+        >
+          OCDS field mapping template (xlsx)
+        </a>
+        <a
+          className="schema-download-link"
+          href="downloads/PhilGEPS_1.5_exports_OCDS_Codelist_Mapping_FILLED.xlsx"
+          download
+        >
+          OCDS codelist mapping template (xlsx)
+        </a>
       </div>
       {last && (
         <p className="hint" style={{ margin: 0 }}>
@@ -1356,7 +1371,7 @@ function ColumnsSection() {
                   <td className="cell-detail">
                     {r.variants.map((v, i) => (
                       <span key={v}>
-                        {i > 0 && ' · '}
+                        {i > 0 && ' | '}
                         <code>{v}</code>
                       </span>
                     ))}

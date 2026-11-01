@@ -86,13 +86,15 @@ PATH_FILLS: dict[str, tuple[list[str], str]] = {
     "tender/items/unit/value/amount": (
         ["tender_items.item_budget_amount"],
         "per-unit price (semantics confirmed by official template, docs/13)",
-    ),
-    "tender/value/amount": (["tenders.value_amount"], "approved budget"),
+    ),    "tender/value/amount": (["tenders.value_amount"], "approved budget"),
     "tender/procurementMethod": (
         ["tenders.procurement_method"],
         "codelist: method",
     ),
-    "tender/procurementMethodDetails": (["tenders.procurement_method_details"], ""),
+    "tender/procurementMethodDetails": (
+        ["tenders.procurement_method_details", "tenders.solicitation_number"],
+        "solicitation number retained as process detail",
+    ),
     "tender/mainProcurementCategory": (
         ["tenders.main_procurement_category"],
         "codelist: procurementCategory",
@@ -177,6 +179,139 @@ PATH_FILLS: dict[str, tuple[list[str], str]] = {
         ],
         "party classification details",
     ),
+    # -- Identity anchors (row-4 offset fix) --------------------------------
+    "tender/items/classification/scheme": ([], "UNSPSC (fixed scheme)"),
+    "awards/description": (
+        ["awards.description"],
+        "reason for award as printed",
+    ),
+    "contracts/description": (
+        ["contracts.source_contract_number"],
+        "contract number carried; description not published",
+    ),
+    # -- Date evidence ------------------------------------------------------
+    "tender/documents/datePublished": (
+        ["tenders.date_published"],
+        "bid notice publication date",
+    ),
+    "awards/documents/datePublished": (
+        ["awards.date_published"],
+        "award notice publication date",
+    ),
+    # -- Additional analytical fields with a defensible OCDS anchor ----------
+    "tender/procurementMethodRationale": (
+        [
+            "tenders.trade_agreement",
+            "tenders.business_category",
+            "tenders.funding_source",
+            "tenders.funding_instrument",
+            "tenders.area_of_delivery",
+        ],
+        "analytical columns retained beside procurement method (docs/03)",
+    ),
+    "tender/documents/documentType": (
+        ["tenders.source_notice_type"],
+        "notice type kept in source column; documentType is analytical only",
+    ),
+    "awards/documents/documentType": (
+        ["awards.source_award_type"],
+        "award type kept in source column; documentType is analytical only",
+    ),
+    "contracts/status": (
+        ["contracts.notice_to_proceed_date"],
+        "contract status is derived from NTP presence (analytical only)",
+    ),
+    "relatedProcesses/identifier": (
+        ["contracting_processes.source_process_identifier"],
+        "process identity; ocid registration pending (docs/04)",
+    ),
+    "awards/suppliers/name": (
+        ["award_suppliers.source_supplier_label", "award_suppliers.source_joint_venture"],
+        "supplier label; joint-venture label preserved unparsed (unresolved)",
+    ),
+    "parties/details": (
+        [
+            "parties.government_branch",
+            "parties.source_organization_type",
+            "parties.organization_type_grouped",
+            "parties.organization_size",
+            "parties.source_province",
+        ],
+        "party classification + province details (no OCDS address slot for province)",
+    ),
+}
+
+# ---------------------------------------------------------------------------
+# Descriptions for the normalized/cleaned fields (source semantics; derived
+# from DATA_NORMALIZATION docs and cleaning rules).
+
+FIELD_DESCRIPTIONS: dict[str, str] = {
+    "bid_reference_no": "Bid notice reference number; the published process identifier",
+    "solicitation_no": "Solicitation number printed on the notice",
+    "notice_title": "Title of the bid notice",
+    "notice_type": "Notice type as printed (e.g. Invitation to Bid)",
+    "classification": "Goods / Civil Works / Consulting Services classification",
+    "business_category": "Business category as printed on the notice",
+    "funding_source": "Funding source as printed (e.g. GOP)",
+    "funding_instrument": "Funding instrument as printed",
+    "procurement_mode": "Procurement mode / method label as printed",
+    "trade_agreement": "Applicable trade agreement, if any",
+    "approved_budget": "Approved budget of the contract (ABC), PHP",
+    "bid_published_date": "Date the bid notice was published",
+    "closing_date": "Bid closing date",
+    "prebid_date": "Pre-bid conference date",
+    "area_of_delivery": "Delivery place as printed",
+    "contract_duration": "Contract duration as printed (numeric part)",
+    "calendar_type": "Duration unit: Day/s, Month/s, or Year/s",
+    "line_item_no": "Line item number within the notice",
+    "item_name": "Item short name as printed",
+    "item_description": "Full item description",
+    "quantity": "Quantity ordered",
+    "unit_of_measurement": "Unit of measure label",
+    "item_budget": "Approved budget for this line item (per-unit price)",
+    "unspsc_code": "UNSPSC classification code",
+    "unspsc_description": "UNSPSC classification description",
+    "bid_notice_status": "Notice status as printed (e.g. Active, Awarded)",
+    "created_by": "User who encoded the notice (analytical only)",
+    "award_reference_no": "Award notice reference number",
+    "award_title": "Title of the award",
+    "award_type": "Award type as printed (e.g. Notice of Award)",
+    "award_date": "Date of award",
+    "award_published_date": "Date the award notice was published",
+    "contract_amount": "Awarded contract amount, PHP",
+    "award_notice_status": "Award status as printed (e.g. Posted, Updated)",
+    "reason_for_award": "Reason for award as printed",
+    "contract_no": "Contract number as printed",
+    "notice_to_proceed_date": "Notice-to-proceed date",
+    "contract_effectivity_date": "Contract effectivity date (start)",
+    "contract_end_date": "Contract end date",
+    "procuring_entity_name": "Procuring entity organization name",
+    "procuring_entity_name_key": "Conservative dedup key for procuring_entity_name",
+    "client_agency": "Client agency as printed (buyer candidate; unresolved)",
+    "client_agency_key": "Conservative dedup key for client_agency",
+    "awardee_organization_name": "Awardee organization name as printed",
+    "awardee_organization_name_key": "Conservative dedup key for awardee_organization_name",
+    "awardee_contact_person": "Awardee contact person (analytical only, privacy hold)",
+    "awardee_joint_venture": "Awardee joint-venture label as printed (unparsed)",
+    "procuring_entity_region": "Procuring entity region (PSGC pending)",
+    "procuring_entity_province": "Procuring entity province (PSGC pending)",
+    "procuring_entity_city_municipality": "Procuring entity city/municipality (PSGC pending)",
+    "government_branch": "Government branch label",
+    "procuring_entity_organization_type": "PE organization type label",
+    "procuring_entity_organization_type_grouped": "PE organization type, grouped",
+    "awardee_country": "Awardee country label (address normalization pending)",
+    "awardee_region": "Awardee region (PSGC pending)",
+    "awardee_province": "Awardee province (PSGC pending)",
+    "awardee_city_municipality": "Awardee city/municipality (PSGC pending)",
+    "awardee_size": "Awardee size label (small/medium/large)",
+    "_source_file_id": "Source file identifier (provenance)",
+    "_source_sheet": "Source sheet name (provenance)",
+    "_source_row_number": "Source row number (provenance)",
+    "_source_schema_id": "Source schema variant id (provenance)",
+    "_extra_values": "Cells beyond expected column count (data quality)",
+    "_replacement_character_columns": "Columns containing replacement characters (data quality)",
+    "_cleaning_issues": "Cleaning issue codes for the row (data quality)",
+    "_cleaning_issue_count": "Count of cleaning issues for the row (data quality)",
 }
 
 # Domain -> codelist section name in the closed-codelists sheet.
@@ -187,6 +322,7 @@ CLOSED_CODELIST_SECTION = {
     "award_notice_status": "Codelist: awardStatus",
     # calendar_type has no OCDS codelist section in the template
 }
+
 
 
 def load_configs():
@@ -208,17 +344,19 @@ def load_configs():
     )
     if unknown:
         raise SystemExit(f"PATH_FILLS references unknown targets: {unknown}")
-    return fields_by_target, codelists
+    return field, fields_by_target, codelists
 
 
 def render_fill(targets: list[str], note: str, fields_by_target) -> str:
     parts = []
     for t in targets:
         fields = fields_by_target.get(t, [])
-        parts.append(f"{t} <- {', '.join(fields)}" if fields else t)
+        for f in fields:
+            desc = FIELD_DESCRIPTIONS.get(f)
+            parts.append(f"{t} <- {f}" + (f" ({desc})" if desc else ""))
     if note:
         parts.append(f"[{note}]")
-    return " · ".join(parts)
+    return " | ".join(parts)
 
 
 def preserve_original(cell, label: str) -> None:
@@ -235,14 +373,45 @@ def preserve_original(cell, label: str) -> None:
     notes_cell.value = f"{kept} | {prior}" if prior else kept
 
 
-def fill_field_template(src: Path, dst: Path, fields_by_target) -> int:
+def fill_data_elements_sheet(wb, field_mapping, fields_by_target) -> int:
+    """List every normalized field in the template's '2. Data Elements' sheet.
+
+    The template's own structure: one row per existing data element with
+    columns: element name | source | section | data element | publish? |
+    example | description | data type | notes. We append our fields after
+    any existing rows, keyed as '<field> (<pipeline>)'.
+    """
+    ws = wb["2. Data Elements"]
+    # Template header row is 3; existing mPhilGEPS rows follow. Append after.
+    r = ws.max_row + 1
+    listed = 0
+    for field_name, spec in field_mapping["fields"].items():
+        ws.cell(row=r, column=1, value=f"{field_name} (PhilGEPS 1.5 exports)")
+        ws.cell(row=r, column=2, value="PhilGEPS 1.5 exports")
+        ws.cell(row=r, column=3, value="philgeps_cleaned")
+        ws.cell(row=r, column=4, value=field_name)
+        published = spec["status"] == "accepted" and not field_name.startswith("_")
+        ws.cell(row=r, column=5, value="Yes" if published else "No")
+        ws.cell(row=r, column=7, value=FIELD_DESCRIPTIONS.get(field_name, ""))
+        treatments = {spec["treatment"]}
+        ws.cell(row=r, column=8, value=str(next(iter(treatments))))
+        note = f"targets: {'; '.join(spec['targets'])}"
+        if spec["status"] != "accepted":
+            note += f" | status: {spec['status']}"
+        ws.cell(row=r, column=9, value=note)
+        r += 1
+        listed += 1
+    return listed
+
+
+def fill_field_template(src: Path, dst: Path, field_mapping, fields_by_target) -> int:
     wb = openpyxl.load_workbook(src)
     filled = 0
     for name in wb.sheetnames:
         if not name.startswith("(OCDS)"):
             continue
         ws = wb[name]
-        for row in ws.iter_rows(min_row=5):
+        for row in ws.iter_rows(min_row=4):
             path_cell = row[2] if len(row) > 2 else None  # column C
             map_cell = row[5] if len(row) > 5 else None  # column F
             if path_cell is None or map_cell is None:
@@ -254,9 +423,10 @@ def fill_field_template(src: Path, dst: Path, fields_by_target) -> int:
             preserve_original(map_cell, "mPhilGEPS")
             map_cell.value = render_fill(targets, note, fields_by_target)
             filled += 1
+    listed = fill_data_elements_sheet(wb, field_mapping, fields_by_target)
     dst.parent.mkdir(parents=True, exist_ok=True)
     wb.save(dst)
-    return filled
+    return filled, listed
 
 
 def fill_codelist_template(src: Path, dst: Path, codelists) -> tuple[int, int]:
@@ -345,20 +515,26 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    fields_by_target, codelists = load_configs()
+    field_mapping, fields_by_target, codelists = load_configs()
 
     field_dst = args.output_dir / "PhilGEPS_1.5_exports_OCDS_Field_Mapping_FILLED.xlsx"
     codelist_dst = args.output_dir / "PhilGEPS_1.5_exports_OCDS_Codelist_Mapping_FILLED.xlsx"
 
-    n_fields = fill_field_template(
-        args.references_dir / FIELD_TEMPLATE, field_dst, fields_by_target
+    n_fields, n_elements = fill_field_template(
+        args.references_dir / FIELD_TEMPLATE, field_dst, field_mapping, fields_by_target
     )
     n_codes, n_listed = fill_codelist_template(
         args.references_dir / CODELIST_TEMPLATE, codelist_dst, codelists
     )
 
-    print(f"field template : {n_fields} OCDS paths filled -> {field_dst}")
-    print(f"codelist template: {n_codes} code rows filled, {n_listed} source values listed -> {codelist_dst}")
+    print(
+        f"field template : {n_fields} OCDS paths filled, "
+        f"{n_elements} normalized fields listed in Data Elements -> {field_dst}"
+    )
+    print(
+        f"codelist template: {n_codes} code rows filled, "
+        f"{n_listed} source values listed -> {codelist_dst}"
+    )
 
 
 if __name__ == "__main__":

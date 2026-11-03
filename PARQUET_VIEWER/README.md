@@ -69,6 +69,18 @@ The viewer treats these as immutable inputs:
 
 No validation action may modify these files.
 
+On a fresh clone these locations are empty: the datasets ship in the shared
+`DATA_COLLECTION` archive. From the repo root:
+
+```bash
+python restore_data_collection.py --dry-run   # preview
+python restore_data_collection.py             # restore into the paths above
+```
+
+The restore script is cross-platform (Windows / macOS / Linux), stdlib-only,
+idempotent, and safe: it never overwrites differing files without `--force`
+and never touches git-tracked configs. See the repo-root README for details.
+
 ## Current foundation preview
 
 The implementation exposes a schema-checked dataset catalog, health API, and a
@@ -165,6 +177,7 @@ The scripts avoid machine-wide changes:
 
 Foundation tests use Python's standard test runner:
 
-```powershell
-python -m unittest discover -s backend\tests -v
+```bash
+python -m unittest discover -s backend/tests -v        # viewer backend
+python -m unittest discover -s ../tests -v             # restore script (repo root)
 ```

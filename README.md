@@ -16,6 +16,8 @@ served through a read-only analytical viewer.
 | [`PARQUET_VIEWER/`](PARQUET_VIEWER/) | Stage 3 — read-only FastAPI + DuckDB backend and React/Vite frontend for exploring the datasets |
 | [`mapping_references/`](mapping_references/) | Official 2025 mPhilGEPS OCDS mapping templates (field-level v0.91 + codelist v0.2), used as the design reference for the OCDS mapping |
 | `DATA_OUTPUTS.md` | End-to-end dataset guide: every dataset, how it was produced, verified row counts and sizes |
+| `restore_data_collection.py` | Restore the shared `DATA_COLLECTION` archive into the canonical pipeline layout (cross-platform, relative paths, stdlib only) |
+| `tests/` | Sandbox unit tests for the restore script (`python -m unittest discover -s tests`) |
 
 > The `dataset/` downloads inside `RAW_DATA_DOWNLOADER/` are gitignored
 > (size and licensing); only the downloader code, URL lists, and docs are
@@ -87,6 +89,61 @@ npm run build
 Python dependencies per stage: `duckdb`, `openpyxl`, `pandas`/`pyarrow` for
 stage 1–2 scripts; `fastapi`, `uvicorn` for the viewer backend. Node 20+ for
 the frontend.
+
+## Deploy from the DATA_COLLECTION archive
+
+The generated datasets (20 Parquet files + the provenance manifest, ~16 GB)
+are shared as a `DATA_COLLECTION` archive and are gitignored. On a fresh
+clone, extract the archive at the repo root and run the restore script; it
+places every file where the pipeline and viewer expect it (paths in
+`PARQUET_VIEWER/config/settings.json`):
+
+```bash
+# 1. extract the archive so that DATA_COLLECTION/ sits at the repo root
+# 2. preview (touches nothing)
+python restore_data_collection.py --dry-run
+# 3. restore (moves data files; git-tracked files are never overwritten)
+python restore_data_collection.py
+# 4. start the viewer
+cd PARQUET_VIEWER && python -m uvicorn backend.app.main:app --host 0.0.0.0 --port 8765
+```
+
+The script is OS-agnostic (Windows / macOS / Linux), resolves every path
+relative to the repo root (never the current directory), uses only the
+Python standard library, and is safe to re-run: identical targets are
+skipped, differing targets block with exit code 3 unless `--force` is
+given. Options: `--keep-source` (copy instead of move), `--verify-hashes`
+(SHA-256 every copied file), `--report PATH` (machine-readable JSON).
+
+Note: raw source downloads and OCDS build intermediates are not in the
+archive - re-running stage 0/2 requires the Google Drive sources (see
+[`RAW_DATA_DOWNLOADER/README.md`](RAW_DATA_DOWNLOADER/README.md)).
+
+## Verify and test (agent quick reference)
+
+Copy-paste checks for humans and AI agents; all exit 0 on success:
+
+```bash
+# restore script sandbox tests (no production data needed)
+python -m unittest discover -s tests -v
+
+# viewer backend tests (fixture Parquets only, no production data)
+python -m unittest discover -s PARQUET_VIEWER/backend/tests -v
+
+# viewer health + catalog after a restore
+python -m uvicorn PARQUET_VIEWER.backend.app.main:app --host 127.0.0.1 --port 8765   # repo root
+curl http://127.0.0.1:8765/api/health
+curl http://127.0.0.1:8765/api/catalog
+```
+
+Canonical data locations the viewer reads (relative to repo root):
+
+| Path | Contents |
+|---|---|
+| `OCDS_ETL/outputs/parquet/` | 18 OCDS star-schema tables |
+| `DATA_NORMALIZATION/output/philgeps_normalized.parquet` | lossless 60-column layer |
+| `DATA_NORMALIZATION/output/philgeps_cleaned.parquet` | typed 66-column layer |
+| `RAW_DATA_DOWNLOADER/dataset/manifest.json` | SHA-256 provenance registry |
 
 ## Data truth model
 

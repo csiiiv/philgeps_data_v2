@@ -10,18 +10,23 @@ served through a read-only analytical viewer.
 
 | Directory | What it is |
 |---|---|
+| [`RAW_DATA_DOWNLOADER/`](RAW_DATA_DOWNLOADER/) | Stage 0 — Google Drive bulk downloader + the SHA-256 content-addressed `manifest.json` provenance registry (downloads gitignored) |
 | [`DATA_NORMALIZATION/`](DATA_NORMALIZATION/) | Stage 1 — lossless normalization of source exports into `philgeps_normalized.parquet` (60 columns, all strings) + typed `philgeps_cleaned.parquet` (66 columns) |
 | [`OCDS_ETL/`](OCDS_ETL/) | Stage 2 — cleaned layer shaped into 18 OCDS-aligned relational parquet tables plus party-identity and compiled-process layers |
 | [`PARQUET_VIEWER/`](PARQUET_VIEWER/) | Stage 3 — read-only FastAPI + DuckDB backend and React/Vite frontend for exploring the datasets |
 | [`mapping_references/`](mapping_references/) | Official 2025 mPhilGEPS OCDS mapping templates (field-level v0.91 + codelist v0.2), used as the design reference for the OCDS mapping |
 | `DATA_OUTPUTS.md` | End-to-end dataset guide: every dataset, how it was produced, verified row counts and sizes |
 
-> `RAW_DATA_DOWNLOADER/` (stage 0) lives outside this repository; it stages
-> the source downloads and their `manifest.json` (content-addressed by
-> SHA-256) that stage 1 consumes.
+> The `dataset/` downloads inside `RAW_DATA_DOWNLOADER/` are gitignored
+> (size and licensing); only the downloader code, URL lists, and docs are
+> tracked.
 
 ## The three-line summary
 
+0. **Download** — the Google Drive bulk downloader fetches the quarterly
+   exports and registers every byte in a content-addressed manifest
+   (`source_file_id` = SHA-256), the provenance backbone for everything
+   downstream.
 1. **Normalize** — every source layout (5 detected schemas, 2000–2025) maps
    by column name onto one canonical 60-column schema; nothing is dropped,
    every row keeps `_source_file_id` / `_source_sheet` / `_source_row_number`
@@ -48,8 +53,13 @@ served through a read-only analytical viewer.
 ## Build and run (full pipeline)
 
 ```powershell
+# Stage 0 — download sources (idempotent, resumable)
+cd RAW_DATA_DOWNLOADER
+python scripts/download_gdrive_sources.py references/source_urls_4.txt
+python scripts/rebuild_manifest.py
+
 # Stage 1 — normalize (requires RAW_DATA_DOWNLOADER/dataset/ with manifest.json)
-cd DATA_NORMALIZATION
+cd ..\DATA_NORMALIZATION
 python scripts/build_source_catalog.py
 python scripts/verify_schema.py
 python scripts/build_normalized_parquet.py

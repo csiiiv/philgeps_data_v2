@@ -60,10 +60,10 @@ at the repository root, which runs every stage in order with resume switches.
 
 ## 2. Stage 0 — Source downloads (RAW_DATA_DOWNLOADER)
 
-> The `RAW_DATA_DOWNLOADER/` folder is git-ignored and not required to exist
-> for later stages to query data, but the manifest it produced is the
-> provenance backbone of everything downstream. Described here from the
-> manifest, catalog, and pipeline script.
+> The `RAW_DATA_DOWNLOADER/dataset/` downloads are git-ignored (8.4 GB, and
+> the source documents are not ours to redistribute), but the downloader
+> scripts and URL lists are tracked. The manifest the stage produced is the
+> provenance backbone of everything downstream.
 
 ### What was downloaded
 

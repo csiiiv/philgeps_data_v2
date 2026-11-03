@@ -3,7 +3,7 @@
 *.csv
 *.duckdb
 *.duckdb.wal
-RAW_DATA_DOWNLOADER/
+RAW_DATA_DOWNLOADER/dataset/
 OCDS_ETL/outputs/
 DATA_NORMALIZATION/output/
 .tmp/

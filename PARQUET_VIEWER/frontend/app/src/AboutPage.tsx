@@ -232,7 +232,17 @@ export default function AboutPage() {
           </a>
           . Each file, its checksum, coverage dates, and download
           URL are registered in <code>manifest.json</code> and browsable from
-          any record&rsquo;s <em>Source files</em> panel.
+          any record&rsquo;s <em>Source files</em> panel. The generated datasets
+          behind this viewer (20 Parquet files + the provenance manifest) are
+          shared as a downloadable archive:{' '}
+          <a
+            href="https://drive.google.com/file/d/1CswNTPdCi2BvF8u9xXsg-bY9g4WS8ids/view?usp=sharing"
+            target="_blank"
+            rel="noreferrer"
+          >
+            DATA_COLLECTION.7z
+          </a>
+          .
         </p>
         <p>
           Related standards and references:

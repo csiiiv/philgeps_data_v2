@@ -33,3 +33,6 @@ Thumbs.db
 .DS_Store
 .vscode/*
 !.vscode/settings.json
+
+# ===== Data collection archives (shared externally, not versioned) =====
+DATA_COLLECTION/

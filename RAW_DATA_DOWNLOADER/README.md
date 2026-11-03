@@ -6,6 +6,8 @@ depends on. The downloaded files and manifest are **not** tracked in git
 (`dataset/` is gitignored — 8.4 GB); the scripts, URL lists, and reference
 docs are.
 
+> **Source data on Google Drive**: <https://drive.google.com/drive/folders/1Km2gqIfaY_9ZotjvePFZVSMEuxud6WWA?usp=sharing>
+
 ## Layout
 
 ```
@@ -43,6 +45,7 @@ source document.
 
 ## Current corpus state
 
+- **Source folder (Google Drive)**: <https://drive.google.com/drive/folders/1Km2gqIfaY_9ZotjvePFZVSMEuxud6WWA?usp=sharing>
 - **70 local files** — 52 XLSX + 18 CSV, spanning 2000–2025
 - **71 source URLs** (one file reachable via two URLs, identical SHA-256)
 - The manifest is the provenance backbone; stage 1 (`DATA_NORMALIZATION`)

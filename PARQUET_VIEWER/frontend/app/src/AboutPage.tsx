@@ -222,7 +222,15 @@ export default function AboutPage() {
             philgeps.gov.ph
           </a>{' '}
           — whose quarterly bulk files are mirrored to Google Drive/Docs
-          spreadsheets. Each file, its checksum, coverage dates, and download
+          spreadsheets:{' '}
+          <a
+            href="https://drive.google.com/drive/folders/1Km2gqIfaY_9ZotjvePFZVSMEuxud6WWA?usp=sharing"
+            target="_blank"
+            rel="noreferrer"
+          >
+            PHILGEPS-V2 source folder
+          </a>
+          . Each file, its checksum, coverage dates, and download
           URL are registered in <code>manifest.json</code> and browsable from
           any record&rsquo;s <em>Source files</em> panel.
         </p>

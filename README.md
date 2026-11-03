@@ -10,7 +10,7 @@ served through a read-only analytical viewer.
 
 | Directory | What it is |
 |---|---|
-| [`RAW_DATA_DOWNLOADER/`](RAW_DATA_DOWNLOADER/) | Stage 0 — Google Drive bulk downloader + the SHA-256 content-addressed `manifest.json` provenance registry (downloads gitignored) |
+| [`RAW_DATA_DOWNLOADER/`](RAW_DATA_DOWNLOADER/) | Stage 0 — Google Drive bulk downloader + the SHA-256 content-addressed `manifest.json` provenance registry (downloads gitignored). [Source folder on Drive →](https://drive.google.com/drive/folders/1Km2gqIfaY_9ZotjvePFZVSMEuxud6WWA?usp=sharing) |
 | [`DATA_NORMALIZATION/`](DATA_NORMALIZATION/) | Stage 1 — lossless normalization of source exports into `philgeps_normalized.parquet` (60 columns, all strings) + typed `philgeps_cleaned.parquet` (66 columns) |
 | [`OCDS_ETL/`](OCDS_ETL/) | Stage 2 — cleaned layer shaped into 18 OCDS-aligned relational parquet tables plus party-identity and compiled-process layers |
 | [`PARQUET_VIEWER/`](PARQUET_VIEWER/) | Stage 3 — read-only FastAPI + DuckDB backend and React/Vite frontend for exploring the datasets |
@@ -24,7 +24,8 @@ served through a read-only analytical viewer.
 ## The three-line summary
 
 0. **Download** — the Google Drive bulk downloader fetches the quarterly
-   exports and registers every byte in a content-addressed manifest
+   exports ([PHILGEPS-V2 Drive folder](https://drive.google.com/drive/folders/1Km2gqIfaY_9ZotjvePFZVSMEuxud6WWA?usp=sharing))
+   and registers every byte in a content-addressed manifest
    (`source_file_id` = SHA-256), the provenance backbone for everything
    downstream.
 1. **Normalize** — every source layout (5 detected schemas, 2000–2025) maps

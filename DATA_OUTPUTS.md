@@ -68,7 +68,9 @@ at the repository root, which runs every stage in order with resume switches.
 ### What was downloaded
 
 PhilGEPS publishes procurement exports (bid notices and award details) as
-quarterly/annual workbooks on Google Drive. `scripts/download_gdrive_sources.py`
+quarterly/annual workbooks on Google Drive — collected in the
+[PHILGEPS-V2 Drive folder](https://drive.google.com/drive/folders/1Km2gqIfaY_9ZotjvePFZVSMEuxud6WWA?usp=sharing).
+`scripts/download_gdrive_sources.py`
 reads a URL list (e.g. `references/source_urls_4.txt`) and downloads or resumes
 each file into `dataset/files/`. Current catalog state:
 

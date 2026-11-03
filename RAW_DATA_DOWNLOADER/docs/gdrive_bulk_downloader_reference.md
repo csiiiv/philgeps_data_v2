@@ -10,6 +10,10 @@ downloaded document back to its original source URL.
 The downloader should prioritize reproducibility, provenance, clear
 error reporting, and safe reruns.
 
+> **Production corpus**: the actual PhilGEPS exports this utility was
+> built for live in the [PHILGEPS-V2 Drive folder](https://drive.google.com/drive/folders/1Km2gqIfaY_9ZotjvePFZVSMEuxud6WWA?usp=sharing)
+> (70 files, 2000–2025).
+
 ## Expected Input
 
 Use a plain-text file such as `source_urls.txt`, with one source URL per

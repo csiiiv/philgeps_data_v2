@@ -16,7 +16,7 @@ served through a read-only analytical viewer.
 | [`PARQUET_VIEWER/`](PARQUET_VIEWER/) | Stage 3 — read-only FastAPI + DuckDB backend and React/Vite frontend for exploring the datasets |
 | [`mapping_references/`](mapping_references/) | Official 2025 mPhilGEPS OCDS mapping templates (field-level v0.91 + codelist v0.2), used as the design reference for the OCDS mapping |
 | `DATA_OUTPUTS.md` | End-to-end dataset guide: every dataset, how it was produced, verified row counts and sizes |
-| `restore_data_collection.py` | Restore the shared `DATA_COLLECTION` archive into the canonical pipeline layout (cross-platform, relative paths, stdlib only) |
+| `restore_data_collection.py` | Restore the shared [`DATA_COLLECTION` archive](https://drive.google.com/file/d/1CswNTPdCi2BvF8u9xXsg-bY9g4WS8ids/view?usp=sharing) into the canonical pipeline layout (cross-platform, relative paths, stdlib only) |
 | `tests/` | Sandbox unit tests for the restore script (`python -m unittest discover -s tests`) |
 
 > The `dataset/` downloads inside `RAW_DATA_DOWNLOADER/` are gitignored
@@ -93,10 +93,11 @@ the frontend.
 ## Deploy from the DATA_COLLECTION archive
 
 The generated datasets (20 Parquet files + the provenance manifest, ~16 GB)
-are shared as a `DATA_COLLECTION` archive and are gitignored. On a fresh
-clone, extract the archive at the repo root and run the restore script; it
-places every file where the pipeline and viewer expect it (paths in
-`PARQUET_VIEWER/config/settings.json`):
+are shared as a `DATA_COLLECTION` archive and are gitignored:
+<https://drive.google.com/file/d/1CswNTPdCi2BvF8u9xXsg-bY9g4WS8ids/view?usp=sharing>.
+On a fresh clone, download and extract the archive at the repo root, then
+run the restore script; it places every file where the pipeline and viewer
+expect it (paths in `PARQUET_VIEWER/config/settings.json`):
 
 ```bash
 # 1. extract the archive so that DATA_COLLECTION/ sits at the repo root

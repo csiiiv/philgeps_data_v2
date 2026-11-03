@@ -70,7 +70,9 @@ The viewer treats these as immutable inputs:
 No validation action may modify these files.
 
 On a fresh clone these locations are empty: the datasets ship in the shared
-`DATA_COLLECTION` archive. From the repo root:
+`DATA_COLLECTION` archive
+(<https://drive.google.com/file/d/1CswNTPdCi2BvF8u9xXsg-bY9g4WS8ids/view?usp=sharing>).
+From the repo root:
 
 ```bash
 python restore_data_collection.py --dry-run   # preview

@@ -56,6 +56,8 @@ The active implementation checklist is maintained in [TODO.md](TODO.md).
 15. [Source coverage spec](docs/15_source_coverage_spec.md)
 16. [VPS deployment profile (4–6 GB RAM)](docs/16_vps_deployment_profile.md)
 
+Module READMEs: [backend/](backend/README.md) · [frontend/](frontend/README.md)
+
 ## Data sources
 
 The viewer treats these as immutable inputs:

@@ -14,7 +14,7 @@ python scripts/build_cleaned_parquet.py
 ```
 
 The final dataset is `output/philgeps_normalized.parquet`. The writer streams
-all 67 source files directly into one temporary Parquet and atomically renames
+all 70 source files directly into one temporary Parquet and atomically renames
 it only after a successful build. It does not create per-source Parquets.
 
 All source values remain nullable strings. Source layouts are mapped onto one
@@ -39,4 +39,5 @@ See [docs/normalized_parquet.md](docs/normalized_parquet.md) for validation
 results and query examples, [docs/cleaning.md](docs/cleaning.md) for the typed
 cleaned layer, [docs/normalization_design.md](docs/normalization_design.md)
 for the design, and [docs/source_inventory.md](docs/source_inventory.md) for
-source-schema findings.
+source-schema findings. A per-script reference is in
+[docs/scripts.md](docs/scripts.md).

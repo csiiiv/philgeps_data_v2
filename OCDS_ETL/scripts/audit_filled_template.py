@@ -21,7 +21,7 @@ import openpyxl
 sys.stdout.reconfigure(encoding="utf-8")
 
 PROJECT = Path(__file__).resolve().parents[1]
-XLSX = PROJECT / "artifacts" / "filled_templates" / "PhilGEPS_1.5_exports_OCDS_Field_Mapping_FILLED.xlsx"
+XLSX = PROJECT / "artifacts" / "filled_templates" / "UNIFIED_exports_OCDS_Field_Mapping_FILLED.xlsx"
 
 fm = json.loads((PROJECT / "config" / "field_mapping.json").read_text(encoding="utf-8"))
 fields = set(fm["fields"])

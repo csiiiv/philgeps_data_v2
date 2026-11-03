@@ -1241,14 +1241,14 @@ function SchemaDownloads() {
         ))}
         <a
           className="schema-download-link"
-          href="downloads/PhilGEPS_1.5_exports_OCDS_Field_Mapping_FILLED.xlsx"
+          href="downloads/UNIFIED_exports_OCDS_Field_Mapping_FILLED.xlsx"
           download
         >
           OCDS field mapping template (xlsx)
         </a>
         <a
           className="schema-download-link"
-          href="downloads/PhilGEPS_1.5_exports_OCDS_Codelist_Mapping_FILLED.xlsx"
+          href="downloads/UNIFIED_exports_OCDS_Codelist_Mapping_FILLED.xlsx"
           download
         >
           OCDS codelist mapping template (xlsx)

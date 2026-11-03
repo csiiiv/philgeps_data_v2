@@ -13,8 +13,8 @@ const sourceDir = path.resolve(appDir, '../../../OCDS_ETL/artifacts/filled_templ
 const targetDir = path.resolve(appDir, 'public/downloads');
 
 const FILES = [
-  'PhilGEPS_1.5_exports_OCDS_Field_Mapping_FILLED.xlsx',
-  'PhilGEPS_1.5_exports_OCDS_Codelist_Mapping_FILLED.xlsx',
+  'UNIFIED_exports_OCDS_Field_Mapping_FILLED.xlsx',
+  'UNIFIED_exports_OCDS_Codelist_Mapping_FILLED.xlsx',
 ];
 
 mkdirSync(targetDir, { recursive: true });

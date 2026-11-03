@@ -517,8 +517,8 @@ def main() -> None:
 
     field_mapping, fields_by_target, codelists = load_configs()
 
-    field_dst = args.output_dir / "PhilGEPS_1.5_exports_OCDS_Field_Mapping_FILLED.xlsx"
-    codelist_dst = args.output_dir / "PhilGEPS_1.5_exports_OCDS_Codelist_Mapping_FILLED.xlsx"
+    field_dst = args.output_dir / "UNIFIED_exports_OCDS_Field_Mapping_FILLED.xlsx"
+    codelist_dst = args.output_dir / "UNIFIED_exports_OCDS_Codelist_Mapping_FILLED.xlsx"
 
     n_fields, n_elements = fill_field_template(
         args.references_dir / FIELD_TEMPLATE, field_dst, field_mapping, fields_by_target

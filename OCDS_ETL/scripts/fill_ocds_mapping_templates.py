@@ -380,17 +380,34 @@ def preserve_original(cell, label: str) -> None:
     notes_cell.value = f"{kept} | {prior}" if prior else kept
 
 
-def fill_data_elements_sheet(wb, field_mapping) -> int:
+def first_blank_element_row(ws) -> int:
+    """First row (from 4) where the element columns B/D are empty.
+
+    The template pre-fills hundreds of blank rows below the mPhilGEPS
+    entries with display formulas (A) and stage counters (J) for curators
+    to type into; new elements belong in those slots, NOT at max_row+1
+    (max_row counts ghost formatting rows far below). Falls back to
+    max_row+1 only when every slot is used.
+    """
+    for row in ws.iter_rows(min_row=4, max_row=ws.max_row, max_col=4):
+        if row[1].value is None and row[3].value is None:
+            return row[0].row
+    return ws.max_row + 1
+
+
+def fill_data_elements_sheet(wb, field_mapping) -> tuple[int, int]:
     """List every normalized field in the template's '2. Data Elements' sheet.
 
     Follows the template's conventions (display formula in A, 'PhilGEPS 1.5'
-    data source in B, real data types, plain notes) and extends the
-    stage-sheet dropdown ranges so our element rows stay selectable.
+    data source in B, real data types, plain notes) and fills the first
+    blank element slots after the mPhilGEPS rows, keeping the block inside
+    the stage-sheet dropdown range ('2. Data Elements'!$A$5:$A$491). The
+    range is extended only as a safety net if the block would exceed it.
     Returns (first_row, count).
     """
     ws = wb["2. Data Elements"]
-    first_row = ws.max_row + 1
-    r = first_row
+    r = first_blank_element_row(ws)
+    first_row = r
     listed = 0
     for field_name, spec in field_mapping["fields"].items():
         ws.cell(row=r, column=1, value=f'=CONCATENATE(C{r}," (",D{r},")")')
@@ -492,7 +509,17 @@ def fill_codelist_template(src: Path, dst: Path, codelists) -> tuple[int, int]:
         if b and c:
             existing.setdefault((b, c), row[2].row)
     listed = 0
-    r = ws.max_row + 1
+    # The template pre-fills blank rows below the existing entries with
+    # =CONCATENATE key formulas (D); new values belong in those slots, not
+    # at max_row+1 (which counts ghost rows past the dropdown range).
+    r = next(
+        (
+            row[0].row
+            for row in ws.iter_rows(min_row=4, max_row=ws.max_row, max_col=3)
+            if row[1].value is None and row[2].value is None
+        ),
+        ws.max_row + 1,
+    )
     for domain, spec in codelists["mappings"].items():
         name = CODELIST_NAMES.get(domain, domain)
         for source_value, v in spec["values"].items():

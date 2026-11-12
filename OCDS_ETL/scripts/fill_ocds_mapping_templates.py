@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import argparse
 import json
+from decimal import Decimal
 from pathlib import Path
 
 import openpyxl
@@ -51,6 +52,12 @@ CODELIST_TEMPLATE = (
     "Copy of OCDS - Codelist Mapping Template for OCDS 1.1.5 "
     "(Template Version 0.2) #public.xlsx"
 )
+
+# Typed layer sampled for the Data Elements 'Example (optional)' column.
+EXAMPLES_SOURCE = PROJECT.parent / "DATA_NORMALIZATION" / "output" / "philgeps_cleaned.parquet"
+
+# Fields where a real example would expose personal data: no example.
+PRIVACY_HOLD_FIELDS = {"awardee_contact_person", "created_by"}
 
 SOURCE_LABEL = "PhilGEPS 1.5"
 
@@ -380,6 +387,46 @@ def preserve_original(cell, label: str) -> None:
     notes_cell.value = f"{kept} | {prior}" if prior else kept
 
 
+def collect_examples(field_names) -> dict[str, str]:
+    """One representative non-null example per field, from the typed layer.
+
+    Uses the most frequent value per column (mode) with trivial values
+    (whitespace-only) filtered out: a typical, real observation rather
+    than a degenerate edge value. Personal-data fields get no example.
+    Dates render as ISO (midnight timestamps as date-only); long values
+    are truncated to 120 chars. Returns {} when the cleaned parquet is
+    absent, so the template can still be generated without data present.
+    """
+    wanted = [f for f in field_names if f not in PRIVACY_HOLD_FIELDS]
+    if not wanted or not EXAMPLES_SOURCE.is_file():
+        return {}
+    import duckdb
+
+    relation = str(EXAMPLES_SOURCE).replace("\\", "/")
+    examples: dict[str, str] = {}
+    for name in wanted:
+        row = duckdb.sql(
+            f'SELECT mode("{name}") FILTER ('
+            f'WHERE "{name}" IS NOT NULL '
+            f"AND trim(try_cast(\"{name}\" AS VARCHAR)) <> '') "
+            f"FROM read_parquet('{relation}')"
+        ).fetchone()
+        value = row[0] if row else None
+        if value is None:
+            continue
+        if hasattr(value, "isoformat"):
+            iso = value.isoformat()
+            examples[name] = iso[:10] if iso.endswith("T00:00:00") else iso
+        elif isinstance(value, Decimal):
+            normalized = format(value.normalize(), "f")
+            examples[name] = normalized[:120]
+        else:
+            text = str(value).strip()
+            if text:
+                examples[name] = text[:120]
+    return examples
+
+
 def first_blank_element_row(ws) -> int:
     """First row (from 4) where the element columns B/D are empty.
 
@@ -409,6 +456,7 @@ def fill_data_elements_sheet(wb, field_mapping) -> tuple[int, int]:
     r = first_blank_element_row(ws)
     first_row = r
     listed = 0
+    examples = collect_examples(field_mapping["fields"].keys())
     for field_name, spec in field_mapping["fields"].items():
         ws.cell(row=r, column=1, value=f'=CONCATENATE(C{r}," (",D{r},")")')
         ws.cell(row=r, column=2, value=SOURCE_LABEL)
@@ -416,6 +464,7 @@ def fill_data_elements_sheet(wb, field_mapping) -> tuple[int, int]:
         ws.cell(row=r, column=4, value=field_name)
         published = spec["status"] == "accepted" and not field_name.startswith("_")
         ws.cell(row=r, column=5, value="Yes" if published else "No")
+        ws.cell(row=r, column=6, value=examples.get(field_name, ""))
         ws.cell(row=r, column=7, value=FIELD_DESCRIPTIONS.get(field_name, ""))
         ws.cell(row=r, column=8, value=FIELD_TYPES.get(field_name, "string"))
         if field_name.startswith("_"):

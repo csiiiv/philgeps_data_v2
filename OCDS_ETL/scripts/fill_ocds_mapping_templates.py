@@ -2,25 +2,31 @@
 """Fill the official OCDS mapping templates with this pipeline's decisions.
 
 Clones the two official templates from the workspace ``mapping_references/``
-directory and writes this project's mapping into them:
+directory and fills them the way a data steward would by hand:
 
 1. Field Level Mapping Template (OCDS 1.1, Template Version 0.91)
-   - the six ``(OCDS) n. ...`` stage sheets: fills the Mapping column with
-     ``<local target> <- <normalized field>`` entries for every OCDS path
-     our ``config/field_mapping.json`` feeds
-   - any original mPhilGEPS mapping already present is preserved by moving
-     it into the Notes column (``mPhilGEPS: ...``)
+   - the ``(OCDS) n. ...`` stage sheets: Mapping cells read
+     ``tenders (title, status)`` in the same style the mPhilGEPS authors
+     used; the source normalized fields are named in plain sentences in
+     the Notes column. Original mPhilGEPS fills are preserved in Notes as
+     ``mPhilGEPS: ...``.
+   - ``2. Data Elements``: one row per normalized field, appended with the
+     template's own ``=CONCATENATE`` display formula, real data types in
+     the Data Type column, and plain-language publication notes.
 2. Codelist Mapping Template (OCDS 1.1.5, Template Version 0.2)
-   - ``(Source) Codelists``: one row per source value across our five
-     mapped domains, with the decision and status
-   - closed-codelist sheets: fills Source codelist / Source code columns on
-     matching code rows (classification -> procurementCategory,
-     procurement_mode -> method, bid_notice_status -> tenderStatus,
-     award_notice_status -> awardStatus), preserving the original mPhilGEPS
-     fill in Notes
+   - ``(Source) Codelists``: source values under their source codelist
+     names (``procurementMethod`` etc.), carrying the template's
+     ``=CONCATENATE`` lookup-key formula so the closed-codelist sheet's
+     VLOOKUPs resolve; decisions are written as plain sentences. Values
+     the official template already inventories are updated in place
+     instead of duplicated.
+   - closed-codelist sheets: Source codelist / Source code columns get the
+     plain codelist name and primary source value; additional source
+     values are listed in Notes. Original mPhilGEPS fills are preserved.
 
 The templates describe the live mPhilGEPS database; this project maps the
-legacy PhilGEPS 1.5 public exports. Outputs are documentation artifacts in
+legacy PhilGEPS 1.5 public exports (the ``PhilGEPS 1.5`` data source row
+already present in both templates). Outputs are documentation artifacts in
 ``artifacts/filled_templates/``: the JSON configs remain authoritative.
 
 Usage:
@@ -46,189 +52,122 @@ CODELIST_TEMPLATE = (
     "(Template Version 0.2) #public.xlsx"
 )
 
-SOURCE_LABEL = "PhilGEPS 1.5 (public exports)"
+SOURCE_LABEL = "PhilGEPS 1.5"
+
+# Source codelist names, as a curator would name them in the template.
+# 'procurementMethod' matches the name the official template already uses.
+CODELIST_NAMES = {
+    "classification": "procurementCategory",
+    "procurement_mode": "procurementMethod",
+    "bid_notice_status": "bidNoticeStatus",
+    "award_notice_status": "awardNoticeStatus",
+    "calendar_type": "calendarType",
+}
+
+STATUS_SENTENCES = {
+    "accepted": "Accepted.",
+    "proposed": "Proposed mapping - confirm before publication.",
+    "unresolved": "Not yet mapped.",
+}
 
 # ---------------------------------------------------------------------------
 # Curated OCDS-path fills for the field-level template.
-# Each entry: OCDS template path -> (targets, note)
-#   targets: list of "local.target" strings; every one must exist in
-#            config/field_mapping.json targets (validated at startup).
-#   note:    optional suffix rendered after the targets.
-# Normalized field names are looked up from the config so the dict cannot
-# drift from it.
+# Each entry: OCDS template path -> (targets, mapping_text, note)
+#   targets:      list of "local.target" strings; every one must exist in
+#                 config/field_mapping.json targets (validated at startup).
+#   mapping_text: optional explicit Mapping-cell text; when omitted it is
+#                 derived from the targets as "table (column, column)".
+#   note:         plain sentence for the Notes column (source fields are
+#                 prepended automatically).
+FIELD_NOTES = {
+    "tender/id": "Process identity follows the identity rules in docs/04.",
+    "tender/status": "Status via the tenderStatus codelist.",
+    "tender/procurementMethod": "Method via the method codelist.",
+    "tender/mainProcurementCategory": "Category via the procurementCategory codelist.",
+    "tender/items/classification/scheme": "Classification scheme is fixed to UNSPSC.",
+    "tender/items/classification/id": "UNSPSC code as published.",
+    "tender/items/unit/value/amount": "Per-unit price; semantics confirmed against the official template (docs/13).",
+    "tender/procurementMethodDetails": "Solicitation number retained as process detail.",
+    "tender/enquiryPeriod/startDate": "Candidate OCDS-native target (docs/13).",
+    "tender/tenderPeriod/endDate": "Candidate OCDS-native target (docs/13).",
+    "tender/contractPeriod/durationInDays": "Safe day conversion for Day/s durations only (docs/13 candidate).",
+    "tender/procuringEntity/name": "Procuring entity mention; see also buyer/name.",
+    "tender/procuringEntity/id": "Conservative party dedup key.",
+    "awards/id": "Identity follows the identity rules in docs/04.",
+    "awards/status": "Status via the awardStatus codelist.",
+    "awards/value/amount": "Contract amount as awarded.",
+    "awards/suppliers/name": "Party mention; suppliers also appear in parties with the supplier role. Joint-venture labels are preserved unparsed (unresolved).",
+    "contracts/id": "Identity follows the identity rules in docs/04.",
+    "contracts/awardID": "Joins contracts to awards.",
+    "contracts/period/startDate": "Contract effectivity date.",
+    "contracts/value/amount": "Copied from the award value, with a semantics flag.",
+    "contracts/status": "Derived from the notice-to-proceed date (analytical only).",
+    "contracts/description": "No description is published; the contract number is carried instead.",
+    "buyer/name": "Client agency; buyer role unresolved (docs/13).",
+    "parties/name": "Procuring entity, client agency, and awardee mentions.",
+    "parties/id": "Conservative party dedup keys (*_name_key).",
+    "parties/address/region": "PSGC normalization pending.",
+    "parties/address/locality": "Province is kept in a local column; OCDS has no province slot.",
+    "parties/address/countryName": "Address normalization pending.",
+    "parties/contactPoint/name": "Analytical only; privacy review pending.",
+    "parties/roles": "Role assignments; the buyer_candidate role is unresolved.",
+    "parties/details": "Party classification details.",
+    "relatedProcesses/identifier": "Process identity; ocid registration pending (docs/04).",
+    "tender/documents/datePublished": "Bid notice publication date.",
+    "awards/documents/datePublished": "Award notice publication date.",
+    "tender/documents/documentType": "Notice type kept in a source column; documentType is analytical only.",
+    "awards/documents/documentType": "Award type kept in a source column; documentType is analytical only.",
+    "tender/procurementMethodRationale": "Analytical columns retained beside the procurement method (docs/03).",
+}
 
-PATH_FILLS: dict[str, tuple[list[str], str]] = {
+PATH_FILLS: dict[str, tuple[list[str], str | None]] = {
     # -- Tender stage ------------------------------------------------------
-    "tender/id": (
-        ["contracting_processes.source_process_identifier", "tenders.source_bid_reference"],
-        "identity rule (docs/04)",
-    ),
-    "tender/title": (["tenders.title"], ""),
-    "tender/status": (
-        ["tenders.status", "tenders.source_status"],
-        "codelist: tenderStatus",
-    ),
-    "tender/procuringEntity/name": (["parties.name"], "procuring entity mention"),
-    "tender/procuringEntity/id": (["parties.name_key"], "conservative key"),
-    "tender/items/id": (["tender_items.source_line_item_number"], ""),
-    "tender/items/description": (
-        ["tender_items.description", "tender_items.title"],
-        "",
-    ),
-    "tender/items/classification/scheme": ([], "UNSPSC (fixed scheme)"),
-    "tender/items/classification/id": (["tender_items.classification_id"], "UNSPSC code"),
-    "tender/items/classification/description": (
-        ["tender_items.classification_description"],
-        "UNSPSC description",
-    ),
-    "tender/items/quantity": (["tender_items.quantity"], ""),
-    "tender/items/unit/name": (["tender_items.unit_name"], ""),
-    "tender/items/unit/value/amount": (
-        ["tender_items.item_budget_amount"],
-        "per-unit price (semantics confirmed by official template, docs/13)",
-    ),    "tender/value/amount": (["tenders.value_amount"], "approved budget"),
-    "tender/procurementMethod": (
-        ["tenders.procurement_method"],
-        "codelist: method",
-    ),
-    "tender/procurementMethodDetails": (
-        ["tenders.procurement_method_details", "tenders.solicitation_number"],
-        "solicitation number retained as process detail",
-    ),
-    "tender/mainProcurementCategory": (
-        ["tenders.main_procurement_category"],
-        "codelist: procurementCategory",
-    ),
-    "tender/enquiryPeriod/startDate": (
-        ["tenders.prebid_date"],
-        "candidate OCDS-native target (docs/13)",
-    ),
-    "tender/tenderPeriod/endDate": (
-        ["tenders.closing_date"],
-        "candidate OCDS-native target (docs/13)",
-    ),
-    "tender/awardPeriod/startDate": (["awards.date"], ""),
-    "tender/contractPeriod/durationInDays": (
-        ["tenders.contract_duration_days", "tenders.contract_duration_unit"],
-        "safe day conversion, Day/s calendar only (docs/13 candidate)",
-    ),
+    "tender/id": (["contracting_processes.source_process_identifier", "tenders.source_bid_reference"], None),
+    "tender/title": (["tenders.title"], None),
+    "tender/status": (["tenders.status", "tenders.source_status"], None),
+    "tender/procuringEntity/name": (["parties.name"], None),
+    "tender/procuringEntity/id": (["parties.name_key"], None),
+    "tender/items/id": (["tender_items.source_line_item_number"], None),
+    "tender/items/description": (["tender_items.description", "tender_items.title"], None),
+    "tender/items/classification/scheme": ([], "UNSPSC (fixed)"),
+    "tender/items/classification/id": (["tender_items.classification_id"], None),
+    "tender/items/classification/description": (["tender_items.classification_description"], None),
+    "tender/items/quantity": (["tender_items.quantity"], None),
+    "tender/items/unit/name": (["tender_items.unit_name"], None),
+    "tender/items/unit/value/amount": (["tender_items.item_budget_amount"], None),
+    "tender/value/amount": (["tenders.value_amount"], None),
+    "tender/procurementMethod": (["tenders.procurement_method"], None),
+    "tender/procurementMethodDetails": (["tenders.procurement_method_details", "tenders.solicitation_number"], None),
+    "tender/mainProcurementCategory": (["tenders.main_procurement_category"], None),
+    "tender/enquiryPeriod/startDate": (["tenders.prebid_date"], None),
+    "tender/tenderPeriod/endDate": (["tenders.closing_date"], None),
+    "tender/awardPeriod/startDate": (["awards.date"], None),
+    "tender/contractPeriod/durationInDays": (["tenders.contract_duration_days", "tenders.contract_duration_unit"], None),
     # -- Award stage -------------------------------------------------------
-    "awards/id": (["awards.source_award_reference"], "identity rule (docs/04)"),
-    "awards/title": (["awards.title"], ""),
-    "awards/status": (
-        ["awards.status", "awards.source_status"],
-        "codelist: awardStatus",
-    ),
-    "awards/date": (["awards.date"], ""),
-    "awards/value/amount": (["awards.value_amount"], "contract amount"),
-    "awards/suppliers/name": (
-        ["award_suppliers.source_supplier_label"],
-        "party mention; suppliers also in parties with 'supplier' role",
-    ),
+    "awards/id": (["awards.source_award_reference"], None),
+    "awards/title": (["awards.title"], None),
+    "awards/description": (["awards.description"], None),
+    "awards/status": (["awards.status", "awards.source_status"], None),
+    "awards/date": (["awards.date"], None),
+    "awards/value/amount": (["awards.value_amount"], None),
+    "awards/suppliers/name": (["award_suppliers.source_supplier_label", "award_suppliers.source_joint_venture"], None),
     # -- Contract stage ----------------------------------------------------
-    "contracts/id": (["contracts.source_contract_number"], "identity rule (docs/04)"),
-    "contracts/awardID": (
-        ["awards.source_award_reference"],
-        "join contracts to awards",
-    ),
-    "contracts/period/startDate": (["contracts.period_start"], "contract effectivity date"),
-    "contracts/period/endDate": (["contracts.period_end"], ""),
-    "contracts/value/amount": (
-        ["contracts.value_amount"],
-        "copied from award value with semantics flag",
-    ),
+    "contracts/id": (["contracts.source_contract_number"], None),
+    "contracts/awardID": (["awards.source_award_reference"], None),
+    "contracts/status": (["contracts.notice_to_proceed_date"], None),
+    "contracts/description": (["contracts.source_contract_number"], None),
+    "contracts/period/startDate": (["contracts.period_start"], None),
+    "contracts/period/endDate": (["contracts.period_end"], None),
+    "contracts/value/amount": (["contracts.value_amount"], None),
     # -- General / parties -------------------------------------------------
-    "buyer/name": (
-        ["parties.name"],
-        "client_agency, buyer candidate - unresolved (docs/13)",
-    ),
-    "parties/name": (
-        ["parties.name"],
-        "procuring_entity_name / client_agency / awardee_organization_name",
-    ),
-    "parties/id": (
-        ["parties.name_key"],
-        "conservative party dedup keys (*_name_key)",
-    ),
-    "parties/address/region": (
-        ["parties.source_region"],
-        "procuring_entity_region / awardee_region (PSGC pending)",
-    ),
-    "parties/address/locality": (
-        ["parties.source_city_municipality"],
-        "city/municipality; province kept in source_province (no OCDS slot)",
-    ),
-    "parties/address/countryName": (
-        ["parties.source_country"],
-        "awardee_country (address normalization pending)",
-    ),
-    "parties/contactPoint/name": (
-        ["parties.contact_name"],
-        "analytical only, privacy review pending",
-    ),
-    "parties/roles": (
-        ["party_roles.procuringEntity", "party_roles.supplier", "party_roles.buyer_candidate"],
-        "role assignments; buyer_candidate unresolved",
-    ),
-    "parties/details": (
-        [
-            "parties.government_branch",
-            "parties.source_organization_type",
-            "parties.organization_type_grouped",
-            "parties.organization_size",
-        ],
-        "party classification details",
-    ),
-    # -- Identity anchors (row-4 offset fix) --------------------------------
-    "tender/items/classification/scheme": ([], "UNSPSC (fixed scheme)"),
-    "awards/description": (
-        ["awards.description"],
-        "reason for award as printed",
-    ),
-    "contracts/description": (
-        ["contracts.source_contract_number"],
-        "contract number carried; description not published",
-    ),
-    # -- Date evidence ------------------------------------------------------
-    "tender/documents/datePublished": (
-        ["tenders.date_published"],
-        "bid notice publication date",
-    ),
-    "awards/documents/datePublished": (
-        ["awards.date_published"],
-        "award notice publication date",
-    ),
-    # -- Additional analytical fields with a defensible OCDS anchor ----------
-    "tender/procurementMethodRationale": (
-        [
-            "tenders.trade_agreement",
-            "tenders.business_category",
-            "tenders.funding_source",
-            "tenders.funding_instrument",
-            "tenders.area_of_delivery",
-        ],
-        "analytical columns retained beside procurement method (docs/03)",
-    ),
-    "tender/documents/documentType": (
-        ["tenders.source_notice_type"],
-        "notice type kept in source column; documentType is analytical only",
-    ),
-    "awards/documents/documentType": (
-        ["awards.source_award_type"],
-        "award type kept in source column; documentType is analytical only",
-    ),
-    "contracts/status": (
-        ["contracts.notice_to_proceed_date"],
-        "contract status is derived from NTP presence (analytical only)",
-    ),
-    "relatedProcesses/identifier": (
-        ["contracting_processes.source_process_identifier"],
-        "process identity; ocid registration pending (docs/04)",
-    ),
-    "awards/suppliers/name": (
-        ["award_suppliers.source_supplier_label", "award_suppliers.source_joint_venture"],
-        "supplier label; joint-venture label preserved unparsed (unresolved)",
-    ),
+    "buyer/name": (["parties.name"], None),
+    "parties/name": (["parties.name"], None),
+    "parties/id": (["parties.name_key"], None),
+    "parties/address/region": (["parties.source_region"], None),
+    "parties/address/locality": (["parties.source_city_municipality"], None),
+    "parties/address/countryName": (["parties.source_country"], None),
+    "parties/contactPoint/name": (["parties.contact_name"], None),
+    "parties/roles": (["party_roles.procuringEntity", "party_roles.supplier", "party_roles.buyer_candidate"], None),
     "parties/details": (
         [
             "parties.government_branch",
@@ -237,7 +176,24 @@ PATH_FILLS: dict[str, tuple[list[str], str]] = {
             "parties.organization_size",
             "parties.source_province",
         ],
-        "party classification + province details (no OCDS address slot for province)",
+        None,
+    ),
+    # -- Date evidence -----------------------------------------------------
+    "tender/documents/datePublished": (["tenders.date_published"], None),
+    "awards/documents/datePublished": (["awards.date_published"], None),
+    "tender/documents/documentType": (["tenders.source_notice_type"], None),
+    "awards/documents/documentType": (["awards.source_award_type"], None),
+    # -- Related processes -------------------------------------------------
+    "relatedProcesses/identifier": (["contracting_processes.source_process_identifier"], None),
+    "tender/procurementMethodRationale": (
+        [
+            "tenders.trade_agreement",
+            "tenders.business_category",
+            "tenders.funding_source",
+            "tenders.funding_instrument",
+            "tenders.area_of_delivery",
+        ],
+        None,
     ),
 }
 
@@ -314,6 +270,26 @@ FIELD_DESCRIPTIONS: dict[str, str] = {
     "_cleaning_issue_count": "Count of cleaning issues for the row (data quality)",
 }
 
+# Data types as they exist in philgeps_cleaned (typed layer). Everything not
+# listed is a string, matching the cleaned layer's dominant type.
+FIELD_TYPES: dict[str, str] = {
+    "approved_budget": "decimal",
+    "quantity": "decimal",
+    "item_budget": "decimal",
+    "contract_amount": "decimal",
+    "contract_duration": "decimal",
+    "bid_published_date": "date",
+    "closing_date": "date",
+    "prebid_date": "date",
+    "award_date": "date",
+    "award_published_date": "date",
+    "notice_to_proceed_date": "date",
+    "contract_effectivity_date": "date",
+    "contract_end_date": "date",
+    "_source_row_number": "integer",
+    "_cleaning_issue_count": "integer",
+}
+
 # Domain -> codelist section name in the closed-codelists sheet.
 CLOSED_CODELIST_SECTION = {
     "classification": "Codelist: procurementCategory",
@@ -324,7 +300,6 @@ CLOSED_CODELIST_SECTION = {
 }
 
 
-
 def load_configs():
     field = json.loads(
         (PROJECT / "config" / "field_mapping.json").read_text(encoding="utf-8")
@@ -332,12 +307,10 @@ def load_configs():
     codelists = json.loads(
         (PROJECT / "config" / "codelist_mapping.json").read_text(encoding="utf-8")
     )
-    # field -> targets, and reverse index target -> [fields]
     fields_by_target: dict[str, list[str]] = {}
     for field_name, spec in field["fields"].items():
         for target in spec["targets"]:
             fields_by_target.setdefault(target, []).append(field_name)
-    # Validate curated fills against the config
     known = set(fields_by_target)
     unknown = sorted(
         {t for targets, _ in PATH_FILLS.values() for t in targets if t not in known}
@@ -347,16 +320,36 @@ def load_configs():
     return field, fields_by_target, codelists
 
 
-def render_fill(targets: list[str], note: str, fields_by_target) -> str:
-    parts = []
-    for t in targets:
-        fields = fields_by_target.get(t, [])
-        for f in fields:
-            desc = FIELD_DESCRIPTIONS.get(f)
-            parts.append(f"{t} <- {f}" + (f" ({desc})" if desc else ""))
+def render_mapping(targets: list[str]) -> str:
+    """'tenders.title, tenders.source_status' -> 'tenders (title, source_status)'.
+
+    Multiple tables are joined with '; ', matching how a curator writes a
+    multi-table mapping by hand.
+    """
+    by_table: dict[str, list[str]] = {}
+    for target in targets:
+        table, _, column = target.partition(".")
+        by_table.setdefault(table, []).append(column)
+    return "; ".join(
+        f"{table} ({', '.join(columns)})" if columns else table
+        for table, columns in by_table.items()
+    )
+
+
+def render_note(targets: list[str], path: str, fields_by_target) -> str:
+    """Plain sentence naming the source fields, plus the curated note."""
+    fields: list[str] = []
+    for target in targets:
+        for field_name in fields_by_target.get(target, []):
+            if field_name not in fields:
+                fields.append(field_name)
+    sentences = []
+    if fields:
+        sentences.append(f"From {', '.join(fields)}.")
+    note = FIELD_NOTES.get(path)
     if note:
-        parts.append(f"[{note}]")
-    return " | ".join(parts)
+        sentences.append(note)
+    return " ".join(sentences)
 
 
 def preserve_original(cell, label: str) -> None:
@@ -373,38 +366,39 @@ def preserve_original(cell, label: str) -> None:
     notes_cell.value = f"{kept} | {prior}" if prior else kept
 
 
-def fill_data_elements_sheet(wb, field_mapping, fields_by_target) -> int:
+def fill_data_elements_sheet(wb, field_mapping) -> int:
     """List every normalized field in the template's '2. Data Elements' sheet.
 
-    The template's own structure: one row per existing data element with
-    columns: element name | source | section | data element | publish? |
-    example | description | data type | notes. We append our fields after
-    any existing rows, keyed as '<field> (<pipeline>)'.
+    Follows the template's own conventions: the display formula in column A,
+    the 'PhilGEPS 1.5' data source row, real data types, and plain notes.
     """
     ws = wb["2. Data Elements"]
-    # Template header row is 3; existing mPhilGEPS rows follow. Append after.
     r = ws.max_row + 1
     listed = 0
     for field_name, spec in field_mapping["fields"].items():
-        ws.cell(row=r, column=1, value=f"{field_name} (PhilGEPS 1.5 exports)")
-        ws.cell(row=r, column=2, value="PhilGEPS 1.5 exports")
+        ws.cell(row=r, column=1, value=f'=CONCATENATE(C{r}," (",D{r},")")')
+        ws.cell(row=r, column=2, value=SOURCE_LABEL)
         ws.cell(row=r, column=3, value="philgeps_cleaned")
         ws.cell(row=r, column=4, value=field_name)
         published = spec["status"] == "accepted" and not field_name.startswith("_")
         ws.cell(row=r, column=5, value="Yes" if published else "No")
         ws.cell(row=r, column=7, value=FIELD_DESCRIPTIONS.get(field_name, ""))
-        treatments = {spec["treatment"]}
-        ws.cell(row=r, column=8, value=str(next(iter(treatments))))
-        note = f"targets: {'; '.join(spec['targets'])}"
-        if spec["status"] != "accepted":
-            note += f" | status: {spec['status']}"
+        ws.cell(row=r, column=8, value=FIELD_TYPES.get(field_name, "string"))
+        if field_name.startswith("_"):
+            note = "Internal provenance / data-quality field; not published."
+        elif spec["status"] == "accepted":
+            note = f"Feeds {'; '.join(spec['targets'])}."
+        elif spec["status"] == "proposed":
+            note = "Mapping proposed; not published pending confirmation."
+        else:
+            note = "Unresolved mapping; not published."
         ws.cell(row=r, column=9, value=note)
         r += 1
         listed += 1
     return listed
 
 
-def fill_field_template(src: Path, dst: Path, field_mapping, fields_by_target) -> int:
+def fill_field_template(src: Path, dst: Path, field_mapping, fields_by_target) -> tuple[int, int]:
     wb = openpyxl.load_workbook(src)
     filled = 0
     for name in wb.sheetnames:
@@ -419,14 +413,38 @@ def fill_field_template(src: Path, dst: Path, field_mapping, fields_by_target) -
             path = str(path_cell.value).strip() if path_cell.value else ""
             if path not in PATH_FILLS:
                 continue
-            targets, note = PATH_FILLS[path]
+            targets, explicit = PATH_FILLS[path]
             preserve_original(map_cell, "mPhilGEPS")
-            map_cell.value = render_fill(targets, note, fields_by_target)
+            map_cell.value = explicit if explicit else render_mapping(targets)
+            note_cell = row[7] if len(row) > 7 else None  # column H
+            if note_cell is not None:
+                prior = str(note_cell.value).strip() if note_cell.value else ""
+                sentence = render_note(targets, path, fields_by_target)
+                if sentence:
+                    note_cell.value = f"{sentence} | {prior}" if prior else sentence
             filled += 1
-    listed = fill_data_elements_sheet(wb, field_mapping, fields_by_target)
+    listed = fill_data_elements_sheet(wb, field_mapping)
     dst.parent.mkdir(parents=True, exist_ok=True)
     wb.save(dst)
     return filled, listed
+
+
+def source_note(domain: str, spec: dict) -> str:
+    """Plain-language decision sentence for one source value row."""
+    value_spec = spec
+    destination = CODELIST_NAMES.get(domain, domain)
+    dest = value_spec.get("destination_value")
+    status = value_spec.get("status", "unresolved")
+    parts = []
+    if domain == "calendar_type":
+        parts.append(f"Kept in tenders.contract_duration_unit (local column); no OCDS codelist.")
+    elif dest:
+        parts.append(f"Maps to {dest}.")
+    parts.append(STATUS_SENTENCES.get(status, ""))
+    rationale = value_spec.get("rationale")
+    if rationale:
+        parts.append(rationale)
+    return " ".join(p for p in parts if p).strip()
 
 
 def fill_codelist_template(src: Path, dst: Path, codelists) -> tuple[int, int]:
@@ -434,25 +452,30 @@ def fill_codelist_template(src: Path, dst: Path, codelists) -> tuple[int, int]:
 
     # -- (Source) Codelists: one row per source value -----------------------
     ws = wb["(Source) Codelists"]
-    r = ws.max_row + 1
+    existing: dict[tuple[str, str], int] = {}
+    for row in ws.iter_rows(min_row=4):
+        b = str(row[1].value).strip() if row[1].value else ""
+        c = str(row[2].value).strip() if row[2].value else ""
+        if b and c:
+            existing.setdefault((b, c), row[2].row)
     listed = 0
+    r = ws.max_row + 1
     for domain, spec in codelists["mappings"].items():
-        destination = spec["destination"]
+        name = CODELIST_NAMES.get(domain, domain)
         for source_value, v in spec["values"].items():
-            status = v.get("status")
-            decision = v.get("destination_value")
-            ws.cell(row=r, column=1, value=SOURCE_LABEL)
-            ws.cell(row=r, column=2, value=domain)
-            ws.cell(row=r, column=3, value=source_value)
-            if decision:
-                ws.cell(
-                    row=r,
-                    column=4,
-                    value=f"{destination} = {decision}",
-                )
-            note = v.get("rationale") or ""
-            ws.cell(row=r, column=7, value=f"[{status}] {note}".strip())
-            r += 1
+            note = source_note(domain, v)
+            key = (name, source_value.strip())
+            if key in existing:
+                # The official template already inventories this value:
+                # record our decision on the existing row, don't duplicate.
+                ws.cell(row=existing[key], column=7, value=note)
+            else:
+                ws.cell(row=r, column=1, value=SOURCE_LABEL)
+                ws.cell(row=r, column=2, value=name)
+                ws.cell(row=r, column=3, value=source_value)
+                ws.cell(row=r, column=4, value=f"=CONCATENATE(B{r},C{r})")
+                ws.cell(row=r, column=7, value=note)
+                r += 1
             listed += 1
 
     # -- Closed-codelist sheets: fill matching code rows --------------------
@@ -490,9 +513,16 @@ def fill_codelist_template(src: Path, dst: Path, codelists) -> tuple[int, int]:
         if not matches:
             continue
         preserve_original(source_code_cell, "mPhilGEPS")
-        statuses = "/".join(sorted({v["status"] for _, v in matches}))
-        source_codelist_cell.value = f"{SOURCE_LABEL} [{statuses}]"
-        source_code_cell.value = " | ".join(s for s, _ in matches)
+        preserve_original(source_codelist_cell, "mPhilGEPS")
+        source_codelist_cell.value = CODELIST_NAMES[domain]
+        source_code_cell.value = matches[0][0]
+        if len(matches) > 1:
+            others = ", ".join(s for s, _ in matches[1:])
+            statuses = "/".join(sorted({v["status"] for _, v in matches[1:]}))
+            notes_cell = source_code_cell.parent.cell(row=source_code_cell.row, column=8)
+            prior = str(notes_cell.value).strip() if notes_cell.value else ""
+            addition = f"Also: {others} ({statuses})."
+            notes_cell.value = f"{addition} | {prior}" if prior else addition
         filled_keys.add(key)
         filled += 1
 

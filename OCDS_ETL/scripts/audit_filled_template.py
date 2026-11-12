@@ -6,7 +6,10 @@ Checks the regenerated workbook in artifacts/filled_templates/:
    with descriptions and data types
 2. Every field name appears in at least one stage-sheet cell (Mapping or
    Notes; fields are named in the plain-language notes)
-3. Spot-checks identity anchors and shows sample cells
+3. Every filled cell satisfies the workbook's own list validations
+   (dropdowns), so Excel shows no 'Input must fall within specified range'
+   warnings on our fills
+4. Spot-checks identity anchors and shows sample cells
 
 Run: python audit_filled_template.py
 """
@@ -14,10 +17,12 @@ Run: python audit_filled_template.py
 from __future__ import annotations
 
 import json
+import re
 import sys
 from pathlib import Path
 
 import openpyxl
+from openpyxl.utils import range_boundaries
 
 sys.stdout.reconfigure(encoding="utf-8")
 
@@ -25,6 +30,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 XLSX = PROJECT / "artifacts" / "filled_templates" / "UNIFIED_exports_OCDS_Field_Mapping_FILLED.xlsx"
 
 fm = json.loads((PROJECT / "config" / "field_mapping.json").read_text(encoding="utf-8"))
+OUR_SOURCE_LABEL = "PhilGEPS 1.5"  # our fills' data-source marker
 fields = set(fm["fields"])
 
 # Fields that intentionally have no OCDS stage-sheet path: they feed local
@@ -94,3 +100,89 @@ for sheet, path in [
             if len(row) > 7 and row[7].value:
                 print(f"    note   : {str(row[7].value)[:120]}")
             break
+
+
+# ---------------------------------------------------------------------------
+# List-validation compliance: every cell WE filled must satisfy the
+# workbook's own dropdown rules, so Excel raises no 'Input must fall within
+# specified range' warnings on our fills. Pre-existing official-template
+# fills are out of scope (identified via our fills' marker strings).
+
+def display_value(ws, cell):
+    """Displayed value for the template's CONCATENATE display formulas."""
+    v = cell.value
+    if v is None:
+        return None
+    if isinstance(v, str) and v.startswith("=CONCATENATE("):
+        body = v.strip()[len("=CONCATENATE("):-1]
+        parts, cur, in_str = [], "", False
+        for ch in body:
+            if ch == '"':
+                in_str = not in_str
+                cur += ch
+            elif ch == "," and not in_str:
+                parts.append(cur)
+                cur = ""
+            else:
+                cur += ch
+        parts.append(cur)
+        out = []
+        for p in parts:
+            p = p.strip()
+            if len(p) >= 2 and p.startswith('"') and p.endswith('"'):
+                out.append(p[1:-1])
+            else:
+                ref = p.strip('"')
+                if re.fullmatch(r"[A-Z]+[0-9]+", ref):
+                    ref_cell = ws[ref]
+                    if ref_cell.value is not None:
+                        out.append(str(ref_cell.value))
+        return "".join(out)
+    return str(v)
+
+
+def element_markers(cell_value: str) -> bool:
+    """True when a Mapping cell was written by our filler."""
+    return cell_value.startswith("philgeps_cleaned (")
+
+
+print()
+print("validation compliance (our fills only):")
+violations = 0
+for ws_audit in wb.worksheets:
+    for dv in ws_audit.data_validations.dataValidation:
+        if dv.type != "list":
+            continue
+        f1 = str(dv.formula1 or "")
+        if f1.startswith('"'):
+            allowed = {v.strip() for v in f1.strip('"').split(",")}
+            ours = lambda v: False  # inline lists cover type columns; skip origin test
+        elif "!" in f1:
+            sheet_ref, cell_range = f1.split("!", 1)
+            src = wb[sheet_ref.strip("'")]
+            allowed = set()
+            for row in src[cell_range.replace("$", "")]:
+                for c in row:
+                    d = display_value(src, c)
+                    if d not in (None, ""):
+                        allowed.add(d.strip())
+            ours = element_markers
+        else:
+            continue
+        for rng in str(dv.sqref).split():
+            min_c, min_r, max_c, max_r = range_boundaries(rng)
+            for row in ws_audit.iter_rows(min_row=min_r, max_row=max_r,
+                                          min_col=min_c, max_col=max_c):
+                for cell in row:
+                    v = display_value(ws_audit, cell)
+                    if not v or v in allowed:
+                        continue
+                    # Only OUR fills are in scope.
+                    src_col = str(dv.formula1 or "")
+                    if "!" in f1 and not ours(v):
+                        continue
+                    print(f"  VIOLATION [{ws_audit.title}] {cell.coordinate}: {v[:60]!r}")
+                    violations += 1
+print(f"  our fills violating dropdowns : {violations or 'NONE'}")
+if violations:
+    sys.exit(1)

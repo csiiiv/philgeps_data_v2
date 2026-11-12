@@ -54,6 +54,12 @@ CODELIST_TEMPLATE = (
 
 SOURCE_LABEL = "PhilGEPS 1.5"
 
+# Section name used for our element rows in '2. Data Elements' (column C).
+# The template intends C to be the source table/dataset; ours is the typed
+# cleaned layer. Mapping cells on the stage sheets reference elements as
+# '<section> (<field>)', exactly like the mPhilGEPS 'Tenders (Tender ID)'.
+ELEMENT_SECTION = "philgeps_cleaned"
+
 # Source codelist names, as a curator would name them in the template.
 # 'procurementMethod' matches the name the official template already uses.
 CODELIST_NAMES = {
@@ -84,8 +90,7 @@ FIELD_NOTES = {
     "tender/status": "Status via the tenderStatus codelist.",
     "tender/procurementMethod": "Method via the method codelist.",
     "tender/mainProcurementCategory": "Category via the procurementCategory codelist.",
-    "tender/items/classification/scheme": "Classification scheme is fixed to UNSPSC.",
-    "tender/items/classification/id": "UNSPSC code as published.",
+    "tender/items/classification/scheme": "Classification scheme is fixed to UNSPSC.",    "tender/items/classification/id": "UNSPSC code as published.",
     "tender/items/unit/value/amount": "Per-unit price; semantics confirmed against the official template (docs/13).",
     "tender/procurementMethodDetails": "Solicitation number retained as process detail.",
     "tender/enquiryPeriod/startDate": "Candidate OCDS-native target (docs/13).",
@@ -129,7 +134,7 @@ PATH_FILLS: dict[str, tuple[list[str], str | None]] = {
     "tender/procuringEntity/id": (["parties.name_key"], None),
     "tender/items/id": (["tender_items.source_line_item_number"], None),
     "tender/items/description": (["tender_items.description", "tender_items.title"], None),
-    "tender/items/classification/scheme": ([], "UNSPSC (fixed)"),
+    "tender/items/classification/scheme": ([], None),
     "tender/items/classification/id": (["tender_items.classification_id"], None),
     "tender/items/classification/description": (["tender_items.classification_description"], None),
     "tender/items/quantity": (["tender_items.quantity"], None),
@@ -270,14 +275,16 @@ FIELD_DESCRIPTIONS: dict[str, str] = {
     "_cleaning_issue_count": "Count of cleaning issues for the row (data quality)",
 }
 
-# Data types as they exist in philgeps_cleaned (typed layer). Everything not
-# listed is a string, matching the cleaned layer's dominant type.
+# Data types as they exist in philgeps_cleaned (typed layer), expressed in
+# the template's own vocabulary (its Data Type column is validated to
+# string,integer,long,double,float,date,date-time,codelist,other).
+# Everything not listed is a string, matching the cleaned layer's dominant type.
 FIELD_TYPES: dict[str, str] = {
-    "approved_budget": "decimal",
-    "quantity": "decimal",
-    "item_budget": "decimal",
-    "contract_amount": "decimal",
-    "contract_duration": "decimal",
+    "approved_budget": "double",
+    "quantity": "double",
+    "item_budget": "double",
+    "contract_amount": "double",
+    "contract_duration": "double",
     "bid_published_date": "date",
     "closing_date": "date",
     "prebid_date": "date",
@@ -320,20 +327,24 @@ def load_configs():
     return field, fields_by_target, codelists
 
 
-def render_mapping(targets: list[str]) -> str:
-    """'tenders.title, tenders.source_status' -> 'tenders (title, source_status)'.
+def render_mapping(targets: list[str], fields_by_target: dict[str, list[str]]) -> str:
+    """Mapping cells must reference a Data Elements entry (template rule).
 
-    Multiple tables are joined with '; ', matching how a curator writes a
-    multi-table mapping by hand.
+    The stage sheets' Mapping column is validated against the Data Elements
+    display values, so a compliant fill is a single reference like
+    'philgeps_cleaned (bid_reference_no)' -- the same style as the
+    template's own 'Tenders (Tender ID)' fills. When several source fields
+    feed one OCDS path, the primary field is referenced here and the others
+    are named in the Notes column.
     """
-    by_table: dict[str, list[str]] = {}
+    fields: list[str] = []
     for target in targets:
-        table, _, column = target.partition(".")
-        by_table.setdefault(table, []).append(column)
-    return "; ".join(
-        f"{table} ({', '.join(columns)})" if columns else table
-        for table, columns in by_table.items()
-    )
+        for field_name in fields_by_target.get(target, []):
+            if field_name not in fields:
+                fields.append(field_name)
+    if not fields:
+        return ""
+    return f"{ELEMENT_SECTION} ({fields[0]})"
 
 
 def render_note(targets: list[str], path: str, fields_by_target) -> str:
@@ -345,7 +356,10 @@ def render_note(targets: list[str], path: str, fields_by_target) -> str:
                 fields.append(field_name)
     sentences = []
     if fields:
-        sentences.append(f"From {', '.join(fields)}.")
+        if len(fields) == 1:
+            sentences.append(f"From {fields[0]}.")
+        else:
+            sentences.append(f"From {fields[0]}. Also from {', '.join(fields[1:])}.")
     note = FIELD_NOTES.get(path)
     if note:
         sentences.append(note)
@@ -369,16 +383,19 @@ def preserve_original(cell, label: str) -> None:
 def fill_data_elements_sheet(wb, field_mapping) -> int:
     """List every normalized field in the template's '2. Data Elements' sheet.
 
-    Follows the template's own conventions: the display formula in column A,
-    the 'PhilGEPS 1.5' data source row, real data types, and plain notes.
+    Follows the template's conventions (display formula in A, 'PhilGEPS 1.5'
+    data source in B, real data types, plain notes) and extends the
+    stage-sheet dropdown ranges so our element rows stay selectable.
+    Returns (first_row, count).
     """
     ws = wb["2. Data Elements"]
-    r = ws.max_row + 1
+    first_row = ws.max_row + 1
+    r = first_row
     listed = 0
     for field_name, spec in field_mapping["fields"].items():
         ws.cell(row=r, column=1, value=f'=CONCATENATE(C{r}," (",D{r},")")')
         ws.cell(row=r, column=2, value=SOURCE_LABEL)
-        ws.cell(row=r, column=3, value="philgeps_cleaned")
+        ws.cell(row=r, column=3, value=ELEMENT_SECTION)
         ws.cell(row=r, column=4, value=field_name)
         published = spec["status"] == "accepted" and not field_name.startswith("_")
         ws.cell(row=r, column=5, value="Yes" if published else "No")
@@ -395,7 +412,23 @@ def fill_data_elements_sheet(wb, field_mapping) -> int:
         ws.cell(row=r, column=9, value=note)
         r += 1
         listed += 1
-    return listed
+
+    # Keep the stage-sheet dropdowns (validated against column A) covering
+    # our element rows: extend any '2. Data Elements'!$A$... range whose end
+    # row falls short of our block.
+    last_row = r - 1
+    for sheet_name in wb.sheetnames:
+        if not sheet_name.startswith("(OCDS)"):
+            continue
+        for dv in wb[sheet_name].data_validations.dataValidation:
+            formula = str(dv.formula1 or "")
+            marker = "'2. Data Elements'!$A$"
+            if marker not in formula:
+                continue
+            end = formula.rsplit("$A$", 1)[-1]  # range end row, e.g. '...$A$491' -> '491'
+            if end.isdigit() and int(end) < last_row:
+                dv.formula1 = formula.replace(f"$A${end}", f"$A${last_row}")
+    return first_row, listed
 
 
 def fill_field_template(src: Path, dst: Path, field_mapping, fields_by_target) -> tuple[int, int]:
@@ -415,7 +448,7 @@ def fill_field_template(src: Path, dst: Path, field_mapping, fields_by_target) -
                 continue
             targets, explicit = PATH_FILLS[path]
             preserve_original(map_cell, "mPhilGEPS")
-            map_cell.value = explicit if explicit else render_mapping(targets)
+            map_cell.value = explicit if explicit else render_mapping(targets, fields_by_target)
             note_cell = row[7] if len(row) > 7 else None  # column H
             if note_cell is not None:
                 prior = str(note_cell.value).strip() if note_cell.value else ""
@@ -426,7 +459,7 @@ def fill_field_template(src: Path, dst: Path, field_mapping, fields_by_target) -
     listed = fill_data_elements_sheet(wb, field_mapping)
     dst.parent.mkdir(parents=True, exist_ok=True)
     wb.save(dst)
-    return filled, listed
+    return filled, listed[1]
 
 
 def source_note(domain: str, spec: dict) -> str:
@@ -477,6 +510,22 @@ def fill_codelist_template(src: Path, dst: Path, codelists) -> tuple[int, int]:
                 ws.cell(row=r, column=7, value=note)
                 r += 1
             listed += 1
+
+    # Keep the codelist-sheet dropdowns (validated against columns B/C of
+    # this sheet) covering our appended rows: extend any '(Source)
+    # Codelists'!$B$... / $C$... range whose end row falls short.
+    last_row = r - 1
+    for sheet_name in wb.sheetnames:
+        if not sheet_name.startswith("(OCDS)"):
+            continue
+        for dv in wb[sheet_name].data_validations.dataValidation:
+            formula = str(dv.formula1 or "")
+            marker = "'(Source) Codelists'!$"
+            if marker not in formula:
+                continue
+            tail = formula.rsplit("$", 1)[-1]
+            if tail.isdigit() and int(tail) < last_row:
+                dv.formula1 = formula.replace(f"${tail}", f"${last_row}")
 
     # -- Closed-codelist sheets: fill matching code rows --------------------
     filled = 0
